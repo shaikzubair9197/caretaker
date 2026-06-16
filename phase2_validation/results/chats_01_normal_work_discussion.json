@@ -1,0 +1,142 @@
+{
+  "source_type": "teams_chat",
+  "fixture_name": "Normal work discussion",
+  "fixture_meta": {
+    "name": "Normal work discussion",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "1718437200.000001",
+    "chatId": "19:team_eng@thread.v2",
+    "from": {
+      "user": {
+        "displayName": "Deepak Krishnamurthy",
+        "id": "deepak-guid"
+      }
+    },
+    "body": {
+      "content": "Hey Monish, the staging build is green. I'll merge PR #342 once you've reviewed the token refresh changes. Ping me if anything looks off."
+    },
+    "createdDateTime": "2026-06-15T06:30:00Z",
+    "messageType": "message",
+    "importance": "normal",
+    "mentions": [],
+    "replyToId": null
+  },
+  "normalized": {
+    "source_type": "teams_chat",
+    "external_id": "1718437200.000001",
+    "raw_payload": {
+      "id": "1718437200.000001",
+      "chatId": "19:team_eng@thread.v2",
+      "from": {
+        "user": {
+          "displayName": "Deepak Krishnamurthy",
+          "id": "deepak-guid"
+        }
+      },
+      "body": {
+        "content": "Hey Monish, the staging build is green. I'll merge PR #342 once you've reviewed the token refresh changes. Ping me if anything looks off."
+      },
+      "createdDateTime": "2026-06-15T06:30:00Z",
+      "messageType": "message",
+      "importance": "normal",
+      "mentions": [],
+      "replyToId": null
+    },
+    "body_text": "Hey Monish, the staging build is green. I'll merge PR #342 once you've reviewed the token refresh changes. Ping me if anything looks off.",
+    "subject": null,
+    "sender": "deepak-guid",
+    "sender_name": "Deepak Krishnamurthy",
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T06:30:00",
+    "end_time": null,
+    "thread_id": "19:team_eng@thread.v2",
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "chat_id": "19:team_eng@thread.v2",
+      "channel_id": null,
+      "team_id": null,
+      "message_type": "message",
+      "reply_to_id": null
+    }
+  },
+  "masked_output": "Hey <PERSON_1>, the staging build is green. I'll merge PR #342 once you've reviewed the token refresh changes. Ping me if anything looks off.",
+  "vault_tokens": {
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Monish",
+      "encrypted_hex": "ff4a1a681f49e57d9bee288d820c83094dbec3e5c7efe3230b62cb647e5b61333ce7",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "deepak-guid",
+      "encrypted_hex": "1d208f3603787f5ef505dc78903da5e71efce759f3147393517c5ab7d020a91c87d0b122c8ec81",
+      "blob_bytes": 39,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Deepak Krishnamurthy",
+      "encrypted_hex": "fa5433977693d41a9902bef71ded0d69744bb835e1bc025c898617d7fd34bd98a363a354d5a4bd351a36e9653b720217",
+      "blob_bytes": 48,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "CONFIDENTIAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "teams_chat",
+    "external_id": "1718437200.000001",
+    "sensitivity_label": "CONFIDENTIAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "chat_id": "19:team_eng@thread.v2",
+    "from_token": "EMAIL_ADDRESS_1",
+    "from_name_token": "PERSON_2",
+    "body_masked": "Hey <PERSON_1>, the staging build is green. I'll merge PR #342 once you've reviewed the token refresh changes. Ping me if anything looks off.",
+    "mentions_tokens": [],
+    "importance": "normal",
+    "sent_at": "2026-06-15T06:30:00"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "teams_chat",
+    "external_id": "1718437200.000001",
+    "resource_type": "chats",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 3,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "CONFIDENTIAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.120884"
+  }
+}

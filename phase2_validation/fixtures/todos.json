@@ -1,0 +1,92 @@
+[
+  {
+    "meta": {
+      "name": "Engineering task — OAuth refactor",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": false
+    },
+    "payload": {
+      "id": "todo-001",
+      "title": "Complete OAuth2 token refresh refactor",
+      "body": { "content": "Refactor the token refresh flow in auth-service v2.1. Add unit tests for expiry edge cases. Target: 99% coverage." },
+      "status": "inProgress",
+      "importance": "high",
+      "dueDateTime": { "dateTime": "2026-06-20T18:00:00.0000000", "timeZone": "Asia/Kolkata" },
+      "createdDateTime": "2026-06-15T09:00:00Z",
+      "listId": "list-eng"
+    }
+  },
+  {
+    "meta": {
+      "name": "Follow-up with client",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "todo-002",
+      "title": "Follow up with Srihari Rajan on SLA credit",
+      "body": { "content": "Call Srihari at +91-22-6789-0123 to confirm the $5000 SLA credit. Reference case TITAN-2026-04421. Send confirmation to srihari.rajan@titancorp.com." },
+      "status": "notStarted",
+      "importance": "high",
+      "dueDateTime": { "dateTime": "2026-06-16T17:00:00.0000000", "timeZone": "Asia/Kolkata" },
+      "createdDateTime": "2026-06-15T09:05:00Z",
+      "listId": "list-followups"
+    }
+  },
+  {
+    "meta": {
+      "name": "Security task — rotate credentials",
+      "category": "credential",
+      "expect_min_threat": "QUARANTINE",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "todo-003",
+      "title": "Rotate prod DB password after Titan migration",
+      "body": { "content": "Current password: Titan2024! must be rotated before EOD. Connection string in use: postgres://prod:Titan2024!@prod-db.internal:5432/prod. Coordinate with Ananya and update AWS Secrets Manager." },
+      "status": "notStarted",
+      "importance": "high",
+      "dueDateTime": { "dateTime": "2026-06-15T18:00:00.0000000", "timeZone": "Asia/Kolkata" },
+      "createdDateTime": "2026-06-15T06:35:00Z",
+      "listId": "list-security"
+    }
+  },
+  {
+    "meta": {
+      "name": "Bugfix task",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": false
+    },
+    "payload": {
+      "id": "todo-004",
+      "title": "Fix connection pool saturation alert",
+      "body": { "content": "Add alerting on DB connection pool saturation. This was the root cause of the auth 503 outage. Owner: Deepak." },
+      "status": "notStarted",
+      "importance": "normal",
+      "dueDateTime": { "dateTime": "2026-06-22T18:00:00.0000000", "timeZone": "Asia/Kolkata" },
+      "createdDateTime": "2026-06-15T15:45:00Z",
+      "listId": "list-eng"
+    }
+  },
+  {
+    "meta": {
+      "name": "Documentation task",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": false
+    },
+    "payload": {
+      "id": "todo-005",
+      "title": "Document the rollback runbook",
+      "body": { "content": "Write the rollback runbook for auth-service deployments. Include the 5% error-rate threshold and the manual rollback steps. Publish to Confluence." },
+      "status": "notStarted",
+      "importance": "normal",
+      "dueDateTime": { "dateTime": "2026-06-21T18:00:00.0000000", "timeZone": "Asia/Kolkata" },
+      "createdDateTime": "2026-06-15T16:00:00Z",
+      "listId": "list-docs"
+    }
+  }
+]

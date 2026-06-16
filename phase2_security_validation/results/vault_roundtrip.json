@@ -1,0 +1,188 @@
+{
+  "test": "TEST 2 \u2014 Vault Round-Trip Validation",
+  "generated_at": "2026-06-15T12:24:42.319634",
+  "passed": true,
+  "entity_count": 26,
+  "encrypted_count": 26,
+  "decrypted_count": 26,
+  "recovered_count": 26,
+  "recovery_percentage": 100.0,
+  "records": [
+    {
+      "source": "outlook_email",
+      "name": "Email with OpenAI key + AWS key + recipient",
+      "entity_count": 5,
+      "encrypted_count": 5,
+      "decrypted_count": 5,
+      "recovered_count": 5,
+      "recovery_pct": 100.0,
+      "tokens": {
+        "API_KEY_1": {
+          "recovered": true,
+          "blob_bytes": 48
+        },
+        "ORGANIZATION_1": {
+          "recovered": true,
+          "blob_bytes": 31
+        },
+        "DATE_TIME_1": {
+          "recovered": true,
+          "blob_bytes": 32
+        },
+        "PERSON_1": {
+          "recovered": true,
+          "blob_bytes": 35
+        },
+        "API_KEY_2": {
+          "recovered": true,
+          "blob_bytes": 54
+        }
+      },
+      "reconstructed_equals_masked_substitution": true
+    },
+    {
+      "source": "teams_chat",
+      "name": "Teams chat with bearer token + DB connection string",
+      "entity_count": 4,
+      "encrypted_count": 4,
+      "decrypted_count": 4,
+      "recovered_count": 4,
+      "recovery_pct": 100.0,
+      "tokens": {
+        "EMAIL_ADDRESS_1": {
+          "recovered": true,
+          "blob_bytes": 50
+        },
+        "CONNECTION_STRING_1": {
+          "recovered": true,
+          "blob_bytes": 82
+        },
+        "API_KEY_1": {
+          "recovered": true,
+          "blob_bytes": 61
+        },
+        "ORGANIZATION_1": {
+          "recovered": true,
+          "blob_bytes": 31
+        }
+      },
+      "reconstructed_equals_masked_substitution": true
+    },
+    {
+      "source": "transcript",
+      "name": "Transcript with credentials, phone, email, names",
+      "entity_count": 9,
+      "encrypted_count": 9,
+      "decrypted_count": 9,
+      "recovered_count": 9,
+      "recovery_pct": 100.0,
+      "tokens": {
+        "ORGANIZATION_1": {
+          "recovered": true,
+          "blob_bytes": 31
+        },
+        "EMAIL_ADDRESS_1": {
+          "recovered": true,
+          "blob_bytes": 50
+        },
+        "PERSON_1": {
+          "recovered": true,
+          "blob_bytes": 34
+        },
+        "PHONE_NUMBER_1": {
+          "recovered": true,
+          "blob_bytes": 44
+        },
+        "EMAIL_ADDRESS_2": {
+          "recovered": true,
+          "blob_bytes": 60
+        },
+        "PERSON_2": {
+          "recovered": true,
+          "blob_bytes": 33
+        },
+        "CONNECTION_STRING_1": {
+          "recovered": true,
+          "blob_bytes": 85
+        },
+        "API_KEY_1": {
+          "recovered": true,
+          "blob_bytes": 60
+        },
+        "ORGANIZATION_2": {
+          "recovered": true,
+          "blob_bytes": 31
+        }
+      },
+      "reconstructed_equals_masked_substitution": true
+    },
+    {
+      "source": "calendar",
+      "name": "Calendar event with attendee identities + embedded secret",
+      "entity_count": 1,
+      "encrypted_count": 1,
+      "decrypted_count": 1,
+      "recovered_count": 1,
+      "recovery_pct": 100.0,
+      "tokens": {
+        "API_KEY_1": {
+          "recovered": true,
+          "blob_bytes": 58
+        }
+      },
+      "reconstructed_equals_masked_substitution": true
+    },
+    {
+      "source": "todo",
+      "name": "ToDo with password + connection string",
+      "entity_count": 3,
+      "encrypted_count": 3,
+      "decrypted_count": 3,
+      "recovered_count": 3,
+      "recovery_pct": 100.0,
+      "tokens": {
+        "EMAIL_ADDRESS_1": {
+          "recovered": true,
+          "blob_bytes": 50
+        },
+        "CONNECTION_STRING_1": {
+          "recovered": true,
+          "blob_bytes": 87
+        },
+        "API_KEY_1": {
+          "recovered": true,
+          "blob_bytes": 58
+        }
+      },
+      "reconstructed_equals_masked_substitution": true
+    },
+    {
+      "source": "onedrive_document",
+      "name": "OneDrive runbook with embedded AWS key + connection string",
+      "entity_count": 4,
+      "encrypted_count": 4,
+      "decrypted_count": 4,
+      "recovered_count": 4,
+      "recovery_pct": 100.0,
+      "tokens": {
+        "CONNECTION_STRING_1": {
+          "recovered": true,
+          "blob_bytes": 87
+        },
+        "API_KEY_1": {
+          "recovered": true,
+          "blob_bytes": 48
+        },
+        "EMAIL_ADDRESS_1": {
+          "recovered": true,
+          "blob_bytes": 50
+        },
+        "API_KEY_2": {
+          "recovered": true,
+          "blob_bytes": 52
+        }
+      },
+      "reconstructed_equals_masked_substitution": true
+    }
+  ]
+}

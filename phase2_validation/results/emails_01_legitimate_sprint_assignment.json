@@ -1,0 +1,267 @@
+{
+  "source_type": "outlook_email",
+  "fixture_name": "Legitimate sprint assignment",
+  "fixture_meta": {
+    "name": "Legitimate sprint assignment",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "AAMkAGEMAIL001",
+    "subject": "Sprint 47 \u2014 Auth service migration assigned to you",
+    "from": {
+      "emailAddress": {
+        "name": "Kavitha Subramaniam",
+        "address": "kavitha.s@amperatech.ai"
+      }
+    },
+    "toRecipients": [
+      {
+        "emailAddress": {
+          "name": "Monish Selvanathan",
+          "address": "monish.selvanathan@amperatech.ai"
+        }
+      }
+    ],
+    "ccRecipients": [
+      {
+        "emailAddress": {
+          "name": "Deepak Krishnamurthy",
+          "address": "deepak.k@amperatech.ai"
+        }
+      }
+    ],
+    "body": {
+      "content": "Hi Monish,\n\nYou're taking ownership of the auth service migration in Sprint 47. Deliverables:\n1. Complete the OAuth2 token refresh refactor by June 20\n2. Review Deepak's PR #342 by end of week\n3. Present the migration plan on Thursday 10am\n\nBudget for external tooling: $500 (pre-approved by me). Please confirm by EOD.\n\nThanks,\nKavitha"
+    },
+    "receivedDateTime": "2026-06-15T09:15:44Z",
+    "importance": "normal",
+    "hasAttachments": false,
+    "conversationId": "CONV-EMAIL-001",
+    "internetMessageId": "<msg-001@amperatech.ai>"
+  },
+  "normalized": {
+    "source_type": "outlook_email",
+    "external_id": "AAMkAGEMAIL001",
+    "raw_payload": {
+      "id": "AAMkAGEMAIL001",
+      "subject": "Sprint 47 \u2014 Auth service migration assigned to you",
+      "from": {
+        "emailAddress": {
+          "name": "Kavitha Subramaniam",
+          "address": "kavitha.s@amperatech.ai"
+        }
+      },
+      "toRecipients": [
+        {
+          "emailAddress": {
+            "name": "Monish Selvanathan",
+            "address": "monish.selvanathan@amperatech.ai"
+          }
+        }
+      ],
+      "ccRecipients": [
+        {
+          "emailAddress": {
+            "name": "Deepak Krishnamurthy",
+            "address": "deepak.k@amperatech.ai"
+          }
+        }
+      ],
+      "body": {
+        "content": "Hi Monish,\n\nYou're taking ownership of the auth service migration in Sprint 47. Deliverables:\n1. Complete the OAuth2 token refresh refactor by June 20\n2. Review Deepak's PR #342 by end of week\n3. Present the migration plan on Thursday 10am\n\nBudget for external tooling: $500 (pre-approved by me). Please confirm by EOD.\n\nThanks,\nKavitha"
+      },
+      "receivedDateTime": "2026-06-15T09:15:44Z",
+      "importance": "normal",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-001",
+      "internetMessageId": "<msg-001@amperatech.ai>"
+    },
+    "body_text": "Subject: Sprint 47 \u2014 Auth service migration assigned to you\n\nHi Monish,\n\nYou're taking ownership of the auth service migration in Sprint 47. Deliverables:\n1. Complete the OAuth2 token refresh refactor by June 20\n2. Review Deepak's PR #342 by end of week\n3. Present the migration plan on Thursday 10am\n\nBudget for external tooling: $500 (pre-approved by me). Please confirm by EOD.\n\nThanks,\nKavitha",
+    "subject": "Sprint 47 \u2014 Auth service migration assigned to you",
+    "sender": "kavitha.s@amperatech.ai",
+    "sender_name": "Kavitha Subramaniam",
+    "recipients": [
+      "monish.selvanathan@amperatech.ai",
+      "deepak.k@amperatech.ai"
+    ],
+    "participants": [],
+    "timestamp": "2026-06-15T09:15:44",
+    "end_time": null,
+    "thread_id": "CONV-EMAIL-001",
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "internet_message_id": "<msg-001@amperatech.ai>",
+      "folder": null
+    }
+  },
+  "masked_output": "Subject: Sprint 47 \u2014 <ORGANIZATION_5> service migration assigned to you\n\nHi Monish,\n\nYou're taking ownership of <ORGANIZATION_4> in <ORGANIZATION_3> 47. <PERSON_3>:\n1. Complete the <ORGANIZATION_2> token refresh refactor by <DATE_TIME_2>. <PERSON_2> PR #342 by end of week\n3. Present the migration plan on <DATE_TIME_1> 10am\n\nBudget for external tooling: $500 (pre-approved by me). Please confirm by <ORGANIZATION_1>.\n\nThanks,\n<PERSON_1>",
+  "vault_tokens": {
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Kavitha",
+      "encrypted_hex": "2dcfe7473a363b97fa4694631a53a2049e20d63f71280a0f67a6c391a2a1da9baf03b3",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "EOD",
+      "encrypted_hex": "b3f18304292fcae04cb01402a912849693ae2c68ebf40dad12ce7b7c27a00c",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_1": {
+      "entity_type": "DATE_TIME",
+      "original_value": "Thursday",
+      "encrypted_hex": "1da4bd310cebc9b86a69ae0e99f8c45c23160a003885749a58711afc38a37929fa8acc97",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Review Deepak's",
+      "encrypted_hex": "caa70de443f58a76653f1a5011be07f04fae990e2a65a970a041126001c61c15c283ab306e329cbe8b4fe5",
+      "blob_bytes": 43,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_2": {
+      "entity_type": "DATE_TIME",
+      "original_value": "June 20\n2",
+      "encrypted_hex": "9f92687dc192333b9e4962ea1bb32961d2166367c22b622ddb63cf823a917529445ee940ee",
+      "blob_bytes": 37,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_2": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "OAuth2",
+      "encrypted_hex": "08046890efc8f9c7e527e09dae61243daefa0b59c29fa0f288bf359000dcd6bdc29e",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_3": {
+      "entity_type": "PERSON",
+      "original_value": "Deliverables",
+      "encrypted_hex": "1101843c96d5d4ceb103f2ea61e3792223ef9f6aff50236885b372651fe6b827d2472163d11aec84",
+      "blob_bytes": 40,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_3": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "Sprint",
+      "encrypted_hex": "0f20a5cf9ec8af5b8e2bfa23d4c5526399db3cfef2034308cb52f3027a0515537bc3",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_4": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "the auth service migration",
+      "encrypted_hex": "89d314c86b6e31a0c5279cf491e21d79b93ed1187bdb9cf3d5fd53a886cef97b712c491b37d50f7d6228e832ed275680a19887207f31",
+      "blob_bytes": 54,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_5": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "Auth",
+      "encrypted_hex": "bfcccddc6590ee09ed53bb1b2b2c382575b33173ee8f7c908399679056a69e5b",
+      "blob_bytes": 32,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "kavitha.s@amperatech.ai",
+      "encrypted_hex": "f50d6d062e63058d81df48bb0f391e0981a87638ef9df50690bf6356dbb91c255ba97343f5ef5009e9cc72b98a0e619bf8ee5e",
+      "blob_bytes": 51,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_4": {
+      "entity_type": "PERSON",
+      "original_value": "Kavitha Subramaniam",
+      "encrypted_hex": "da27f1a541f87b0337b6ec1521449f5f8e3f7e8bdea536ad3795b253365f8de5eac649647de664b48837bb5f203b14",
+      "blob_bytes": 47,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "monish.selvanathan@amperatech.ai",
+      "encrypted_hex": "d270726d88d1478f08cc38a6a2b83fa3714ef64ba0c19461e32c2f71308582c5f9b17a172c847368615381ae027037c1e19ab8a0cc32c393deed1fe3",
+      "blob_bytes": 60,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_3": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "deepak.k@amperatech.ai",
+      "encrypted_hex": "583a5ea7deaef6ed5c8bf80c080b6be2db45dac825860d42b9982266f7c17da60ac0a187b6334b9303cdf4df70d889220ef1",
+      "blob_bytes": 50,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "CONFIDENTIAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "from=kavitha.s@amperatech.ai"
+  },
+  "database_object": {
+    "source_type": "outlook_email",
+    "external_id": "AAMkAGEMAIL001",
+    "sensitivity_label": "CONFIDENTIAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "subject_masked": "<ORGANIZATION_3> 47 \u2014 <ORGANIZATION_5> service migration assigned to you",
+    "from_token": "EMAIL_ADDRESS_1",
+    "from_name_token": "PERSON_4",
+    "to_tokens": [
+      "EMAIL_ADDRESS_2",
+      "EMAIL_ADDRESS_3"
+    ],
+    "importance": "normal",
+    "received_at": "2026-06-15T09:15:44",
+    "thread_id": "CONV-EMAIL-001",
+    "has_attachments": false,
+    "body_size_chars": 397
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "outlook_email",
+    "external_id": "AAMkAGEMAIL001",
+    "resource_type": "emails",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 14,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "CONFIDENTIAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:44.953036"
+  }
+}

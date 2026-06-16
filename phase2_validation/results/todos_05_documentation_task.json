@@ -1,0 +1,107 @@
+{
+  "source_type": "todo",
+  "fixture_name": "Documentation task",
+  "fixture_meta": {
+    "name": "Documentation task",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": false
+  },
+  "raw_payload": {
+    "id": "todo-005",
+    "title": "Document the rollback runbook",
+    "body": {
+      "content": "Write the rollback runbook for auth-service deployments. Include the 5% error-rate threshold and the manual rollback steps. Publish to Confluence."
+    },
+    "status": "notStarted",
+    "importance": "normal",
+    "dueDateTime": {
+      "dateTime": "2026-06-21T18:00:00.0000000",
+      "timeZone": "Asia/Kolkata"
+    },
+    "createdDateTime": "2026-06-15T16:00:00Z",
+    "listId": "list-docs"
+  },
+  "normalized": {
+    "source_type": "todo",
+    "external_id": "todo-005",
+    "raw_payload": {
+      "id": "todo-005",
+      "title": "Document the rollback runbook",
+      "body": {
+        "content": "Write the rollback runbook for auth-service deployments. Include the 5% error-rate threshold and the manual rollback steps. Publish to Confluence."
+      },
+      "status": "notStarted",
+      "importance": "normal",
+      "dueDateTime": {
+        "dateTime": "2026-06-21T18:00:00.0000000",
+        "timeZone": "Asia/Kolkata"
+      },
+      "createdDateTime": "2026-06-15T16:00:00Z",
+      "listId": "list-docs"
+    },
+    "body_text": "Task: Document the rollback runbook\n\nWrite the rollback runbook for auth-service deployments. Include the 5% error-rate threshold and the manual rollback steps. Publish to Confluence.",
+    "subject": "Document the rollback runbook",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T16:00:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "status": "notStarted",
+      "due_at": "2026-06-21T18:00:00.0000000",
+      "list_id": "list-docs"
+    }
+  },
+  "masked_output": "Task: Document the rollback runbook\n\nWrite the rollback runbook for auth-service deployments. Include the 5% error-rate threshold and the manual rollback steps. Publish to Confluence.",
+  "vault_tokens": {},
+  "classification": "PUBLIC",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "from="
+  },
+  "database_object": {
+    "source_type": "todo",
+    "external_id": "todo-005",
+    "sensitivity_label": "PUBLIC",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "title_masked": "Document the rollback runbook",
+    "body_masked": "Task: Document the rollback runbook\n\nWrite the rollback runbook for auth-service deployments. Include the 5% error-rate threshold and the manual rollback steps. Publish to Confluence.",
+    "status": "notStarted",
+    "importance": "normal",
+    "due_at": "2026-06-21T18:00:00.0000000"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "todo",
+    "external_id": "todo-005",
+    "resource_type": "todos",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 0,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "PUBLIC",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.762058"
+  }
+}

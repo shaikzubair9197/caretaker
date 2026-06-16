@@ -1,0 +1,75 @@
+[
+  {
+    "source": "outlook_email",
+    "name": "Email — request to send API key",
+    "correlation_key": "api-key-handoff",
+    "secrets": ["sk-corr-key-aaa111bbb222ccc333"],
+    "identities": ["srihari.rajan@titancorp.com"],
+    "payload": {
+      "id": "CORR-EMAIL-001",
+      "subject": "Send API key to Srihari",
+      "from": { "emailAddress": { "name": "Monish Selvanathan", "address": "monish.selvanathan@amperatech.ai" } },
+      "toRecipients": [ { "emailAddress": { "name": "Ananya Krishnan", "address": "ananya.k@amperatech.ai" } } ],
+      "ccRecipients": [],
+      "body": { "content": "Ananya, please send the API key sk-corr-key-aaa111bbb222ccc333 to Srihari (srihari.rajan@titancorp.com) for the integration test today." },
+      "receivedDateTime": "2026-06-15T09:00:00Z",
+      "importance": "high",
+      "hasAttachments": false,
+      "conversationId": "CORR-CONV-001",
+      "internetMessageId": "<corr-001@amperatech.ai>"
+    }
+  },
+  {
+    "source": "teams_chat",
+    "name": "Teams — follow-up 'did you send it?'",
+    "correlation_key": "api-key-handoff",
+    "secrets": [],
+    "identities": ["monish.selvanathan@amperatech.ai"],
+    "payload": {
+      "id": "CORR-CHAT-001",
+      "chatId": "19:secops@thread.v2",
+      "from": { "user": { "displayName": "Monish Selvanathan", "id": "monish-guid" } },
+      "body": { "content": "Hey Ananya, did you send the API key to Srihari yet? The integration test is blocked on it." },
+      "createdDateTime": "2026-06-15T11:00:00Z",
+      "messageType": "message",
+      "importance": "normal",
+      "mentions": [],
+      "replyToId": null
+    }
+  },
+  {
+    "source": "calendar",
+    "name": "Calendar — security review event",
+    "correlation_key": "api-key-handoff",
+    "secrets": [],
+    "identities": ["kavitha.s@amperatech.ai"],
+    "payload": {
+      "id": "CORR-CAL-001",
+      "subject": "Security review — API key rotation",
+      "start": { "dateTime": "2026-06-16T15:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-16T16:00:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Kavitha Subramaniam", "address": "kavitha.s@amperatech.ai" } },
+      "attendees": [ { "emailAddress": { "name": "Ananya Krishnan", "address": "ananya.k@amperatech.ai" }, "status": { "response": "accepted" } } ],
+      "body": { "content": "Review the API key handoff and confirm rotation of the integration key shared with Titan Corp." },
+      "importance": "normal",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/corrabc",
+      "isCancelled": false
+    }
+  },
+  {
+    "source": "transcript",
+    "name": "Transcript — 'we rotated credentials'",
+    "correlation_key": "api-key-handoff",
+    "secrets": [],
+    "identities": ["ananya.k@amperatech.ai"],
+    "payload": {
+      "id": "CORR-TRANS-001",
+      "meetingId": "corr-meeting-001",
+      "subject": "Security review outcome",
+      "content": "[00:00] Kavitha Subramaniam: Did we close out the Titan key handoff?\n[00:20] Ananya Krishnan: Yes, we rotated the credentials after the integration test. The old key shared with Srihari is now revoked.",
+      "createdDateTime": "2026-06-16T16:05:00Z",
+      "participants": [ "kavitha.s@amperatech.ai", "ananya.k@amperatech.ai" ]
+    }
+  }
+]

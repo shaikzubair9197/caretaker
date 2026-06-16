@@ -14,15 +14,23 @@ class TaskService:
     def create(
         db: Session,
         description: str,
-        priority: str
+        priority: str,
+        user_id: int = 1,
     ):
         """
-        Prevent duplicate tasks before creating new one
+        Prevent duplicate tasks before creating new one.
+
+        Dedup is scoped to user_id so it matches the (user_id, description)
+        unique constraint — a description-only match would return another
+        user's task.
         """
 
         existing_task = (
             db.query(Task)
-            .filter(Task.description == description)
+            .filter(
+                Task.user_id == user_id,
+                Task.description == description,
+            )
             .first()
         )
 
@@ -32,7 +40,8 @@ class TaskService:
         return create_task(
             db,
             description,
-            priority
+            priority,
+            user_id=user_id,
         )
 
     @staticmethod

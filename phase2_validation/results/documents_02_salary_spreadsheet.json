@@ -1,0 +1,141 @@
+{
+  "source_type": "onedrive_document",
+  "fixture_name": "Salary spreadsheet",
+  "fixture_meta": {
+    "name": "Salary spreadsheet",
+    "category": "confidential",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "doc-002",
+    "name": "Compensation_Review_2026_DO_NOT_SHARE.xlsx",
+    "size": 245118,
+    "createdBy": {
+      "user": {
+        "displayName": "Lakshmi Iyer",
+        "email": "lakshmi.iyer@amperatech.ai"
+      }
+    },
+    "lastModifiedBy": {
+      "user": {
+        "displayName": "Lakshmi Iyer",
+        "email": "lakshmi.iyer@amperatech.ai"
+      }
+    },
+    "parentReference": {
+      "path": "/drive/root:/HR/Confidential"
+    },
+    "sensitivityLabel": {
+      "name": "Highly Confidential"
+    },
+    "shared": null,
+    "lastModifiedDateTime": "2026-06-14T18:30:00Z"
+  },
+  "normalized": {
+    "source_type": "onedrive_document",
+    "external_id": "doc-002",
+    "body_text": "Document: Compensation_Review_2026_DO_NOT_SHARE.xlsx\nPath: /drive/root:/HR/Confidential\nOwner: lakshmi.iyer@amperatech.ai\nLast modified by: lakshmi.iyer@amperatech.ai",
+    "subject": "Compensation_Review_2026_DO_NOT_SHARE.xlsx",
+    "sender": "lakshmi.iyer@amperatech.ai",
+    "sender_name": "Lakshmi Iyer",
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-14T18:30:00Z",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "size_bytes": 245118,
+      "parent_path": "/drive/root:/HR/Confidential",
+      "file_extension": "xlsx",
+      "ms_sensitivity_label": "Highly Confidential",
+      "share_scope": null,
+      "is_shared": false
+    }
+  },
+  "masked_output": "Document: <API_KEY_1>.xlsx\nPath: /drive/root:/HR/Confidential\nOwner: <EMAIL_ADDRESS_1>modified by: <EMAIL_ADDRESS_1>",
+  "vault_tokens": {
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "amperatech.ai",
+      "encrypted_hex": "c86030852eed45d7045cf1a3a2e7ac87036d6a8abf84220102dccc4f3cadc0d5b8ee9a1e820bf02801",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "lakshmi.iyer@amperatech.ai",
+      "encrypted_hex": "74043a9958e1a86afc272d4b27be1cde0520315eb93d6a593c628dfe426f79fc03ad85da4d345943480483bf11ce88ae4052f3338878",
+      "blob_bytes": 54,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "API_KEY_1": {
+      "entity_type": "API_KEY",
+      "original_value": "Compensation_Review_2026_DO_NOT_SHARE",
+      "encrypted_hex": "8b84f053d677a1da30373eb4633cbe704d240a62c48a16791f8f35f000d4f45a4a79c1522995795d1242fec59e5c51d31f48e786ebca7e7d5349217dc96761a928",
+      "blob_bytes": 65,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Lakshmi Iyer",
+      "encrypted_hex": "60a6c09d2365cb374998af802e41d1cb45329a0eaa74b7a0c2e4064927c5a60acb742629d826da47",
+      "blob_bytes": 40,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "CONFIDENTIAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "Document metadata only."
+  },
+  "database_object": {
+    "source_type": "onedrive_document",
+    "external_id": "doc-002",
+    "sensitivity_label": "CONFIDENTIAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "name_masked": "<API_KEY_1>.xlsx",
+    "file_extension": "xlsx",
+    "size_bytes": 245118,
+    "owner_token": "EMAIL_ADDRESS_1",
+    "parent_path": "/drive/root:/HR/Confidential",
+    "ms_sensitivity_label": "Highly Confidential",
+    "is_shared": false,
+    "share_scope": null
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "onedrive_document",
+    "external_id": "doc-002",
+    "resource_type": "documents",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 4,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "CONFIDENTIAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.791203"
+  }
+}

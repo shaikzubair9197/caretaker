@@ -1,0 +1,107 @@
+[
+  {
+    "meta": {
+      "name": "Legitimate sprint assignment",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "AAMkAGEMAIL001",
+      "subject": "Sprint 47 — Auth service migration assigned to you",
+      "from": { "emailAddress": { "name": "Kavitha Subramaniam", "address": "kavitha.s@amperatech.ai" } },
+      "toRecipients": [ { "emailAddress": { "name": "Monish Selvanathan", "address": "monish.selvanathan@amperatech.ai" } } ],
+      "ccRecipients": [ { "emailAddress": { "name": "Deepak Krishnamurthy", "address": "deepak.k@amperatech.ai" } } ],
+      "body": { "content": "Hi Monish,\n\nYou're taking ownership of the auth service migration in Sprint 47. Deliverables:\n1. Complete the OAuth2 token refresh refactor by June 20\n2. Review Deepak's PR #342 by end of week\n3. Present the migration plan on Thursday 10am\n\nBudget for external tooling: $500 (pre-approved by me). Please confirm by EOD.\n\nThanks,\nKavitha" },
+      "receivedDateTime": "2026-06-15T09:15:44Z",
+      "importance": "normal",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-001",
+      "internetMessageId": "<msg-001@amperatech.ai>"
+    }
+  },
+  {
+    "meta": {
+      "name": "Microsoft 365 credential phishing",
+      "category": "phishing",
+      "expect_min_threat": "SUSPICIOUS",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "AAMkAGEMAIL002",
+      "subject": "ACTION REQUIRED: Verify your Microsoft 365 account within 24 hours",
+      "from": { "emailAddress": { "name": "Microsoft Security Team", "address": "security@micros0ft-alerts.com" } },
+      "toRecipients": [ { "emailAddress": { "name": "Vignesh Kumar", "address": "vignesh.kumar@amperatech.ai" } } ],
+      "ccRecipients": [],
+      "body": { "content": "Dear User,\n\nWe detected suspicious login activity. Your account will be suspended in 24 hours unless you verify your credentials.\n\nClick here to verify your password: http://verify-microsoft-auth.xyz/login?token=a9f3k2\n\nAlternatively, reply to this email with your username and password to verify manually.\n\nMicrosoft Support Team\nRef: MS-2026-447291" },
+      "receivedDateTime": "2026-06-15T07:12:05Z",
+      "importance": "high",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-002",
+      "internetMessageId": "<phish-002@micros0ft-alerts.com>"
+    }
+  },
+  {
+    "meta": {
+      "name": "CEO wire transfer (business email compromise)",
+      "category": "bec",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "AAMkAGEMAIL003",
+      "subject": "Urgent payment needed before EOD",
+      "from": { "emailAddress": { "name": "Rajesh Menon (CEO)", "address": "rajesh.menon.ceo@gmail.com" } },
+      "toRecipients": [ { "emailAddress": { "name": "Finance Team", "address": "finance@amperatech.ai" } } ],
+      "ccRecipients": [],
+      "body": { "content": "Hi,\n\nI'm in back-to-back meetings and need you to process an urgent wire transfer of $48,000 to a new vendor immediately. This is critical and time-sensitive — please send the payment to the account details I will share next and confirm once done. Do not call me, just handle it.\n\nRegards,\nRajesh" },
+      "receivedDateTime": "2026-06-15T11:02:00Z",
+      "importance": "high",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-003",
+      "internetMessageId": "<bec-003@gmail.com>"
+    }
+  },
+  {
+    "meta": {
+      "name": "Fake password reset (credential harvesting)",
+      "category": "phishing",
+      "expect_min_threat": "SUSPICIOUS",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "AAMkAGEMAIL004",
+      "subject": "Your password expires today — reset now",
+      "from": { "emailAddress": { "name": "IT Helpdesk", "address": "helpdesk@amperatech-support.tk" } },
+      "toRecipients": [ { "emailAddress": { "name": "Ananya Krishnan", "address": "ananya.k@amperatech.ai" } } ],
+      "ccRecipients": [],
+      "body": { "content": "Your corporate password expires in 2 hours. To avoid losing access, please verify your password and enter your credentials at the secure portal below:\n\nhttps://amperatech-reset.tk/portal?session=8842\n\nFailure to act will lock your account permanently.\n\nIT Helpdesk" },
+      "receivedDateTime": "2026-06-15T06:40:00Z",
+      "importance": "high",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-004",
+      "internetMessageId": "<reset-004@amperatech-support.tk>"
+    }
+  },
+  {
+    "meta": {
+      "name": "Internal all-hands announcement",
+      "category": "announcement",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "AAMkAGEMAIL005",
+      "subject": "All-Hands: Q2 results and Q3 roadmap — Friday 4pm",
+      "from": { "emailAddress": { "name": "Priya Nair", "address": "priya.nair@amperatech.ai" } },
+      "toRecipients": [ { "emailAddress": { "name": "All Staff", "address": "all-staff@amperatech.ai" } } ],
+      "ccRecipients": [],
+      "body": { "content": "Team,\n\nOur Q2 all-hands is this Friday at 4pm in the main hall and on Teams. Kavitha will cover Q2 results and the Q3 roadmap. This is internal and confidential — please do not share outside the company.\n\nSee you there,\nPriya" },
+      "receivedDateTime": "2026-06-15T08:00:00Z",
+      "importance": "normal",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-005",
+      "internetMessageId": "<allhands-005@amperatech.ai>"
+    }
+  }
+]

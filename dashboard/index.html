@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caretaker — Dev Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Toast container -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- App shell -->
+<div class="shell">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">⬡</span>
+      <span class="sidebar-title">Caretaker</span>
+      <span class="sidebar-sub">Dev Console</span>
+    </div>
+
+    <ul class="nav-list">
+      <li><a class="nav-link active" href="#dashboard"   data-page="dashboard">
+        <span class="nav-icon">◈</span> Dashboard
+      </a></li>
+      <li><a class="nav-link" href="#panic-dump"   data-page="panic-dump">
+        <span class="nav-icon">⚡</span> Panic Dump
+      </a></li>
+      <li><a class="nav-link" href="#brain"        data-page="brain">
+        <span class="nav-icon">◎</span> Brain Inspector
+      </a></li>
+      <li><a class="nav-link" href="#agent"        data-page="agent">
+        <span class="nav-icon">◇</span> Agent Actions
+      </a></li>
+      <li><a class="nav-link" href="#tasks"        data-page="tasks">
+        <span class="nav-icon">▣</span> Tasks
+      </a></li>
+      <li><a class="nav-link" href="#commitments"  data-page="commitments">
+        <span class="nav-icon">◉</span> Commitments
+      </a></li>
+      <li><a class="nav-link" href="#llm-audit"    data-page="llm-audit">
+        <span class="nav-icon">◈</span> LLM Audit
+      </a></li>
+      <li><a class="nav-link" href="#telemetry"    data-page="telemetry">
+        <span class="nav-icon">▦</span> Telemetry
+      </a></li>
+      <li><a class="nav-link" href="#txn-debug"    data-page="txn-debug">
+        <span class="nav-icon">⟁</span> Transaction Debug
+      </a></li>
+      <li><a class="nav-link" href="#dev-testing"  data-page="dev-testing">
+        <span class="nav-icon">⚗</span> Dev Testing
+      </a></li>
+    </ul>
+
+    <div class="sidebar-config">
+      <div class="config-label">API Config</div>
+      <input id="cfg-url"  class="cfg-input" type="text" placeholder="http://127.0.0.1:8000" spellcheck="false" />
+      <input id="cfg-key"  class="cfg-input" type="password" placeholder="X-API-Key" spellcheck="false" />
+      <button id="cfg-save" class="btn btn-ghost btn-sm">Save</button>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main">
+    <div id="content" class="content">
+      <div class="loading-full"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

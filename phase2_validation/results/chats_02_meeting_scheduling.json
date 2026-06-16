@@ -1,0 +1,222 @@
+{
+  "source_type": "teams_chat",
+  "fixture_name": "Meeting scheduling",
+  "fixture_meta": {
+    "name": "Meeting scheduling",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "1718437300.000002",
+    "chatId": "19:team_general@thread.v2",
+    "from": {
+      "user": {
+        "displayName": "Priya Nair",
+        "id": "priya-guid"
+      }
+    },
+    "body": {
+      "content": "Standup is moved to 11am today since Kavitha has a conflict. Please add your accomplishments to the Q2 review doc by Thursday. You can reach me at priya.nair@amperatech.ai or +91-80-2233-4455 if needed."
+    },
+    "createdDateTime": "2026-06-15T08:00:00Z",
+    "messageType": "message",
+    "importance": "normal",
+    "mentions": [],
+    "replyToId": null
+  },
+  "normalized": {
+    "source_type": "teams_chat",
+    "external_id": "1718437300.000002",
+    "raw_payload": {
+      "id": "1718437300.000002",
+      "chatId": "19:team_general@thread.v2",
+      "from": {
+        "user": {
+          "displayName": "Priya Nair",
+          "id": "priya-guid"
+        }
+      },
+      "body": {
+        "content": "Standup is moved to 11am today since Kavitha has a conflict. Please add your accomplishments to the Q2 review doc by Thursday. You can reach me at priya.nair@amperatech.ai or +91-80-2233-4455 if needed."
+      },
+      "createdDateTime": "2026-06-15T08:00:00Z",
+      "messageType": "message",
+      "importance": "normal",
+      "mentions": [],
+      "replyToId": null
+    },
+    "body_text": "Standup is moved to 11am today since Kavitha has a conflict. Please add your accomplishments to the Q2 review doc by Thursday. You can reach me at priya.nair@amperatech.ai or +91-80-2233-4455 if needed.",
+    "subject": null,
+    "sender": "priya-guid",
+    "sender_name": "Priya Nair",
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T08:00:00",
+    "end_time": null,
+    "thread_id": "19:team_general@thread.v2",
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "chat_id": "19:team_general@thread.v2",
+      "channel_id": null,
+      "team_id": null,
+      "message_type": "message",
+      "reply_to_id": null
+    }
+  },
+  "masked_output": "<PERSON_2> is moved to <DATE_TIME_3> <DATE_TIME_2> since <PERSON_1> has a conflict. Please add your accomplishments to the <US_DRIVER_LICENSE_1>RGANIZATION_1> review doc by <DATE_TIME_1>. You can reach me at <URL_2>DDRESS_1>HONE_NUMBER_1> if needed.",
+  "vault_tokens": {
+    "PHONE_NUMBER_1": {
+      "entity_type": "PHONE_NUMBER",
+      "original_value": "+91-80-2233-4455",
+      "encrypted_hex": "be82a7e23b2f024f9ae0f7f7c03c3df06eab28c5f6a223c1c0949b546a2d3f2800ba71de80ed16e839c543ce",
+      "blob_bytes": 44,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "amperatech.ai",
+      "encrypted_hex": "b091e6a70b236267109f678024fd92101fa8c19eb903d78b1f0df38653b24c34ed15621ce41518d1cf",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "priya.nair@amperatech.ai",
+      "encrypted_hex": "5204f1388a8e163b928d3600850b8b62a9a942145f3a27161cbc392d857ef96a9fade635ecf91e223126c0c391b86f86ac21a25f",
+      "blob_bytes": 52,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_2": {
+      "entity_type": "URL",
+      "original_value": "priya.na",
+      "encrypted_hex": "40ef73546465031fb3ed6b260b2bec95a1bf6e432a2f790204909a5b22aeb42d5ba78357",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_1": {
+      "entity_type": "DATE_TIME",
+      "original_value": "Thursday",
+      "encrypted_hex": "316b772520fc61e420ae8405cbe8636bd5cb5c23faf7bdd135b8254d87de4b7b1d5abf0e",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "Q2",
+      "encrypted_hex": "b08e214d0cb934d52d37889c4f2baaab27e4220773682e467fa441ac3d49",
+      "blob_bytes": 30,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "US_DRIVER_LICENSE_1": {
+      "entity_type": "US_DRIVER_LICENSE",
+      "original_value": "Q2",
+      "encrypted_hex": "c40b54f8da6567422535d78288d4bc7fbf9b8e41078d81a1bfc189da7a77",
+      "blob_bytes": 30,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Kavitha",
+      "encrypted_hex": "72a413a7205ce37bbe06a09d705aea841f520b4a2090d5b050bcc6a1657c51c5a14f33",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_2": {
+      "entity_type": "DATE_TIME",
+      "original_value": "today",
+      "encrypted_hex": "bb4e643aac6f35092953a17731f075567ccbdf0999c8cd24cae251d68bcd992fde",
+      "blob_bytes": 33,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_3": {
+      "entity_type": "DATE_TIME",
+      "original_value": "11am",
+      "encrypted_hex": "2fe7745944778418c713319c5f515b54e2ceabb952e6b129079d24fb1adee3ee",
+      "blob_bytes": 32,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Standup",
+      "encrypted_hex": "bc27b5d63afe9b377bbc24a35c9ff6ca604a6d1647c1c6a6449e69f77061780adb8cfc",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "priya-guid",
+      "encrypted_hex": "b4aed5191909f7d21e1e6cb931e0ad7e8cb95847bcdd5cd2b7cc9c75d6b6f8fd91487ed0e96f",
+      "blob_bytes": 38,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_3": {
+      "entity_type": "PERSON",
+      "original_value": "Priya Nair",
+      "encrypted_hex": "70365dcbda2a993cbe0e2843dac66e39a2c4c451c51ad72d4466beb12dc1673219051d71ef7d",
+      "blob_bytes": 38,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "teams_chat",
+    "external_id": "1718437300.000002",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "chat_id": "19:team_general@thread.v2",
+    "from_token": "EMAIL_ADDRESS_2",
+    "from_name_token": "PERSON_3",
+    "body_masked": "<PERSON_2> is moved to <DATE_TIME_3> <DATE_TIME_2> since <PERSON_1> has a conflict. Please add your accomplishments to the <US_DRIVER_LICENSE_1>RGANIZATION_1> review doc by <DATE_TIME_1>. You can reach me at <URL_2>DDRESS_1>HONE_NUMBER_1> if needed.",
+    "mentions_tokens": [],
+    "importance": "normal",
+    "sent_at": "2026-06-15T08:00:00"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "teams_chat",
+    "external_id": "1718437300.000002",
+    "resource_type": "chats",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 13,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.162527"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "source_type": "todo",
+  "fixture_name": "Bugfix task",
+  "fixture_meta": {
+    "name": "Bugfix task",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": false
+  },
+  "raw_payload": {
+    "id": "todo-004",
+    "title": "Fix connection pool saturation alert",
+    "body": {
+      "content": "Add alerting on DB connection pool saturation. This was the root cause of the auth 503 outage. Owner: Deepak."
+    },
+    "status": "notStarted",
+    "importance": "normal",
+    "dueDateTime": {
+      "dateTime": "2026-06-22T18:00:00.0000000",
+      "timeZone": "Asia/Kolkata"
+    },
+    "createdDateTime": "2026-06-15T15:45:00Z",
+    "listId": "list-eng"
+  },
+  "normalized": {
+    "source_type": "todo",
+    "external_id": "todo-004",
+    "raw_payload": {
+      "id": "todo-004",
+      "title": "Fix connection pool saturation alert",
+      "body": {
+        "content": "Add alerting on DB connection pool saturation. This was the root cause of the auth 503 outage. Owner: Deepak."
+      },
+      "status": "notStarted",
+      "importance": "normal",
+      "dueDateTime": {
+        "dateTime": "2026-06-22T18:00:00.0000000",
+        "timeZone": "Asia/Kolkata"
+      },
+      "createdDateTime": "2026-06-15T15:45:00Z",
+      "listId": "list-eng"
+    },
+    "body_text": "Task: Fix connection pool saturation alert\n\nAdd alerting on DB connection pool saturation. This was the root cause of the auth 503 outage. Owner: Deepak.",
+    "subject": "Fix connection pool saturation alert",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T15:45:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "status": "notStarted",
+      "due_at": "2026-06-22T18:00:00.0000000",
+      "list_id": "list-eng"
+    }
+  },
+  "masked_output": "Task: Fix connection pool saturation alert\n\nAdd alerting on DB connection pool saturation. This was the root cause of the auth 503 outage. Owner: <PERSON_1>.",
+  "vault_tokens": {
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Deepak",
+      "encrypted_hex": "4249e76ee9bf94ad0d1e8583af331553e54e3ea9519327b359b2083e2575ebabe5aa",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "from="
+  },
+  "database_object": {
+    "source_type": "todo",
+    "external_id": "todo-004",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "title_masked": "Fix connection pool saturation alert",
+    "body_masked": "Task: Fix connection pool saturation alert\n\nAdd alerting on DB connection pool saturation. This was the root cause of the auth 503 outage. Owner: <PERSON_1>.",
+    "status": "notStarted",
+    "importance": "normal",
+    "due_at": "2026-06-22T18:00:00.0000000"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "todo",
+    "external_id": "todo-004",
+    "resource_type": "todos",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 1,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.739038"
+  }
+}

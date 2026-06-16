@@ -1,0 +1,107 @@
+[
+  {
+    "source": "outlook_email",
+    "name": "Email with OpenAI key + AWS key + recipient",
+    "secrets": ["sk-prod-abc123xyz789def456", "AKIAIOSFODNN7EXAMPLE"],
+    "identities": ["srihari.rajan@titancorp.com", "monish.selvanathan@amperatech.ai"],
+    "payload": {
+      "id": "SEC-EMAIL-001",
+      "subject": "Prod key handoff before 5 PM",
+      "from": { "emailAddress": { "name": "Monish Selvanathan", "address": "monish.selvanathan@amperatech.ai" } },
+      "toRecipients": [ { "emailAddress": { "name": "Srihari Rajan", "address": "srihari.rajan@titancorp.com" } } ],
+      "ccRecipients": [],
+      "body": { "content": "Please send the OpenAI key sk-prod-abc123xyz789def456 to Srihari before 5 PM. Also the prod AWS key is AKIAIOSFODNN7EXAMPLE — rotate after the migration." },
+      "receivedDateTime": "2026-06-15T09:00:00Z",
+      "importance": "high",
+      "hasAttachments": false,
+      "conversationId": "SEC-CONV-001",
+      "internetMessageId": "<sec-001@amperatech.ai>"
+    }
+  },
+  {
+    "source": "teams_chat",
+    "name": "Teams chat with bearer token + DB connection string",
+    "secrets": ["Bearer eyJhbG123tokenABC456payloadDEF789", "postgres://admin:S3cretPass2026@db.internal:5432/prod"],
+    "identities": ["ananya.k@amperatech.ai"],
+    "payload": {
+      "id": "SEC-CHAT-001",
+      "chatId": "19:secops@thread.v2",
+      "from": { "user": { "displayName": "Ananya Krishnan", "id": "ananya-guid" } },
+      "body": { "content": "Here is the API gateway header: Authorization: Bearer eyJhbG123tokenABC456payloadDEF789 and the DB is postgres://admin:S3cretPass2026@db.internal:5432/prod. Ping ananya.k@amperatech.ai when done." },
+      "createdDateTime": "2026-06-15T09:30:00Z",
+      "messageType": "message",
+      "importance": "high",
+      "mentions": [],
+      "replyToId": null
+    }
+  },
+  {
+    "source": "transcript",
+    "name": "Transcript with credentials, phone, email, names",
+    "secrets": ["sk-live-7f3a9b2c1d4e5f6a7b8c9d0e", "postgres://demo:Demo_2026Pass@demo-db.internal:5432/demo"],
+    "identities": ["deepak.k@amperatech.ai", "monish.selvanathan@amperatech.ai"],
+    "payload": {
+      "id": "SEC-TRANS-001",
+      "meetingId": "sec-meeting-001",
+      "subject": "Infra credentials sync",
+      "content": "[00:00] Ananya Krishnan: For the demo the temporary API key is sk-live-7f3a9b2c1d4e5f6a7b8c9d0e and the DB is postgres://demo:Demo_2026Pass@demo-db.internal:5432/demo.\n[00:30] Monish Selvanathan: Got it. Reach me at monish.selvanathan@amperatech.ai or +91-80-4567-8901. Deepak (deepak.k@amperatech.ai) will rotate both before EOD.",
+      "createdDateTime": "2026-06-15T10:00:00Z",
+      "participants": [ "ananya.k@amperatech.ai", "monish.selvanathan@amperatech.ai", "deepak.k@amperatech.ai" ]
+    }
+  },
+  {
+    "source": "calendar",
+    "name": "Calendar event with attendee identities + embedded secret",
+    "secrets": ["sk-cal-secret-9988776655aabbcc"],
+    "identities": ["kavitha.s@amperatech.ai", "arjun.pillai@gmail.com"],
+    "payload": {
+      "id": "SEC-CAL-001",
+      "subject": "Security review — rotate demo key",
+      "start": { "dateTime": "2026-06-16T10:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-16T11:00:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Kavitha Subramaniam", "address": "kavitha.s@amperatech.ai" } },
+      "attendees": [
+        { "emailAddress": { "name": "Arjun Pillai", "address": "arjun.pillai@gmail.com" }, "status": { "response": "accepted" } }
+      ],
+      "body": { "content": "Agenda: rotate the demo key sk-cal-secret-9988776655aabbcc and review access. Confidential." },
+      "importance": "high",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/secabc",
+      "isCancelled": false
+    }
+  },
+  {
+    "source": "todo",
+    "name": "ToDo with password + connection string",
+    "secrets": ["Prod_Master_2026Key!", "postgres://root:Root_Pass_2026X@prod-db.internal:5432/prod"],
+    "identities": ["ananya.k@amperatech.ai"],
+    "payload": {
+      "id": "SEC-TODO-001",
+      "title": "Rotate prod DB master password",
+      "body": { "content": "Current password: Prod_Master_2026Key! must be rotated. Connection in use: postgres://root:Root_Pass_2026X@prod-db.internal:5432/prod. Coordinate with ananya.k@amperatech.ai." },
+      "status": "notStarted",
+      "importance": "high",
+      "dueDateTime": { "dateTime": "2026-06-15T18:00:00.0000000", "timeZone": "Asia/Kolkata" },
+      "createdDateTime": "2026-06-15T06:35:00Z",
+      "listId": "list-security"
+    }
+  },
+  {
+    "source": "onedrive_document",
+    "name": "OneDrive runbook with embedded AWS key + connection string",
+    "secrets": ["AKIAIOSFODNN7EXAMPLE", "postgres://root:Root_Pass_2026Y@prod-db.internal:5432/prod"],
+    "identities": ["ananya.k@amperatech.ai"],
+    "payload": {
+      "id": "SEC-DOC-001",
+      "name": "Prod_Break_Glass_Runbook.md",
+      "size": 51230,
+      "createdBy": { "user": { "displayName": "Ananya Krishnan", "email": "ananya.k@amperatech.ai" } },
+      "lastModifiedBy": { "user": { "displayName": "Ananya Krishnan", "email": "ananya.k@amperatech.ai" } },
+      "parentReference": { "path": "/drive/root:/Ops/Runbooks" },
+      "sensitivityLabel": { "name": "Confidential" },
+      "shared": { "scope": "organization" },
+      "lastModifiedDateTime": "2026-06-13T09:15:00Z",
+      "preview_text": "Break-glass: AWS key AKIAIOSFODNN7EXAMPLE, DB postgres://root:Root_Pass_2026Y@prod-db.internal:5432/prod. Rotate after use."
+    }
+  }
+]

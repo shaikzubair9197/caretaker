@@ -13,5 +13,26 @@ class Settings:
     DB_USER = os.getenv("DB_USER")
     DB_PASSWORD = os.getenv("DB_PASSWORD")
 
+    # ── Microsoft Graph (OAuth2 client_credentials) ───────────────────────────
+    # Accept both GRAPH_* and the lowercase tenant_id/client_id/client_secret
+    # names so existing .env files (lowercase) are picked up without renaming.
+    GRAPH_TENANT_ID     = os.getenv("GRAPH_TENANT_ID")     or os.getenv("tenant_id", "")
+    GRAPH_CLIENT_ID     = os.getenv("GRAPH_CLIENT_ID")     or os.getenv("client_id", "")
+    GRAPH_CLIENT_SECRET = os.getenv("GRAPH_CLIENT_SECRET") or os.getenv("client_secret", "")
+    GRAPH_SERVICE_UPN   = os.getenv("GRAPH_SERVICE_UPN", "care.taker@amperatech.ai")
+
+    # ── Vault (AES-256-GCM) ───────────────────────────────────────────────────
+    # 64 hex chars = 32 bytes = 256-bit key. Generate with:
+    #   python -c "import secrets; print(secrets.token_hex(32))"
+    # Store in .env as VAULT_MASTER_KEY=<hex>
+    VAULT_MASTER_KEY         = os.getenv("VAULT_MASTER_KEY", "")
+    VAULT_KEY_VERSION        = int(os.getenv("VAULT_KEY_VERSION", "1"))
+
+    # ── Retention (days) ─────────────────────────────────────────────────────
+    RETENTION_RAW_DAYS         = int(os.getenv("RETENTION_RAW_DAYS", "90"))
+    RETENTION_TRANSCRIPT_DAYS  = int(os.getenv("RETENTION_TRANSCRIPT_DAYS", "30"))
+    RETENTION_PRESENCE_DAYS    = int(os.getenv("RETENTION_PRESENCE_DAYS", "7"))
+    RETENTION_KNOWLEDGE_DAYS   = int(os.getenv("RETENTION_KNOWLEDGE_DAYS", "365"))
+
 
 settings = Settings()

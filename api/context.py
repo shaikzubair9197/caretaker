@@ -8,7 +8,8 @@ from database.crud import (
     start_window_session,
     end_window_session,
     get_active_session,
-    get_all_window_events
+    get_all_window_events,
+    cleanup_stale_sessions,
 )
 
 from services.context_service import (
@@ -27,6 +28,8 @@ def save_window(request: ActiveWindowRequest):
     db = SessionLocal()
 
     try:
+
+        cleanup_stale_sessions(db)
 
         active_session = get_active_session(db)
 

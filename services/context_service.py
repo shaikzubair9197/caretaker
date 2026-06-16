@@ -1,15 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from database.models import (
     ActiveWindow,
     Task
 )
+from utils.time_utils import utcnow
 
 
 def get_last_hour_context(db):
 
     one_hour_ago = (
-        datetime.now()
+        utcnow()
         - timedelta(hours=1)
     )
 
@@ -68,7 +69,7 @@ def get_last_hour_context(db):
 def get_agent_context(db):
 
     one_hour_ago = (
-        datetime.now()
+        utcnow()
         - timedelta(hours=1)
     )
 
@@ -126,7 +127,7 @@ def get_agent_context(db):
     return {
 
         "current_time": str(
-            datetime.now()
+            utcnow()
         ),
 
         "focus_minutes": round(

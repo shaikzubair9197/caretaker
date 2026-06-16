@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "read": {
+      "deny": [
+        "**/.env",
+        "**/.env.*"
+      ]
+    },
+    "edit": {
+      "deny": [
+        "**/.env",
+        "**/.env.*"
+      ]
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "source_type": "calendar",
+  "fixture_name": "Executive strategy meeting",
+  "fixture_meta": {
+    "name": "Executive strategy meeting",
+    "category": "confidential",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "event-003",
+    "subject": "Executive Strategy \u2014 Q3 Growth Plan (Confidential)",
+    "start": {
+      "dateTime": "2026-06-18T09:00:00",
+      "timeZone": "Asia/Kolkata"
+    },
+    "end": {
+      "dateTime": "2026-06-18T10:30:00",
+      "timeZone": "Asia/Kolkata"
+    },
+    "organizer": {
+      "emailAddress": {
+        "name": "Rajesh Menon",
+        "address": "rajesh.menon@amperatech.ai"
+      }
+    },
+    "attendees": [
+      {
+        "emailAddress": {
+          "name": "Kavitha Subramaniam",
+          "address": "kavitha.s@amperatech.ai"
+        },
+        "status": {
+          "response": "accepted"
+        }
+      }
+    ],
+    "body": {
+      "content": "Confidential leadership session. Review the Q3 growth strategy and acquisition targets. Do not distribute. Materials are in the board deck on OneDrive."
+    },
+    "importance": "high",
+    "isOnlineMeeting": false,
+    "onlineMeetingUrl": null,
+    "isCancelled": false
+  },
+  "normalized": {
+    "source_type": "calendar",
+    "external_id": "event-003",
+    "raw_payload": {
+      "id": "event-003",
+      "subject": "Executive Strategy \u2014 Q3 Growth Plan (Confidential)",
+      "start": {
+        "dateTime": "2026-06-18T09:00:00",
+        "timeZone": "Asia/Kolkata"
+      },
+      "end": {
+        "dateTime": "2026-06-18T10:30:00",
+        "timeZone": "Asia/Kolkata"
+      },
+      "organizer": {
+        "emailAddress": {
+          "name": "Rajesh Menon",
+          "address": "rajesh.menon@amperatech.ai"
+        }
+      },
+      "attendees": [
+        {
+          "emailAddress": {
+            "name": "Kavitha Subramaniam",
+            "address": "kavitha.s@amperatech.ai"
+          },
+          "status": {
+            "response": "accepted"
+          }
+        }
+      ],
+      "body": {
+        "content": "Confidential leadership session. Review the Q3 growth strategy and acquisition targets. Do not distribute. Materials are in the board deck on OneDrive."
+      },
+      "importance": "high",
+      "isOnlineMeeting": false,
+      "onlineMeetingUrl": null,
+      "isCancelled": false
+    },
+    "body_text": "Event: Executive Strategy \u2014 Q3 Growth Plan (Confidential)\n\nConfidential leadership session. Review the Q3 growth strategy and acquisition targets. Do not distribute. Materials are in the board deck on OneDrive.",
+    "subject": "Executive Strategy \u2014 Q3 Growth Plan (Confidential)",
+    "sender": "rajesh.menon@amperatech.ai",
+    "sender_name": "Rajesh Menon",
+    "recipients": [
+      "kavitha.s@amperatech.ai"
+    ],
+    "participants": [],
+    "timestamp": "2026-06-18T03:30:00",
+    "end_time": "2026-06-18T05:00:00",
+    "thread_id": null,
+    "importance": "high",
+    "has_attachments": false,
+    "metadata": {
+      "is_online_meeting": false,
+      "meeting_url": null,
+      "recurrence": true,
+      "is_cancelled": false
+    }
+  },
+  "masked_output": "Event: Executive Strategy \u2014 <US_DRIVER_LICENSE_1> Growth Plan (Confidential)\n\nConfidential leadership session. Review the <US_DRIVER_LICENSE_1>OCATION_1> growth strategy and acquisition targets. Do not distribute. Materials are in the board deck on <ORGANIZATION_1>.",
+  "vault_tokens": {
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "OneDrive",
+      "encrypted_hex": "e355f7578142eb781b262c83eb5e4faed3f9eb3b951a9378b1d5cf3d280503d736420f73",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "LOCATION_1": {
+      "entity_type": "LOCATION",
+      "original_value": "Q3",
+      "encrypted_hex": "d4325e113589bdf21c7a73dabb6bd5414e4c82a3b77e680a760bb8a9f7bf",
+      "blob_bytes": 30,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "US_DRIVER_LICENSE_1": {
+      "entity_type": "US_DRIVER_LICENSE",
+      "original_value": "Q3",
+      "encrypted_hex": "8f5269bee8dc258993d041bfa17f0e9dd9b12605aaa89988241bedc78e42",
+      "blob_bytes": 30,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "rajesh.menon@amperatech.ai",
+      "encrypted_hex": "35c4cea783f477a447362619ca3a7dfbd4352c5a3cf6114a1008b2d96fe06801ad89a16b484486f08160e07ea4c7d8ed06b5a99125a9",
+      "blob_bytes": 54,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Rajesh Menon",
+      "encrypted_hex": "2713705f00fcbb5fdb70932ed1e650f0facbf546b9aa0a847f55e8048fccd2b9104dec974636d559",
+      "blob_bytes": 40,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "kavitha.s@amperatech.ai",
+      "encrypted_hex": "be0f9d94c63dc94c335af5afb39b8013b087204893094e9ef004f43a04fb0d6359618ec7b1691d515fa88a176af20f2fbd160e",
+      "blob_bytes": 51,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "calendar",
+    "external_id": "event-003",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "subject_masked": "Executive Strategy \u2014 <LOCATION_1> Growth Plan (Confidential)",
+    "organizer_token": "EMAIL_ADDRESS_1",
+    "attendee_tokens": [
+      "EMAIL_ADDRESS_2"
+    ],
+    "start_at": "2026-06-18T03:30:00",
+    "end_at": "2026-06-18T05:00:00",
+    "is_online_meeting": false,
+    "importance": "high"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "calendar",
+    "external_id": "event-003",
+    "resource_type": "calendars",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 6,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.608243"
+  }
+}

@@ -1,45 +1,57 @@
+import os
 import time
-
 import requests
 import pywinctl as pwc
 
+from utils.logger import get_logger
 
-last_window = None
+logger = get_logger("daemon.active_window")
+
+API_BASE = os.getenv("CARETAKER_API_URL", "http://127.0.0.1:8000")
+POLL_INTERVAL = int(os.getenv("CARETAKER_POLL_INTERVAL", "5"))
+_API_KEY = os.getenv("CARETAKER_API_KEY", "")
+_HEADERS = {"X-API-Key": _API_KEY} if _API_KEY else {}
 
 
-while True:
+def main():
+    last_window = None
 
-    try:
+    logger.info("Active window daemon started")
 
-        window = pwc.getActiveWindow()
+    while True:
+        try:
+            window = pwc.getActiveWindow()
 
-        if window:
+            if window:
+                current_window = window.title
 
-            current_window = window.title
+                if current_window != last_window:
+                    logger.info(f"Window switch detected: {current_window!r}")
 
-            if current_window != last_window:
+                    requests.post(
+                        f"{API_BASE}/telemetry/",
+                        json={"window_title": current_window},
+                        headers=_HEADERS,
+                        timeout=3,
+                    )
 
-                print(
-                    f"New Window Detected: {current_window}"
-                )
+                    agent_response = requests.get(
+                        f"{API_BASE}/agent/tick",
+                        headers=_HEADERS,
+                        timeout=5,
+                    )
 
-                response = requests.post(
-                    "http://127.0.0.1:8000/telemetry/",
-                    json={
-                        "window_title": current_window
-                    }
-                )
+                    logger.info(f"Agent tick: {agent_response.json()}")
 
-                print(
-                    f"Saved: {response.status_code}"
-                )
+                    last_window = current_window
 
-                last_window = current_window
+        except requests.exceptions.ConnectionError:
+            logger.warning("API unreachable — will retry")
+        except Exception as e:
+            logger.error(f"Unhandled error: {e}")
 
-    except Exception as e:
+        time.sleep(POLL_INTERVAL)
 
-        print(
-            f"Error: {e}"
-        )
 
-    time.sleep(5)
+if __name__ == "__main__":
+    main()

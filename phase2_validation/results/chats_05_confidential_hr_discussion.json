@@ -1,0 +1,182 @@
+{
+  "source_type": "teams_chat",
+  "fixture_name": "Confidential HR discussion",
+  "fixture_meta": {
+    "name": "Confidential HR discussion",
+    "category": "confidential",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "1718437900.000005",
+    "chatId": "19:hr_private@thread.v2",
+    "from": {
+      "user": {
+        "displayName": "Lakshmi Iyer (HR)",
+        "id": "hr-guid"
+      }
+    },
+    "body": {
+      "content": "Confidential \u2014 do not share. We are finalizing the compensation review for Rahul Verma. His revised salary is 28 LPA effective July. Please keep this strictly between us until the offer letter is signed. His personal email is rahul.verma87@gmail.com."
+    },
+    "createdDateTime": "2026-06-15T10:20:00Z",
+    "messageType": "message",
+    "importance": "high",
+    "mentions": [],
+    "replyToId": null
+  },
+  "normalized": {
+    "source_type": "teams_chat",
+    "external_id": "1718437900.000005",
+    "raw_payload": {
+      "id": "1718437900.000005",
+      "chatId": "19:hr_private@thread.v2",
+      "from": {
+        "user": {
+          "displayName": "Lakshmi Iyer (HR)",
+          "id": "hr-guid"
+        }
+      },
+      "body": {
+        "content": "Confidential \u2014 do not share. We are finalizing the compensation review for Rahul Verma. His revised salary is 28 LPA effective July. Please keep this strictly between us until the offer letter is signed. His personal email is rahul.verma87@gmail.com."
+      },
+      "createdDateTime": "2026-06-15T10:20:00Z",
+      "messageType": "message",
+      "importance": "high",
+      "mentions": [],
+      "replyToId": null
+    },
+    "body_text": "Confidential \u2014 do not share. We are finalizing the compensation review for Rahul Verma. His revised salary is 28 LPA effective July. Please keep this strictly between us until the offer letter is signed. His personal email is rahul.verma87@gmail.com.",
+    "subject": null,
+    "sender": "hr-guid",
+    "sender_name": "Lakshmi Iyer (HR)",
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T10:20:00",
+    "end_time": null,
+    "thread_id": "19:hr_private@thread.v2",
+    "importance": "high",
+    "has_attachments": false,
+    "metadata": {
+      "chat_id": "19:hr_private@thread.v2",
+      "channel_id": null,
+      "team_id": null,
+      "message_type": "message",
+      "reply_to_id": null
+    }
+  },
+  "masked_output": "Confidential \u2014 do not share. We are finalizing the compensation review for <PERSON_1>. His revised salary is 28 <ORGANIZATION_1> effective <DATE_TIME_1>. Please keep this strictly between us until the offer letter is signed. His personal email is <URL_2>DDRESS_1>",
+  "vault_tokens": {
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "gmail.com",
+      "encrypted_hex": "fc321f4f6999a20d6f7a8f20d9eef390f9a50f3666e2e0be3803ff5e5abe504e98b8c0e6e2",
+      "blob_bytes": 37,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "rahul.verma87@gmail.com",
+      "encrypted_hex": "b655940ad1af01e4fbc2cf5ee3aa6a53b8243209d27fa2c50b4b56f72503107875e043aba638ec1fcaae346d542fb4037c46da",
+      "blob_bytes": 51,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_2": {
+      "entity_type": "URL",
+      "original_value": "rahul.ve",
+      "encrypted_hex": "ccc949ff9dffa7d453ae733ef8e45a785ff5384adced288c0e975c7cb508154c03041f66",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_1": {
+      "entity_type": "DATE_TIME",
+      "original_value": "July",
+      "encrypted_hex": "98f9c821bc63b137f7dd6ba0a3c7f0f67d20c42a456384eff1d50fb7e9ed4638",
+      "blob_bytes": 32,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "LPA",
+      "encrypted_hex": "dc135855f2df5cc6f78f67b21096f362dbea83426a3012bbe146132e79b5c9",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Rahul Verma",
+      "encrypted_hex": "c8165e39dd3972b9e1b94fab009f0a8d4a81d471ffd823b2be6f684613b9e97742058183df2f16",
+      "blob_bytes": 39,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "hr-guid",
+      "encrypted_hex": "6e8bc22cffd95e34e214edcf0e7a8dbc154a8e914460434c6b4f5b8421b811f3fa3057",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Lakshmi Iyer (HR)",
+      "encrypted_hex": "a5ad508e3f4aef5c4d8b2dd094bfb346d2265187519843dc2195d0d1ce83533969de5d1fe1194cfa2c2725cf3e",
+      "blob_bytes": 45,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "teams_chat",
+    "external_id": "1718437900.000005",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "chat_id": "19:hr_private@thread.v2",
+    "from_token": "EMAIL_ADDRESS_2",
+    "from_name_token": "PERSON_2",
+    "body_masked": "Confidential \u2014 do not share. We are finalizing the compensation review for <PERSON_1>. His revised salary is 28 <ORGANIZATION_1> effective <DATE_TIME_1>. Please keep this strictly between us until the offer letter is signed. His personal email is <URL_2>DDRESS_1>",
+    "mentions_tokens": [],
+    "importance": "high",
+    "sent_at": "2026-06-15T10:20:00"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "teams_chat",
+    "external_id": "1718437900.000005",
+    "resource_type": "chats",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 8,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.245219"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "system": "Caretaker Phase 2A",
+  "generated_at": "2026-06-15T12:24:42.857029",
+  "overall_status": "PASS",
+  "go_no_go": "GO",
+  "tests_passed": 8,
+  "tests_failed": 0,
+  "tests_total": 8,
+  "test_summary": {
+    "TEST 1 \u2014 LLM Data Leak Validation": "PASS",
+    "TEST 2 \u2014 Vault Round-Trip Validation": "PASS",
+    "TEST 3 \u2014 Unmask Authorization Validation": "PASS",
+    "TEST 4 \u2014 Prompt Injection Resistance": "PASS",
+    "TEST 5 \u2014 Cross-Source Correlation": "PASS",
+    "TEST 6 \u2014 Threat Engine Validation": "PASS",
+    "TEST 7 \u2014 Audit Completeness": "PASS",
+    "TEST 8 \u2014 Security Boundary Proof": "PASS"
+  },
+  "critical_findings": [],
+  "all_findings": [
+    {
+      "severity": "MEDIUM",
+      "finding": "Idealized audit taxonomy has granularity gaps (discrete INGEST/CLASSIFY/UNMASK_REQUEST/UNMASK_APPROVED events are not emitted).",
+      "evidence": [
+        "INGEST",
+        "CLASSIFY",
+        "UNMASK_REQUEST"
+      ],
+      "recommendation": "Emit discrete audit_events for INGEST, CLASSIFY, UNMASK_REQUEST and UNMASK_APPROVED in graph_sync.py and the approval workflow."
+    }
+  ],
+  "recommendations": [
+    "Add an Azure Storage connection-string recognizer to PreprocessingService (AccountKey value is masked via the generic API_KEY pattern, but the AccountName partially survives \u2014 defense-in-depth).",
+    "Emit discrete audit_events (INGEST, CLASSIFY, UNMASK_REQUEST, UNMASK_APPROVED) so the audit trail matches the idealized taxonomy end-to-end.",
+    "Port the harness threat-elevation rule (any fired signal flag \u2192 SUSPICIOUS) into ThreatEngine so production graph_sync flags injection/BEC consistently."
+  ],
+  "verdict": "Caretaker Phase 2A Security Boundary Validation PASSED"
+}

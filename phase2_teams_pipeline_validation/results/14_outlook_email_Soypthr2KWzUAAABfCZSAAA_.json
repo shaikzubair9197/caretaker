@@ -1,0 +1,47 @@
+{
+  "message_id": "AAMkAGVlNjc5MTdmLTg1MmEtNGIwOC05ZTIwLWI0YmI1NzU5YjhmNABGAAAAAAAIcN5Z8H13RrKP2U763N3lBwBIPuiY85i6Soypthr2KWzUAAAAAAEMAABIPuiY85i6Soypthr2KWzUAAABfCZSAAA=",
+  "sender": "Care Taker User",
+  "timestamp": "2026-06-15 10:58:21",
+  "source_type": "outlook_email",
+  "raw_text": "Subject: deployment\n\n<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Please send the deployment notes to john.doe@company.com after the release.</div></body></html>",
+  "normalized_text": "Subject: deployment\n\n<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Please send the deployment notes to john.doe@company.com after the release.</div></body></html>",
+  "cleaned_text": "Subject: deployment\n\n\r\n Please send the deployment notes to john.doe@company.com after the release.",
+  "masked_text": "Subject: deployment\n\n\r\n Please send the deployment notes to <EMAIL_ADDRESS_1> after the release.",
+  "vault_tokens_created": [
+    "EMAIL_ADDRESS_1"
+  ],
+  "threat_assessment": {
+    "score": 0.0,
+    "label": "CLEAN",
+    "category": "CLEAN",
+    "flags": [],
+    "is_injection": false,
+    "is_phishing": false
+  },
+  "classification": "INTERNAL",
+  "database_storage_safe": true,
+  "llm_boundary_safe": true,
+  "audit_events_generated": [
+    "MASK"
+  ],
+  "checks": {
+    "1_no_raw_email_in_db": true,
+    "2_no_api_key_in_db": true,
+    "3_no_secret_in_db": true,
+    "4_no_secret_in_masked": true,
+    "5_no_secret_in_llm_payload": true,
+    "6_vault_roundtrip": true,
+    "7_every_entity_vaulted": true,
+    "9_restricted_not_public": true,
+    "10_audit_generated": true
+  },
+  "checks_meta": {
+    "8_threat_applicable": false,
+    "injection_neutralised_in_llm": null,
+    "persisted": true,
+    "raw_archive_plaintext_secret": true
+  },
+  "persist_error": null,
+  "validation_result": "PASS",
+  "failure_reason": null
+}

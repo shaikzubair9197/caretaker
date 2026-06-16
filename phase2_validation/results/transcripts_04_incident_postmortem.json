@@ -1,0 +1,191 @@
+{
+  "source_type": "transcript",
+  "fixture_name": "Incident postmortem",
+  "fixture_meta": {
+    "name": "Incident postmortem",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "transcript-004",
+    "meetingId": "meeting-guid-004",
+    "subject": "Postmortem \u2014 Auth 503 outage",
+    "content": "[00:00] Monish Selvanathan: Root cause was the 14:15 DB migration that locked the connection pool. Auth returned 503 for 45 minutes.\n[01:10] Ananya Krishnan: We ran the migration manually instead of via the pipeline. Action item: automate migrations and add a pre-flight pool check.\n[02:00] Deepak Krishnamurthy: I'll add alerting on pool saturation by next sprint. Owner: Deepak, due June 22.\n[02:40] Monish Selvanathan: Agreed. Let's also document the rollback runbook.",
+    "createdDateTime": "2026-06-15T15:30:00Z",
+    "participants": [
+      "monish.selvanathan@amperatech.ai",
+      "ananya.k@amperatech.ai",
+      "deepak.k@amperatech.ai"
+    ]
+  },
+  "normalized": {
+    "source_type": "transcript",
+    "external_id": "transcript-004",
+    "raw_payload": {
+      "id": "transcript-004",
+      "meetingId": "meeting-guid-004",
+      "subject": "Postmortem \u2014 Auth 503 outage",
+      "content": "[00:00] Monish Selvanathan: Root cause was the 14:15 DB migration that locked the connection pool. Auth returned 503 for 45 minutes.\n[01:10] Ananya Krishnan: We ran the migration manually instead of via the pipeline. Action item: automate migrations and add a pre-flight pool check.\n[02:00] Deepak Krishnamurthy: I'll add alerting on pool saturation by next sprint. Owner: Deepak, due June 22.\n[02:40] Monish Selvanathan: Agreed. Let's also document the rollback runbook.",
+      "createdDateTime": "2026-06-15T15:30:00Z",
+      "participants": [
+        "monish.selvanathan@amperatech.ai",
+        "ananya.k@amperatech.ai",
+        "deepak.k@amperatech.ai"
+      ]
+    },
+    "body_text": "[00:00] Monish Selvanathan: Root cause was the 14:15 DB migration that locked the connection pool. Auth returned 503 for 45 minutes.\n[01:10] Ananya Krishnan: We ran the migration manually instead of via the pipeline. Action item: automate migrations and add a pre-flight pool check.\n[02:00] Deepak Krishnamurthy: I'll add alerting on pool saturation by next sprint. Owner: Deepak, due June 22.\n[02:40] Monish Selvanathan: Agreed. Let's also document the rollback runbook.",
+    "subject": "Postmortem \u2014 Auth 503 outage",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [
+      "monish.selvanathan@amperatech.ai",
+      "ananya.k@amperatech.ai",
+      "deepak.k@amperatech.ai"
+    ],
+    "timestamp": "2026-06-15T15:30:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "meeting_id": "meeting-guid-004",
+      "word_count": 71,
+      "segment_count": 4
+    }
+  },
+  "masked_output": "[00:00] Monish Selvanathan: Root cause was the 14:15 DB migration that locked the connection pool. <ORGANIZATION_1> returned 503 for <DATE_TIME_3>.\n[01:10<PERSON_3>: We ran the migration manually instead of via the pipeline. Action item: automate migrations and add a pre-flight pool check.\n[02:00] <PERSON_2>: I'll add alerting on pool saturation by <DATE_TIME_2>. Owner: <PERSON_1>, due <DATE_TIME_1>.\n[02:40] Monish Selvanathan: Agreed. Let's also document the rollback runbook.",
+  "vault_tokens": {
+    "DATE_TIME_1": {
+      "entity_type": "DATE_TIME",
+      "original_value": "June 22",
+      "encrypted_hex": "2190250229d477a7ed01dc390264c0d646c22ad11178ee29ab4965eec988bcbb3535a2",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Deepak",
+      "encrypted_hex": "4ff288a3be38e34bc96d0ea0b2c9201e854ae9a8f09aefdfc81b307f5e543e03f667",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_2": {
+      "entity_type": "DATE_TIME",
+      "original_value": "next sprint",
+      "encrypted_hex": "1dcb798a7e7a641c288dd1d93285dd1c5490e9ee4459a074bbad032f5838075e8c27e54e1666ca",
+      "blob_bytes": 39,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Deepak Krishnamurthy",
+      "encrypted_hex": "b9ee963b0288158d6a963547d7e2261c32d6e53c1dc8058ce869eaa8f9c4b3e69f440b3599934b0e4ff19726497a770b",
+      "blob_bytes": 48,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_3": {
+      "entity_type": "PERSON",
+      "original_value": "] Ananya Krishnan",
+      "encrypted_hex": "d83e67c160a40f8107e5db39afb01488f3de8f8a07e4b8ff55b3bbe3bf95d72b8a1fa5a13d1b027b669346d670",
+      "blob_bytes": 45,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_3": {
+      "entity_type": "DATE_TIME",
+      "original_value": "45 minutes",
+      "encrypted_hex": "580ab0033a5cab5cde3e2f28ad92622d706631af28bedce0193b2277bc7f2e1ebd29819887a5",
+      "blob_bytes": 38,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "Auth",
+      "encrypted_hex": "9ea8ceba9a00023135aded66f19981c028616bbb7e5295828203e655ac09d8a8",
+      "blob_bytes": 32,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "monish.selvanathan@amperatech.ai",
+      "encrypted_hex": "5712cece509bb8aef4936a0672c89d7785e8b7ea44cb2aba82a3bfe61223fee67111b68b8265805f668b20cafe1121639da629811cc4cd0dc9d30be6",
+      "blob_bytes": 60,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "ananya.k@amperatech.ai",
+      "encrypted_hex": "829373586cb5cc965b76aece6ae8dfd9915ce4a79ed67a72c78b6175ce9b167506c6968d12abca734e3edced843516124845",
+      "blob_bytes": 50,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_3": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "deepak.k@amperatech.ai",
+      "encrypted_hex": "ff1b5d14327a293c3abbe3adb8612b7d407162d41ea048a1a83d7c63c9bbcc66d8bebf76e5fead2243b3d3329f0bd33ffc9c",
+      "blob_bytes": 50,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "transcript",
+    "external_id": "transcript-004",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "meeting_id": "meeting-guid-004",
+    "subject_masked": "Postmortem \u2014 <ORGANIZATION_1> 503 outage",
+    "participant_tokens": [
+      "EMAIL_ADDRESS_1",
+      "EMAIL_ADDRESS_2",
+      "EMAIL_ADDRESS_3"
+    ],
+    "word_count": 71,
+    "segment_count": 4,
+    "masked_content": "[00:00] Monish Selvanathan: Root cause was the 14:15 DB migration that locked the connection pool. <ORGANIZATION_1> returned 503 for <DATE_TIME_3>.\n[01:10<PERSON_3>: We ran the migration manually instead of via the pipeline. Action item: automate migrations and add a pre-flight pool check.\n[02:00] <PERSON_2>: I'll add alerting on pool saturation by <DATE_TIME_2>. Owner: <PERSON_1>, due <DATE_TIME_1>.\n[02:40] Monish Selvanathan: Agreed. Let's also document the rollback runbook."
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "transcript",
+    "external_id": "transcript-004",
+    "resource_type": "transcripts",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 10,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.488807"
+  }
+}

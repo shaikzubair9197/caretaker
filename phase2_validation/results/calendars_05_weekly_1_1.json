@@ -1,0 +1,181 @@
+{
+  "source_type": "calendar",
+  "fixture_name": "Weekly 1:1",
+  "fixture_meta": {
+    "name": "Weekly 1:1",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "event-005",
+    "subject": "1:1 \u2014 Kavitha / Monish",
+    "start": {
+      "dateTime": "2026-06-16T16:00:00",
+      "timeZone": "Asia/Kolkata"
+    },
+    "end": {
+      "dateTime": "2026-06-16T16:30:00",
+      "timeZone": "Asia/Kolkata"
+    },
+    "organizer": {
+      "emailAddress": {
+        "name": "Kavitha Subramaniam",
+        "address": "kavitha.s@amperatech.ai"
+      }
+    },
+    "attendees": [
+      {
+        "emailAddress": {
+          "name": "Monish Selvanathan",
+          "address": "monish.selvanathan@amperatech.ai"
+        },
+        "status": {
+          "response": "accepted"
+        }
+      }
+    ],
+    "body": {
+      "content": "Weekly sync. Topics: sprint progress, blockers, career growth."
+    },
+    "importance": "normal",
+    "isOnlineMeeting": true,
+    "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/jkl012",
+    "isCancelled": false
+  },
+  "normalized": {
+    "source_type": "calendar",
+    "external_id": "event-005",
+    "raw_payload": {
+      "id": "event-005",
+      "subject": "1:1 \u2014 Kavitha / Monish",
+      "start": {
+        "dateTime": "2026-06-16T16:00:00",
+        "timeZone": "Asia/Kolkata"
+      },
+      "end": {
+        "dateTime": "2026-06-16T16:30:00",
+        "timeZone": "Asia/Kolkata"
+      },
+      "organizer": {
+        "emailAddress": {
+          "name": "Kavitha Subramaniam",
+          "address": "kavitha.s@amperatech.ai"
+        }
+      },
+      "attendees": [
+        {
+          "emailAddress": {
+            "name": "Monish Selvanathan",
+            "address": "monish.selvanathan@amperatech.ai"
+          },
+          "status": {
+            "response": "accepted"
+          }
+        }
+      ],
+      "body": {
+        "content": "Weekly sync. Topics: sprint progress, blockers, career growth."
+      },
+      "importance": "normal",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/jkl012",
+      "isCancelled": false
+    },
+    "body_text": "Event: 1:1 \u2014 Kavitha / Monish\n\nWeekly sync. Topics: sprint progress, blockers, career growth.",
+    "subject": "1:1 \u2014 Kavitha / Monish",
+    "sender": "kavitha.s@amperatech.ai",
+    "sender_name": "Kavitha Subramaniam",
+    "recipients": [
+      "monish.selvanathan@amperatech.ai"
+    ],
+    "participants": [],
+    "timestamp": "2026-06-16T10:30:00",
+    "end_time": "2026-06-16T11:00:00",
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "is_online_meeting": true,
+      "meeting_url": "https://teams.microsoft.com/l/meetup-join/jkl012",
+      "recurrence": true,
+      "is_cancelled": false
+    }
+  },
+  "masked_output": "Event: 1:1 \u2014 Kavitha / Monish\n\nWeekly sync. Topics: sprint progress, blockers, career growth.",
+  "vault_tokens": {
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "kavitha.s@amperatech.ai",
+      "encrypted_hex": "d382fa35ae0c68306e3a2b8dd10643325d9655a38c6497107987eb21cd2b89c8a341d1b2c82d29d724f69789c47d47b2ce8850",
+      "blob_bytes": 51,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Kavitha Subramaniam",
+      "encrypted_hex": "43b2f58ef29829a2e1011118fde622aeaee9eca9fdf992bad823f0593ca38ae22497837214e0c8d28b4ce49cc4f616",
+      "blob_bytes": 47,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "monish.selvanathan@amperatech.ai",
+      "encrypted_hex": "f7e49f0ed3f498da17655e15f66a6948d41e1bf4fda5b7afbc7248d545b5b403da03dabe95a15ccea2872ded54dac001f584e1851a40edeadb61ca6a",
+      "blob_bytes": 60,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "calendar",
+    "external_id": "event-005",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "subject_masked": "1:1 \u2014 Kavitha / Monish",
+    "organizer_token": "EMAIL_ADDRESS_1",
+    "attendee_tokens": [
+      "EMAIL_ADDRESS_2"
+    ],
+    "start_at": "2026-06-16T10:30:00",
+    "end_at": "2026-06-16T11:00:00",
+    "is_online_meeting": true,
+    "importance": "normal"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "calendar",
+    "external_id": "event-005",
+    "resource_type": "calendars",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 3,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.646942"
+  }
+}

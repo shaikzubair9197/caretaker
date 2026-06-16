@@ -1,0 +1,50 @@
+{
+  "message_id": "1781521126573",
+  "sender": "Care Taker User",
+  "timestamp": "2026-06-15 10:58:46.573000",
+  "source_type": "teams_chat",
+  "raw_text": "<p>Please remember this API key:<br>\nsk-live-123456789abcdefghijklmnop</p>",
+  "normalized_text": "<p>Please remember this API key:<br>\nsk-live-123456789abcdefghijklmnop</p>",
+  "cleaned_text": "Please remember this API key:\n\nsk-live-123456789abcdefghijklmnop",
+  "masked_text": "Please remember this <ORGANIZATION_1> key:\n\n<API_KEY_1>",
+  "vault_tokens_created": [
+    "API_KEY_1",
+    "ORGANIZATION_1"
+  ],
+  "threat_assessment": {
+    "score": 0.75,
+    "label": "SUSPICIOUS",
+    "category": "FLAGGED",
+    "flags": [
+      "API_KEY_DETECTED"
+    ],
+    "is_injection": false,
+    "is_phishing": false
+  },
+  "classification": "RESTRICTED",
+  "database_storage_safe": true,
+  "llm_boundary_safe": true,
+  "audit_events_generated": [
+    "MASK"
+  ],
+  "checks": {
+    "1_no_raw_email_in_db": true,
+    "2_no_api_key_in_db": true,
+    "3_no_secret_in_db": true,
+    "4_no_secret_in_masked": true,
+    "5_no_secret_in_llm_payload": true,
+    "6_vault_roundtrip": true,
+    "7_every_entity_vaulted": true,
+    "9_restricted_not_public": true,
+    "10_audit_generated": true
+  },
+  "checks_meta": {
+    "8_threat_applicable": false,
+    "injection_neutralised_in_llm": null,
+    "persisted": true,
+    "raw_archive_plaintext_secret": true
+  },
+  "persist_error": null,
+  "validation_result": "PASS",
+  "failure_reason": null
+}

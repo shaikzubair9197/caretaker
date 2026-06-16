@@ -1,0 +1,37 @@
+{
+  "test": "TEST 3 \u2014 Unmask Authorization Validation",
+  "generated_at": "2026-06-15T12:24:42.319952",
+  "passed": true,
+  "steps": [
+    {
+      "step": "unmask_without_approval",
+      "expected": "403 Forbidden",
+      "result": "DENIED (PermissionError)",
+      "detail": "AgentAction #26 is 'pending', not 'approved'.",
+      "passed": true
+    },
+    {
+      "step": "unmask_with_approval",
+      "expected": "200 OK",
+      "result": "ALLOWED + plaintext recovered",
+      "plaintext_matches_original": true,
+      "passed": true
+    },
+    {
+      "step": "audit_events_present",
+      "expected": [
+        "UNMASK",
+        "ACCESS_DENIED"
+      ],
+      "found": [
+        "ACCESS_DENIED",
+        "UNMASK"
+      ],
+      "passed": true
+    }
+  ],
+  "audit_events_found": [
+    "ACCESS_DENIED",
+    "UNMASK"
+  ]
+}

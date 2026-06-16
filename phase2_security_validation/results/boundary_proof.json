@@ -1,0 +1,17 @@
+{
+  "test": "TEST 8 \u2014 Security Boundary Proof",
+  "generated_at": "2026-06-15T12:24:42.856714",
+  "passed": true,
+  "llm_prompts_scanned": 13,
+  "patterns_checked": [
+    "openai_key",
+    "aws_key",
+    "bearer_value",
+    "db_conn_with_creds",
+    "raw_email",
+    "azure_account_key",
+    "client_secret_val"
+  ],
+  "llm_facing_violations": [],
+  "note": "Scan targets credential-VALUE shapes in the bytes destined for Ollama. Benign labels (the word 'Bearer'/'password', token placeholders) are excluded. ZERO llm_facing_violations == boundary intact."
+}

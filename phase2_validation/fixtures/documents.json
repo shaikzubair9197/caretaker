@@ -1,0 +1,98 @@
+[
+  {
+    "meta": {
+      "name": "Architecture document",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "doc-001",
+      "name": "Caretaker_Phase2_Architecture.docx",
+      "size": 845231,
+      "createdBy": { "user": { "displayName": "Monish Selvanathan", "email": "monish.selvanathan@amperatech.ai" } },
+      "lastModifiedBy": { "user": { "displayName": "Monish Selvanathan", "email": "monish.selvanathan@amperatech.ai" } },
+      "parentReference": { "path": "/drive/root:/Engineering/Architecture" },
+      "sensitivityLabel": { "name": "Internal" },
+      "shared": { "scope": "organization" },
+      "lastModifiedDateTime": "2026-06-15T12:00:00Z"
+    }
+  },
+  {
+    "meta": {
+      "name": "Salary spreadsheet",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "doc-002",
+      "name": "Compensation_Review_2026_DO_NOT_SHARE.xlsx",
+      "size": 245118,
+      "createdBy": { "user": { "displayName": "Lakshmi Iyer", "email": "lakshmi.iyer@amperatech.ai" } },
+      "lastModifiedBy": { "user": { "displayName": "Lakshmi Iyer", "email": "lakshmi.iyer@amperatech.ai" } },
+      "parentReference": { "path": "/drive/root:/HR/Confidential" },
+      "sensitivityLabel": { "name": "Highly Confidential" },
+      "shared": null,
+      "lastModifiedDateTime": "2026-06-14T18:30:00Z"
+    }
+  },
+  {
+    "meta": {
+      "name": "Security runbook with embedded secret",
+      "category": "credential",
+      "expect_min_threat": "QUARANTINE",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "doc-003",
+      "name": "Prod_Incident_Runbook_with_keys.md",
+      "size": 51230,
+      "createdBy": { "user": { "displayName": "Ananya Krishnan", "email": "ananya.k@amperatech.ai" } },
+      "lastModifiedBy": { "user": { "displayName": "Ananya Krishnan", "email": "ananya.k@amperatech.ai" } },
+      "parentReference": { "path": "/drive/root:/Ops/Runbooks" },
+      "sensitivityLabel": { "name": "Confidential" },
+      "shared": { "scope": "organization" },
+      "lastModifiedDateTime": "2026-06-13T09:15:00Z",
+      "preview_text": "Break-glass access: AWS key AKIAIOSFODNN7EXAMPLE, DB postgres://root:Root_Pass_2026!@prod-db.internal:5432/prod. Rotate after use."
+    }
+  },
+  {
+    "meta": {
+      "name": "API documentation (public SOP)",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "doc-004",
+      "name": "Caretaker_Public_API_Reference_v3.docx",
+      "size": 132045,
+      "createdBy": { "user": { "displayName": "Priya Nair", "email": "priya.nair@amperatech.ai" } },
+      "lastModifiedBy": { "user": { "displayName": "Priya Nair", "email": "priya.nair@amperatech.ai" } },
+      "parentReference": { "path": "/drive/root:/Engineering/Docs" },
+      "sensitivityLabel": { "name": "Public" },
+      "shared": { "scope": "anonymous" },
+      "lastModifiedDateTime": "2026-06-10T10:00:00Z"
+    }
+  },
+  {
+    "meta": {
+      "name": "Confidential board deck",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "doc-005",
+      "name": "Amperatech_Q3_2026_Growth_Strategy_CONFIDENTIAL.pptx",
+      "size": 4521873,
+      "createdBy": { "user": { "displayName": "Kavitha Subramaniam", "email": "kavitha.s@amperatech.ai" } },
+      "lastModifiedBy": { "user": { "displayName": "Kavitha Subramaniam", "email": "kavitha.s@amperatech.ai" } },
+      "parentReference": { "path": "/drive/root:/Strategy/Board Decks" },
+      "sensitivityLabel": { "name": "Highly Confidential" },
+      "shared": null,
+      "lastModifiedDateTime": "2026-06-14T16:30:00Z"
+    }
+  }
+]

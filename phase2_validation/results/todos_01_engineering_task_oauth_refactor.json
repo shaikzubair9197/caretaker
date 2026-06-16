@@ -1,0 +1,116 @@
+{
+  "source_type": "todo",
+  "fixture_name": "Engineering task \u2014 OAuth refactor",
+  "fixture_meta": {
+    "name": "Engineering task \u2014 OAuth refactor",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": false
+  },
+  "raw_payload": {
+    "id": "todo-001",
+    "title": "Complete OAuth2 token refresh refactor",
+    "body": {
+      "content": "Refactor the token refresh flow in auth-service v2.1. Add unit tests for expiry edge cases. Target: 99% coverage."
+    },
+    "status": "inProgress",
+    "importance": "high",
+    "dueDateTime": {
+      "dateTime": "2026-06-20T18:00:00.0000000",
+      "timeZone": "Asia/Kolkata"
+    },
+    "createdDateTime": "2026-06-15T09:00:00Z",
+    "listId": "list-eng"
+  },
+  "normalized": {
+    "source_type": "todo",
+    "external_id": "todo-001",
+    "raw_payload": {
+      "id": "todo-001",
+      "title": "Complete OAuth2 token refresh refactor",
+      "body": {
+        "content": "Refactor the token refresh flow in auth-service v2.1. Add unit tests for expiry edge cases. Target: 99% coverage."
+      },
+      "status": "inProgress",
+      "importance": "high",
+      "dueDateTime": {
+        "dateTime": "2026-06-20T18:00:00.0000000",
+        "timeZone": "Asia/Kolkata"
+      },
+      "createdDateTime": "2026-06-15T09:00:00Z",
+      "listId": "list-eng"
+    },
+    "body_text": "Task: Complete OAuth2 token refresh refactor\n\nRefactor the token refresh flow in auth-service v2.1. Add unit tests for expiry edge cases. Target: 99% coverage.",
+    "subject": "Complete OAuth2 token refresh refactor",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T09:00:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "high",
+    "has_attachments": false,
+    "metadata": {
+      "status": "inProgress",
+      "due_at": "2026-06-20T18:00:00.0000000",
+      "list_id": "list-eng"
+    }
+  },
+  "masked_output": "Task: Complete OAuth2 token refresh refactor\n\nRefactor the token refresh flow in auth-service <US_DRIVER_LICENSE_1>.1. Add unit tests for expiry edge cases. Target: 99% coverage.",
+  "vault_tokens": {
+    "US_DRIVER_LICENSE_1": {
+      "entity_type": "US_DRIVER_LICENSE",
+      "original_value": "v2",
+      "encrypted_hex": "9e1fe315d5b87280a5e892917ea9d3eadbff6e35b0ae8b823059655eb902",
+      "blob_bytes": 30,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "CONFIDENTIAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "from="
+  },
+  "database_object": {
+    "source_type": "todo",
+    "external_id": "todo-001",
+    "sensitivity_label": "CONFIDENTIAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "title_masked": "Complete OAuth2 token refresh refactor",
+    "body_masked": "Task: Complete OAuth2 token refresh refactor\n\nRefactor the token refresh flow in auth-service <US_DRIVER_LICENSE_1>.1. Add unit tests for expiry edge cases. Target: 99% coverage.",
+    "status": "inProgress",
+    "importance": "high",
+    "due_at": "2026-06-20T18:00:00.0000000"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "todo",
+    "external_id": "todo-001",
+    "resource_type": "todos",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 1,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "CONFIDENTIAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.669175"
+  }
+}

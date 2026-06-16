@@ -1,0 +1,183 @@
+{
+  "source_type": "outlook_email",
+  "fixture_name": "CEO wire transfer (business email compromise)",
+  "fixture_meta": {
+    "name": "CEO wire transfer (business email compromise)",
+    "category": "bec",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "AAMkAGEMAIL003",
+    "subject": "Urgent payment needed before EOD",
+    "from": {
+      "emailAddress": {
+        "name": "Rajesh Menon (CEO)",
+        "address": "rajesh.menon.ceo@gmail.com"
+      }
+    },
+    "toRecipients": [
+      {
+        "emailAddress": {
+          "name": "Finance Team",
+          "address": "finance@amperatech.ai"
+        }
+      }
+    ],
+    "ccRecipients": [],
+    "body": {
+      "content": "Hi,\n\nI'm in back-to-back meetings and need you to process an urgent wire transfer of $48,000 to a new vendor immediately. This is critical and time-sensitive \u2014 please send the payment to the account details I will share next and confirm once done. Do not call me, just handle it.\n\nRegards,\nRajesh"
+    },
+    "receivedDateTime": "2026-06-15T11:02:00Z",
+    "importance": "high",
+    "hasAttachments": false,
+    "conversationId": "CONV-EMAIL-003",
+    "internetMessageId": "<bec-003@gmail.com>"
+  },
+  "normalized": {
+    "source_type": "outlook_email",
+    "external_id": "AAMkAGEMAIL003",
+    "raw_payload": {
+      "id": "AAMkAGEMAIL003",
+      "subject": "Urgent payment needed before EOD",
+      "from": {
+        "emailAddress": {
+          "name": "Rajesh Menon (CEO)",
+          "address": "rajesh.menon.ceo@gmail.com"
+        }
+      },
+      "toRecipients": [
+        {
+          "emailAddress": {
+            "name": "Finance Team",
+            "address": "finance@amperatech.ai"
+          }
+        }
+      ],
+      "ccRecipients": [],
+      "body": {
+        "content": "Hi,\n\nI'm in back-to-back meetings and need you to process an urgent wire transfer of $48,000 to a new vendor immediately. This is critical and time-sensitive \u2014 please send the payment to the account details I will share next and confirm once done. Do not call me, just handle it.\n\nRegards,\nRajesh"
+      },
+      "receivedDateTime": "2026-06-15T11:02:00Z",
+      "importance": "high",
+      "hasAttachments": false,
+      "conversationId": "CONV-EMAIL-003",
+      "internetMessageId": "<bec-003@gmail.com>"
+    },
+    "body_text": "Subject: Urgent payment needed before EOD\n\nHi,\n\nI'm in back-to-back meetings and need you to process an urgent wire transfer of $48,000 to a new vendor immediately. This is critical and time-sensitive \u2014 please send the payment to the account details I will share next and confirm once done. Do not call me, just handle it.\n\nRegards,\nRajesh",
+    "subject": "Urgent payment needed before EOD",
+    "sender": "rajesh.menon.ceo@gmail.com",
+    "sender_name": "Rajesh Menon (CEO)",
+    "recipients": [
+      "finance@amperatech.ai"
+    ],
+    "participants": [],
+    "timestamp": "2026-06-15T11:02:00",
+    "end_time": null,
+    "thread_id": "CONV-EMAIL-003",
+    "importance": "high",
+    "has_attachments": false,
+    "metadata": {
+      "internet_message_id": "<bec-003@gmail.com>",
+      "folder": null
+    }
+  },
+  "masked_output": "Subject: Urgent payment needed before <ORGANIZATION_1>\n\nHi,\n\nI'm in back-to-back meetings and need you to process an urgent wire transfer of $48,000 to a new vendor immediately. This is critical and time-sensitive \u2014 please send the payment to the account details I will share next and confirm once done. Do not call me, just handle it.\n\nRegards,\n<PERSON_1>",
+  "vault_tokens": {
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Rajesh",
+      "encrypted_hex": "81573f92ca6e63608a6929b325045576c36b5eaa33b72c5b8f8f146a6b3b39443663",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "EOD",
+      "encrypted_hex": "25f0a1d0f084db2b37a8ff359b5cd33f285214b9abcda55f6b41fa337eac3c",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "rajesh.menon.ceo@gmail.com",
+      "encrypted_hex": "b2c504a4d217407e9d76235eca0c59cf939cd0e456e39a45211fba02b44353d514f3b1795ddf4dd89295fb5dd349eacbfbc03c9c11be",
+      "blob_bytes": 54,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Rajesh Menon (CEO)",
+      "encrypted_hex": "4728d06e98d067cd4ca8018a3d32f5a93b8fdc53f9328f89739fa255621d0fff3c1ada432619ee5f1bafd6399ecf",
+      "blob_bytes": 46,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "finance@amperatech.ai",
+      "encrypted_hex": "c9d27650afe3aac61010fbea0d2b93b7c91d655bb92d8456240ab0af94eef8f5f38954e1c35ddd3fe914dceb77284e555f",
+      "blob_bytes": 49,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.18,
+  "threat_label": "SUSPICIOUS",
+  "engine_category": "CLEAN",
+  "threat_flags": [
+    "BEC_PATTERN_DETECTED"
+  ],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.6,
+    "credential_risk": 0.0,
+    "urgency_score": 0.4,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "from=rajesh.menon.ceo@gmail.com"
+  },
+  "database_object": {
+    "source_type": "outlook_email",
+    "external_id": "AAMkAGEMAIL003",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.18,
+    "is_quarantined": false,
+    "subject_masked": "Urgent payment needed before <ORGANIZATION_1>",
+    "from_token": "EMAIL_ADDRESS_1",
+    "from_name_token": "PERSON_2",
+    "to_tokens": [
+      "EMAIL_ADDRESS_2"
+    ],
+    "importance": "high",
+    "received_at": "2026-06-15T11:02:00",
+    "thread_id": "CONV-EMAIL-003",
+    "has_attachments": false,
+    "body_size_chars": 339
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "outlook_email",
+    "external_id": "AAMkAGEMAIL003",
+    "resource_type": "emails",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 5,
+      "threat_category": "CLEAN",
+      "threat_label": "SUSPICIOUS",
+      "classification": "INTERNAL",
+      "flags": [
+        "BEC_PATTERN_DETECTED"
+      ]
+    },
+    "created_at": "2026-06-15T07:28:45.036606"
+  }
+}

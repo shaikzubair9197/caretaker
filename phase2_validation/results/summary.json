@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-06-15T07:28:45.849601",
+  "total_processed": 30,
+  "clean": 20,
+  "suspicious": 5,
+  "quarantine": 5,
+  "public": 1,
+  "internal": 13,
+  "confidential": 8,
+  "restricted": 8,
+  "vault_items_created": 219,
+  "by_source": {
+    "outlook_email": 5,
+    "teams_chat": 5,
+    "transcript": 5,
+    "calendar": 5,
+    "todo": 5,
+    "onedrive_document": 5
+  }
+}

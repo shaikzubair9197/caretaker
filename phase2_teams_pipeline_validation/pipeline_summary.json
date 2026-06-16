@@ -1,0 +1,13 @@
+{
+  "total_messages_processed": 16,
+  "messages_passed": 16,
+  "messages_failed": 0,
+  "masking_failures": 0,
+  "vault_failures": 0,
+  "threat_detection_failures": 0,
+  "classification_failures": 0,
+  "audit_failures": 0,
+  "llm_boundary_failures": 0,
+  "db_persistence_failures": 0,
+  "overall_result": "GO"
+}

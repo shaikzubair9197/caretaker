@@ -1,7 +1,8 @@
+from embeddings.embedder import encode
+from embeddings.vector_search import search_similar
 from services.task_service import TaskService
 from services.memory_service import MemoryService
-from services.context_service import get_last_hour_context
-from services.llm_service import LLMService
+from services.context_service import get_agent_context
 
 
 class BrainService:
@@ -9,77 +10,71 @@ class BrainService:
     @staticmethod
     def build_context(db):
 
-        # -------------------
-        # RAW DATA
-        # -------------------
         tasks = TaskService.get_all(db)
-        memories = MemoryService.get_recent(db, 10)
-        context = get_last_hour_context(db)
+        context = get_agent_context(db)
 
-        # -------------------
-        # INSIGHTS (RULES)
-        # -------------------
-        focus_minutes = context.get("focus_minutes", 0)
-        applications = context.get("applications", [])
+        task_list = [
+            {
+                "id": t.id,
+                "description": t.description,
+                "priority": t.priority,
+                "status": t.status,
+            }
+            for t in tasks
+        ]
 
-        top_app = applications[0]["window"] if applications else None
+        # Semantic retrieval: fetch memories relevant to the current active window.
+        # Falls back to most-recent-10 when embeddings aren't stored yet or when
+        # search_similar returns an empty list (no matches above min_score).
+        top_app = context.get("top_application")
+        memory_list = None
+        memory_source = "recency"
 
-        work_state = (
-            "deep_work" if focus_minutes > 60 else
-            "focused" if focus_minutes > 25 else
-            "low_focus"
-        )
+        if top_app:
+            query_vec = encode(top_app)
+            if query_vec:
+                results = search_similar(db, query_vec, limit=8)
+                if results:
+                    memory_list = results
+                    memory_source = "semantic"
+                # else: results=[], fall through to recency below
 
-        distraction_level = (
-            "low" if len(applications) <= 2 else
-            "medium" if len(applications) <= 5 else
-            "high"
-        )
-
-        insights = {
-            "focus_minutes": focus_minutes,
-            "top_application": top_app,
-            "work_state": work_state,
-            "distraction_level": distraction_level,
-            "task_count": len(tasks),
-            "memory_count": len(memories)
-        }
-
-        # -------------------
-        # SERIALIZE
-        # -------------------
-        payload = {
-            "tasks": [
-                {
-                    "id": t.id,
-                    "description": t.description,
-                    "priority": t.priority,
-                    "status": t.status
-                }
-                for t in tasks
-            ],
-            "memories": [
+        if not memory_list:
+            raw = MemoryService.get_recent(db, 10)
+            memory_list = [
                 {
                     "id": m.id,
                     "text": m.text,
                     "type": m.type,
-                    "importance": m.importance
+                    "importance": m.importance,
                 }
-                for m in memories
-            ],
-            "context": context,
-            "insights": insights
+                for m in raw
+            ]
+
+        focus_minutes = context["focus_minutes"]
+
+        insights = {
+            "focus_minutes": focus_minutes,
+            "task_count": len(task_list),
+            "memory_count": len(memory_list),
+            "memory_source": memory_source,
+            "top_application": top_app,
+            "work_state": "low_focus" if focus_minutes < 30 else "focused",
+            "distraction_level": (
+                "high" if len(context["applications"]) > 5 else "low"
+            ),
         }
 
-        # -------------------
-        # 🧠 LLM REASONING LAYER
-        # -------------------
-        llm_output = LLMService.reason_brain(payload)
+        brain_summary = {
+            "top_task": task_list[0]["description"] if task_list else None,
+            "task_count": len(task_list),
+            "focus_state": "low_focus" if focus_minutes < 30 else "focused",
+        }
 
-        # -------------------
-        # FINAL OUTPUT
-        # -------------------
         return {
-            **payload,
-            "brain": llm_output
+            "tasks": task_list,
+            "memories": memory_list,
+            "context": context,
+            "insights": insights,
+            "brain": brain_summary,
         }

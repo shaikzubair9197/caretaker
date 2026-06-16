@@ -1,0 +1,199 @@
+{
+  "source_type": "transcript",
+  "fixture_name": "Hiring debrief (HR confidential)",
+  "fixture_meta": {
+    "name": "Hiring debrief (HR confidential)",
+    "category": "confidential",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "transcript-003",
+    "meetingId": "meeting-guid-003",
+    "subject": "Senior Engineer Hiring Debrief",
+    "content": "[00:00] Lakshmi Iyer: This is confidential. We're debriefing on the senior backend candidate, Arjun Pillai.\n[00:40] Deepak Krishnamurthy: Strong on system design. I'd extend an offer at 32 LPA.\n[01:20] Lakshmi Iyer: Agreed. Action item: I'll prepare the offer letter and email arjun.pillai@gmail.com by Friday. Do not discuss the comp outside this room.\n[02:00] Kavitha Subramaniam: Approved. Keep it strictly internal.",
+    "createdDateTime": "2026-06-15T11:00:00Z",
+    "participants": [
+      "lakshmi.iyer@amperatech.ai",
+      "deepak.k@amperatech.ai",
+      "kavitha.s@amperatech.ai"
+    ]
+  },
+  "normalized": {
+    "source_type": "transcript",
+    "external_id": "transcript-003",
+    "raw_payload": {
+      "id": "transcript-003",
+      "meetingId": "meeting-guid-003",
+      "subject": "Senior Engineer Hiring Debrief",
+      "content": "[00:00] Lakshmi Iyer: This is confidential. We're debriefing on the senior backend candidate, Arjun Pillai.\n[00:40] Deepak Krishnamurthy: Strong on system design. I'd extend an offer at 32 LPA.\n[01:20] Lakshmi Iyer: Agreed. Action item: I'll prepare the offer letter and email arjun.pillai@gmail.com by Friday. Do not discuss the comp outside this room.\n[02:00] Kavitha Subramaniam: Approved. Keep it strictly internal.",
+      "createdDateTime": "2026-06-15T11:00:00Z",
+      "participants": [
+        "lakshmi.iyer@amperatech.ai",
+        "deepak.k@amperatech.ai",
+        "kavitha.s@amperatech.ai"
+      ]
+    },
+    "body_text": "[00:00] Lakshmi Iyer: This is confidential. We're debriefing on the senior backend candidate, Arjun Pillai.\n[00:40] Deepak Krishnamurthy: Strong on system design. I'd extend an offer at 32 LPA.\n[01:20] Lakshmi Iyer: Agreed. Action item: I'll prepare the offer letter and email arjun.pillai@gmail.com by Friday. Do not discuss the comp outside this room.\n[02:00] Kavitha Subramaniam: Approved. Keep it strictly internal.",
+    "subject": "Senior Engineer Hiring Debrief",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [
+      "lakshmi.iyer@amperatech.ai",
+      "deepak.k@amperatech.ai",
+      "kavitha.s@amperatech.ai"
+    ],
+    "timestamp": "2026-06-15T11:00:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "meeting_id": "meeting-guid-003",
+      "word_count": 61,
+      "segment_count": 4
+    }
+  },
+  "masked_output": "[00:00] <PERSON_2>: This is confidential. We're debriefing on the senior backend candidate, <PERSON_4>.\n[00:40] <PERSON_3>: Strong on system design. I'd extend an offer at 32 <ORGANIZATION_1>.\n[01:20] <PERSON_2>: Agreed. Action item: I'll prepare the offer letter and email <EMAIL_ADDRESS_1>y <DATE_TIME_1>. Do not discuss the comp outside this room.\n[02:00] <PERSON_1>: Approved. Keep it strictly internal.",
+  "vault_tokens": {
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Kavitha Subramaniam",
+      "encrypted_hex": "f26b6f943802b67b3536ba769965f41b41995b8a2c3603bbab97f0939e2e44c9e02d78ac82d110eab9ef8cc6d8dc5b",
+      "blob_bytes": 47,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_1": {
+      "entity_type": "DATE_TIME",
+      "original_value": "Friday",
+      "encrypted_hex": "54b843ba3e106b693b9b9e32d8369a2665e70c0c1a69b2f6de569f1fa92506827231",
+      "blob_bytes": 34,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "gmail.com",
+      "encrypted_hex": "faa4ab3ac52fb48fd3e8cf531517712a9fb848a7f4560949105a53f4cb0bc21907f17522da",
+      "blob_bytes": 37,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "arjun.pillai@gmail.com",
+      "encrypted_hex": "4a4fcb922f8037befa4bbbe66ccd8c6fff08167ea86d1c066a7828c32bcebef135c73d1518f909b4d1df7b0fe60f58df2869",
+      "blob_bytes": 50,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Lakshmi Iyer",
+      "encrypted_hex": "fdf7910ae21ae2eddb75ed03dcebad1bd6529d68dbb4c1d310f1dbc0a7ec7b81a8ecfc38f120d429",
+      "blob_bytes": 40,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "LPA",
+      "encrypted_hex": "ff3f6d7537c2e0e1b595290b91cdfb70c86c6f88de5729e8fae9d072de7db4",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_3": {
+      "entity_type": "PERSON",
+      "original_value": "Deepak Krishnamurthy",
+      "encrypted_hex": "e48ca6b4820b31113c5451519340ab1f090ee20b6c66bc5b478045215313edebab5263169781e0826f2b2d764e3b4f6e",
+      "blob_bytes": 48,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_4": {
+      "entity_type": "PERSON",
+      "original_value": "Arjun Pillai",
+      "encrypted_hex": "87be6021bfbb3737363cc33e32d3c83c50bb0704ab0d607eb48df4a4728a49cf0b037a38837f1e1c",
+      "blob_bytes": 40,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "lakshmi.iyer@amperatech.ai",
+      "encrypted_hex": "9d9ab9349db2edf76ce852a52ad4f2d63f8c5007d5275ff94d333e833c853edba275b0d51b7d44b91ebf41ff6bcf70813bad4763473f",
+      "blob_bytes": 54,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_3": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "deepak.k@amperatech.ai",
+      "encrypted_hex": "86ced769b500875d9acec20a93a26215b4f175f532b60fd3cb02908d0b7e4a91ddbd07e2d89da8876c91fba8b7238115d07e",
+      "blob_bytes": 50,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_4": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "kavitha.s@amperatech.ai",
+      "encrypted_hex": "9a3a65f77ebcbd0db3a3b9a1a3d170b5a49b54e3e1c00f675cb37a60d7225519a1d8e6ffcebd46ddbd36b94101af48e53aaeb1",
+      "blob_bytes": 51,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "transcript",
+    "external_id": "transcript-003",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "meeting_id": "meeting-guid-003",
+    "subject_masked": "Senior Engineer Hiring Debrief",
+    "participant_tokens": [
+      "EMAIL_ADDRESS_2",
+      "EMAIL_ADDRESS_3",
+      "EMAIL_ADDRESS_4"
+    ],
+    "word_count": 61,
+    "segment_count": 4,
+    "masked_content": "[00:00] <PERSON_2>: This is confidential. We're debriefing on the senior backend candidate, <PERSON_4>.\n[00:40] <PERSON_3>: Strong on system design. I'd extend an offer at 32 <ORGANIZATION_1>.\n[01:20] <PERSON_2>: Agreed. Action item: I'll prepare the offer letter and email <EMAIL_ADDRESS_1>y <DATE_TIME_1>. Do not discuss the comp outside this room.\n[02:00] <PERSON_1>: Approved. Keep it strictly internal."
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "transcript",
+    "external_id": "transcript-003",
+    "resource_type": "transcripts",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 11,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.436067"
+  }
+}

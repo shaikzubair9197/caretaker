@@ -1,0 +1,82 @@
+[
+  {
+    "meta": {
+      "name": "Deployment decision meeting",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "transcript-001",
+      "meetingId": "meeting-guid-001",
+      "subject": "Production Deployment Decision — Auth Service v2.1",
+      "content": "[00:00] Kavitha Subramaniam: We're deciding whether to proceed with the auth service v2.1 deployment tonight at 22:00 IST. Monish, walk us through readiness.\n[00:45] Monish Selvanathan: All 147 unit tests pass. Load testing showed 99.8% success at 500 RPS. One concern is the Titan Corp migration — about 2.3 million records.\n[02:10] Deepak Krishnamurthy: Set the rollback threshold at 5% error rate. I'll be on standby. Reach me at deepak.k@amperatech.ai or +91-80-4567-8901.\n[03:30] Kavitha Subramaniam: Decision: proceed at 22:00 IST. Monish owns deployment, Deepak owns rollback, Ananya on DB standby. If error rate exceeds 5% in the first 15 minutes, Monish rolls back immediately. Meeting adjourned.",
+      "createdDateTime": "2026-06-15T09:00:00Z",
+      "participants": [ "kavitha.s@amperatech.ai", "monish.selvanathan@amperatech.ai", "deepak.k@amperatech.ai", "ananya.k@amperatech.ai" ]
+    }
+  },
+  {
+    "meta": {
+      "name": "Client SLA escalation call",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "transcript-002",
+      "meetingId": "meeting-guid-002",
+      "subject": "Titan Corp SLA Escalation",
+      "content": "[00:00] Priya Nair: Srihari Rajan from Titan Corp is escalating the outage. Their CTO Ramesh Babu is on the line. Account is worth 1.2M ARR.\n[01:00] Srihari Rajan: We've been down since 14:30. This is unacceptable. We need a status update by 15:30 or we invoke SLA penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this month's invoice. Action item: Monish to send the RCA by tomorrow EOD. Follow up with Srihari at +91-22-6789-0123.\n[03:15] Ramesh Babu: Acceptable for now. Send confirmation to ramesh.babu@titancorp.com.",
+      "createdDateTime": "2026-06-15T10:00:00Z",
+      "participants": [ "priya.nair@amperatech.ai", "monish.selvanathan@amperatech.ai", "srihari.rajan@titancorp.com", "ramesh.babu@titancorp.com" ]
+    }
+  },
+  {
+    "meta": {
+      "name": "Hiring debrief (HR confidential)",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "transcript-003",
+      "meetingId": "meeting-guid-003",
+      "subject": "Senior Engineer Hiring Debrief",
+      "content": "[00:00] Lakshmi Iyer: This is confidential. We're debriefing on the senior backend candidate, Arjun Pillai.\n[00:40] Deepak Krishnamurthy: Strong on system design. I'd extend an offer at 32 LPA.\n[01:20] Lakshmi Iyer: Agreed. Action item: I'll prepare the offer letter and email arjun.pillai@gmail.com by Friday. Do not discuss the comp outside this room.\n[02:00] Kavitha Subramaniam: Approved. Keep it strictly internal.",
+      "createdDateTime": "2026-06-15T11:00:00Z",
+      "participants": [ "lakshmi.iyer@amperatech.ai", "deepak.k@amperatech.ai", "kavitha.s@amperatech.ai" ]
+    }
+  },
+  {
+    "meta": {
+      "name": "Incident postmortem",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "transcript-004",
+      "meetingId": "meeting-guid-004",
+      "subject": "Postmortem — Auth 503 outage",
+      "content": "[00:00] Monish Selvanathan: Root cause was the 14:15 DB migration that locked the connection pool. Auth returned 503 for 45 minutes.\n[01:10] Ananya Krishnan: We ran the migration manually instead of via the pipeline. Action item: automate migrations and add a pre-flight pool check.\n[02:00] Deepak Krishnamurthy: I'll add alerting on pool saturation by next sprint. Owner: Deepak, due June 22.\n[02:40] Monish Selvanathan: Agreed. Let's also document the rollback runbook.",
+      "createdDateTime": "2026-06-15T15:30:00Z",
+      "participants": [ "monish.selvanathan@amperatech.ai", "ananya.k@amperatech.ai", "deepak.k@amperatech.ai" ]
+    }
+  },
+  {
+    "meta": {
+      "name": "Transcript with credential mention",
+      "category": "credential",
+      "expect_min_threat": "QUARANTINE",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "transcript-005",
+      "meetingId": "meeting-guid-005",
+      "subject": "Quick infra sync",
+      "content": "[00:00] Ananya Krishnan: For the demo, the temporary API key is sk-live-7f3a9b2c1d4e5f6a7b8c9d0e1f2a3b4c and the DB is postgres://demo:Demo_2026!@demo-db.internal:5432/demo. We'll rotate right after.\n[00:30] Monish Selvanathan: Got it. Please don't paste that in the channel. Action item: rotate both before EOD.",
+      "createdDateTime": "2026-06-15T13:00:00Z",
+      "participants": [ "ananya.k@amperatech.ai", "monish.selvanathan@amperatech.ai" ]
+    }
+  }
+]

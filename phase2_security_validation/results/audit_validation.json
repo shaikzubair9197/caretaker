@@ -1,0 +1,78 @@
+{
+  "test": "TEST 7 \u2014 Audit Completeness",
+  "generated_at": "2026-06-15T12:24:42.565264",
+  "passed": true,
+  "matrix": {
+    "INGEST": {
+      "state": "MISSING",
+      "severity": "MEDIUM",
+      "present": false,
+      "note": "graph_sync.py does not emit a discrete INGEST audit_event"
+    },
+    "MASK": {
+      "state": "PRESENT",
+      "severity": "CRITICAL",
+      "present": true,
+      "note": "VaultService.store_tokens emits MASK"
+    },
+    "CLASSIFY": {
+      "state": "MISSING",
+      "severity": "MEDIUM",
+      "present": false,
+      "note": "classification is not separately audited"
+    },
+    "VAULT_STORE": {
+      "state": "PRESENT (as MASK)",
+      "severity": "LOW",
+      "present": true,
+      "note": "vault storage is covered by the MASK event"
+    },
+    "LLM_CALL": {
+      "state": "PRESENT (LLMCallLog table)",
+      "severity": "LOW",
+      "present": true,
+      "note": "LLM calls audited in dedicated LLMCallLog table, not audit_events"
+    },
+    "UNMASK_REQUEST": {
+      "state": "MISSING",
+      "severity": "MEDIUM",
+      "present": false,
+      "note": "no pre-execution unmask request event is emitted"
+    },
+    "UNMASK_APPROVED": {
+      "state": "PARTIAL (AgentAction.approved_at)",
+      "severity": "MEDIUM",
+      "present": true,
+      "note": "approval recorded on AgentAction, not as an audit_event"
+    },
+    "UNMASK_EXECUTED": {
+      "state": "PRESENT (as UNMASK)",
+      "severity": "CRITICAL",
+      "present": true,
+      "note": "VaultService.decrypt emits UNMASK on success"
+    },
+    "ACCESS_DENIED": {
+      "state": "PRESENT",
+      "severity": "CRITICAL",
+      "present": true,
+      "note": "VaultService.decrypt emits ACCESS_DENIED on unauthorized attempt"
+    }
+  },
+  "emitted_audit_event_types": [
+    "ACCESS_DENIED",
+    "MASK",
+    "UNMASK"
+  ],
+  "llm_call_logged": true,
+  "critical_events": [
+    "MASK",
+    "UNMASK_EXECUTED",
+    "ACCESS_DENIED"
+  ],
+  "critical_events_all_present": true,
+  "granularity_gaps": [
+    "INGEST",
+    "CLASSIFY",
+    "UNMASK_REQUEST"
+  ]
+}

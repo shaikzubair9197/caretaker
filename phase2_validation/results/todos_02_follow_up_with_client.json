@@ -1,0 +1,168 @@
+{
+  "source_type": "todo",
+  "fixture_name": "Follow-up with client",
+  "fixture_meta": {
+    "name": "Follow-up with client",
+    "category": "confidential",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "todo-002",
+    "title": "Follow up with Srihari Rajan on SLA credit",
+    "body": {
+      "content": "Call Srihari at +91-22-6789-0123 to confirm the $5000 SLA credit. Reference case TITAN-2026-04421. Send confirmation to srihari.rajan@titancorp.com."
+    },
+    "status": "notStarted",
+    "importance": "high",
+    "dueDateTime": {
+      "dateTime": "2026-06-16T17:00:00.0000000",
+      "timeZone": "Asia/Kolkata"
+    },
+    "createdDateTime": "2026-06-15T09:05:00Z",
+    "listId": "list-followups"
+  },
+  "normalized": {
+    "source_type": "todo",
+    "external_id": "todo-002",
+    "raw_payload": {
+      "id": "todo-002",
+      "title": "Follow up with Srihari Rajan on SLA credit",
+      "body": {
+        "content": "Call Srihari at +91-22-6789-0123 to confirm the $5000 SLA credit. Reference case TITAN-2026-04421. Send confirmation to srihari.rajan@titancorp.com."
+      },
+      "status": "notStarted",
+      "importance": "high",
+      "dueDateTime": {
+        "dateTime": "2026-06-16T17:00:00.0000000",
+        "timeZone": "Asia/Kolkata"
+      },
+      "createdDateTime": "2026-06-15T09:05:00Z",
+      "listId": "list-followups"
+    },
+    "body_text": "Task: Follow up with Srihari Rajan on SLA credit\n\nCall Srihari at +91-22-6789-0123 to confirm the $5000 SLA credit. Reference case TITAN-2026-04421. Send confirmation to srihari.rajan@titancorp.com.",
+    "subject": "Follow up with Srihari Rajan on SLA credit",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-15T09:05:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "high",
+    "has_attachments": false,
+    "metadata": {
+      "status": "notStarted",
+      "due_at": "2026-06-16T17:00:00.0000000",
+      "list_id": "list-followups"
+    }
+  },
+  "masked_output": "Task: Follow up with <PERSON_2> on <ORGANIZATION_1> credit\n\nCall <PERSON_1> at <PHONE_NUMBER_1> to confirm the $5000 <ORGANIZATION_1> credit. Reference case <API_KEY_1>. Send confirmation to <EMAIL_ADDRESS_1>",
+  "vault_tokens": {
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "titancorp.com",
+      "encrypted_hex": "f1c0fec299537e26e7d04f59a2a4aa42286247fcbff09c3c74bcc5aee80884bce4b547c724528b2f92",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "srihari.rajan@titancorp.com",
+      "encrypted_hex": "258efea1e7a9c4f2fd359c032d81b3a72f21730c0ef7f0315d15778b9d270b31580cad3c9ff488ee487da2d7895aef7ef0a314a0c58b7b",
+      "blob_bytes": 55,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "API_KEY_1": {
+      "entity_type": "API_KEY",
+      "original_value": "TITAN-2026-04421",
+      "encrypted_hex": "f5e2c44b7e7658a3fa310751767d470f9c476b4a449bb4868eba1f4168be6e131d5fedc7a92ab2cf62d40552",
+      "blob_bytes": 44,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "SLA",
+      "encrypted_hex": "09789f323726746eb022ef93f59ca5c557f4a6e6082a2611ef1e42b62bfc0f",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PHONE_NUMBER_1": {
+      "entity_type": "PHONE_NUMBER",
+      "original_value": "+91-22-6789-0123",
+      "encrypted_hex": "4de5a3fa05d59cb63dd97cf976768aaa5cb9832f634cc2f02cd73fcf63d1c24488d9f8bf6b298b2fb8583c91",
+      "blob_bytes": 44,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Srihari",
+      "encrypted_hex": "e27396956eca269d9448aaab71b6b0e35a1e2db8877ad9149ad8a62f420ea1eaf2fcea",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Srihari Rajan",
+      "encrypted_hex": "e68cd0a38e4dee7be2b39d3a6602c31a324fcc2025ec8edd53e90ee9353bfe4735bc3d826bb06abad8",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "RESTRICTED",
+  "threat_score": 0.75,
+  "threat_label": "SUSPICIOUS",
+  "engine_category": "FLAGGED",
+  "threat_flags": [
+    "API_KEY_DETECTED"
+  ],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.75,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "PROCESS_WITH_ELEVATED_AUDIT",
+    "notes": "from="
+  },
+  "database_object": {
+    "source_type": "todo",
+    "external_id": "todo-002",
+    "sensitivity_label": "RESTRICTED",
+    "threat_score": 0.75,
+    "is_quarantined": false,
+    "title_masked": "Follow up with <PERSON_2> on <ORGANIZATION_1> credit",
+    "body_masked": "Task: Follow up with <PERSON_2> on <ORGANIZATION_1> credit\n\nCall <PERSON_1> at <PHONE_NUMBER_1> to confirm the $5000 <ORGANIZATION_1> credit. Reference case <API_KEY_1>. Send confirmation to <EMAIL_ADDRESS_1>",
+    "status": "notStarted",
+    "importance": "high",
+    "due_at": "2026-06-16T17:00:00.0000000"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "todo",
+    "external_id": "todo-002",
+    "resource_type": "todos",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 7,
+      "threat_category": "FLAGGED",
+      "threat_label": "SUSPICIOUS",
+      "classification": "RESTRICTED",
+      "flags": [
+        "API_KEY_DETECTED"
+      ]
+    },
+    "created_at": "2026-06-15T07:28:45.695899"
+  }
+}

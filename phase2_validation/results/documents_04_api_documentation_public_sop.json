@@ -1,0 +1,159 @@
+{
+  "source_type": "onedrive_document",
+  "fixture_name": "API documentation (public SOP)",
+  "fixture_meta": {
+    "name": "API documentation (public SOP)",
+    "category": "legit",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "doc-004",
+    "name": "Caretaker_Public_API_Reference_v3.docx",
+    "size": 132045,
+    "createdBy": {
+      "user": {
+        "displayName": "Priya Nair",
+        "email": "priya.nair@amperatech.ai"
+      }
+    },
+    "lastModifiedBy": {
+      "user": {
+        "displayName": "Priya Nair",
+        "email": "priya.nair@amperatech.ai"
+      }
+    },
+    "parentReference": {
+      "path": "/drive/root:/Engineering/Docs"
+    },
+    "sensitivityLabel": {
+      "name": "Public"
+    },
+    "shared": {
+      "scope": "anonymous"
+    },
+    "lastModifiedDateTime": "2026-06-10T10:00:00Z"
+  },
+  "normalized": {
+    "source_type": "onedrive_document",
+    "external_id": "doc-004",
+    "body_text": "Document: Caretaker_Public_API_Reference_v3.docx\nPath: /drive/root:/Engineering/Docs\nOwner: priya.nair@amperatech.ai\nLast modified by: priya.nair@amperatech.ai",
+    "subject": "Caretaker_Public_API_Reference_v3.docx",
+    "sender": "priya.nair@amperatech.ai",
+    "sender_name": "Priya Nair",
+    "recipients": [],
+    "participants": [],
+    "timestamp": "2026-06-10T10:00:00Z",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "size_bytes": 132045,
+      "parent_path": "/drive/root:/Engineering/Docs",
+      "file_extension": "docx",
+      "ms_sensitivity_label": "Public",
+      "share_scope": "anonymous",
+      "is_shared": true
+    }
+  },
+  "masked_output": "Document: <API_KEY_1>RL_3>cx\nPath: /drive/root:/Engineering/Docs\nOwner: <URL_2>DDRESS_1>modified by: <URL_2>DDRESS_1>",
+  "vault_tokens": {
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "amperatech.ai",
+      "encrypted_hex": "e4e3f0ddb26a216ad0927a5e8adfef5c1f78d87cc1f8d28d12eaf76d9d7f700af87bacd2d9a9b1b55f",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "priya.nair@amperatech.ai",
+      "encrypted_hex": "ea33962d3805583296a3a3e635316a1886d9d129ba0f356cfd0fc5caeb1c0d09bf3c2838e1bbcad3050513748ba2439f5a865142",
+      "blob_bytes": 52,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_2": {
+      "entity_type": "URL",
+      "original_value": "priya.na",
+      "encrypted_hex": "92a6da464ddc93e5e70957acd3d56fa84112da724c7f04b89cf33b5569c61ed230b77861",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_3": {
+      "entity_type": "URL",
+      "original_value": "v3.do",
+      "encrypted_hex": "9d7916cedf01b9b0b156b906f8a7fa89c73fe3671800716cf8a1e86827fe2294c1",
+      "blob_bytes": 33,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "API_KEY_1": {
+      "entity_type": "API_KEY",
+      "original_value": "Caretaker_Public_API_Reference_v3",
+      "encrypted_hex": "1ef767a9d139c8545fe2e5b1250eb0456e9dc9894193432385b223f35804f25d039b146cc34fc59fae7221798de70e9691a8f4f4a6fad3f893a735b00f",
+      "blob_bytes": 61,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Priya Nair",
+      "encrypted_hex": "ba2d515f36ff2d63e1bf5f2e3b2b84aa153a2e3b3bef1feed5805893ac1ff3a7d93ca52f8113",
+      "blob_bytes": 38,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "CONFIDENTIAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": "Document metadata only."
+  },
+  "database_object": {
+    "source_type": "onedrive_document",
+    "external_id": "doc-004",
+    "sensitivity_label": "CONFIDENTIAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "name_masked": "<API_KEY_1>.docx",
+    "file_extension": "docx",
+    "size_bytes": 132045,
+    "owner_token": "EMAIL_ADDRESS_1",
+    "parent_path": "/drive/root:/Engineering/Docs",
+    "ms_sensitivity_label": "Public",
+    "is_shared": true,
+    "share_scope": "anonymous"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "onedrive_document",
+    "external_id": "doc-004",
+    "resource_type": "documents",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 6,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "CONFIDENTIAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.829224"
+  }
+}

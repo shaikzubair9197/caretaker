@@ -1,0 +1,49 @@
+{
+  "message_id": "AAMkAGVlNjc5MTdmLTg1MmEtNGIwOC05ZTIwLWI0YmI1NzU5YjhmNABGAAAAAAAIcN5Z8H13RrKP2U763N3lBwBIPuiY85i6Soypthr2KWzUAAAAAAEMAABIPuiY85i6Soypthr2KWzUAAABfCZUAAA=",
+  "sender": "Care Taker User",
+  "timestamp": "2026-06-15 11:02:44",
+  "source_type": "outlook_email",
+  "raw_text": "Subject: \n\n<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Hi,</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">This is the CEO.</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">I need you to purchase Amazon gift cards immediately.</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Do not tell anyone.</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Thanks.</div></body></html>",
+  "normalized_text": "Subject: \n\n<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Hi,</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">This is the CEO.</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">I need you to purchase Amazon gift cards immediately.</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Do not tell anyone.</div><div class=\"elementToProof\" style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div><div style=\"font-family:Aptos,&quot;Aptos_EmbeddedFont&quot;,&quot;Aptos_MSFontService&quot;,Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">Thanks.</div></body></html>",
+  "cleaned_text": "Subject: \n\n\r\n Hi,\n\nThis is the CEO.\n\nI need you to purchase Amazon gift cards immediately.\n\nDo not tell anyone.\n\nThanks.",
+  "masked_text": "Subject: \n\n\r\n Hi,\n\nThis is the CEO.\n\nI need you to purchase <ORGANIZATION_1> gift cards immediately.\n\nDo not tell anyone.\n\nThanks.",
+  "vault_tokens_created": [
+    "ORGANIZATION_1"
+  ],
+  "threat_assessment": {
+    "score": 0.18,
+    "label": "SUSPICIOUS",
+    "category": "CLEAN",
+    "flags": [
+      "BEC_PATTERN_DETECTED"
+    ],
+    "is_injection": false,
+    "is_phishing": false
+  },
+  "classification": "INTERNAL",
+  "database_storage_safe": true,
+  "llm_boundary_safe": true,
+  "audit_events_generated": [
+    "MASK"
+  ],
+  "checks": {
+    "1_no_raw_email_in_db": true,
+    "2_no_api_key_in_db": true,
+    "3_no_secret_in_db": true,
+    "4_no_secret_in_masked": true,
+    "5_no_secret_in_llm_payload": true,
+    "6_vault_roundtrip": true,
+    "7_every_entity_vaulted": true,
+    "9_restricted_not_public": true,
+    "10_audit_generated": true
+  },
+  "checks_meta": {
+    "8_threat_applicable": false,
+    "injection_neutralised_in_llm": null,
+    "persisted": true,
+    "raw_archive_plaintext_secret": false
+  },
+  "persist_error": null,
+  "validation_result": "PASS",
+  "failure_reason": null
+}

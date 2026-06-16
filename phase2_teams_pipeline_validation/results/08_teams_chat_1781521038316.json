@@ -1,0 +1,48 @@
+{
+  "message_id": "1781521038316",
+  "sender": "Care Taker User",
+  "timestamp": "2026-06-15 10:57:18.316000",
+  "source_type": "teams_chat",
+  "raw_text": "<p>Hi Caretaker, can you remind me to submit the sprint report tomorrow at 10 AM?</p>",
+  "normalized_text": "<p>Hi Caretaker, can you remind me to submit the sprint report tomorrow at 10 AM?</p>",
+  "cleaned_text": "Hi Caretaker, can you remind me to submit the sprint report tomorrow at 10 AM?",
+  "masked_text": "Hi Caretaker, can you remind me to submit the sprint report <DATE_TIME_2> at <DATE_TIME_1>?",
+  "vault_tokens_created": [
+    "DATE_TIME_1",
+    "DATE_TIME_2"
+  ],
+  "threat_assessment": {
+    "score": 0.0,
+    "label": "CLEAN",
+    "category": "CLEAN",
+    "flags": [],
+    "is_injection": false,
+    "is_phishing": false
+  },
+  "classification": "PUBLIC",
+  "database_storage_safe": true,
+  "llm_boundary_safe": true,
+  "audit_events_generated": [
+    "MASK"
+  ],
+  "checks": {
+    "1_no_raw_email_in_db": true,
+    "2_no_api_key_in_db": true,
+    "3_no_secret_in_db": true,
+    "4_no_secret_in_masked": true,
+    "5_no_secret_in_llm_payload": true,
+    "6_vault_roundtrip": true,
+    "7_every_entity_vaulted": true,
+    "9_restricted_not_public": true,
+    "10_audit_generated": true
+  },
+  "checks_meta": {
+    "8_threat_applicable": false,
+    "injection_neutralised_in_llm": null,
+    "persisted": true,
+    "raw_archive_plaintext_secret": false
+  },
+  "persist_error": null,
+  "validation_result": "PASS",
+  "failure_reason": null
+}

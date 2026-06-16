@@ -1,0 +1,88 @@
+{
+  "test": "TEST 6 \u2014 Threat Engine Validation",
+  "generated_at": "2026-06-15T12:24:42.565020",
+  "passed": true,
+  "distribution": {
+    "CLEAN": 1,
+    "SUSPICIOUS": 2,
+    "QUARANTINE": 3
+  },
+  "mismatches": [],
+  "records": [
+    {
+      "source": "outlook_email",
+      "name": "Legitimate internal email",
+      "attack_type": "none",
+      "expected_threat": "CLEAN",
+      "actual_threat": "CLEAN",
+      "threat_score": 0.0,
+      "flags": [],
+      "meets_or_exceeds_expected": true
+    },
+    {
+      "source": "outlook_email",
+      "name": "Microsoft 365 credential phishing (typosquat + link + cred request)",
+      "attack_type": "phishing",
+      "expected_threat": "QUARANTINE",
+      "actual_threat": "QUARANTINE",
+      "threat_score": 0.9,
+      "flags": [
+        "TYPOSQUATTED_SENDER",
+        "DOMAIN_MISMATCH_MICROSOFT",
+        "CREDENTIAL_REQUEST_DETECTED",
+        "SUSPICIOUS_TLD_LINK",
+        "URL_WITH_AUTH_TOKEN"
+      ],
+      "meets_or_exceeds_expected": true
+    },
+    {
+      "source": "outlook_email",
+      "name": "CEO wire-transfer BEC",
+      "attack_type": "bec",
+      "expected_threat": "SUSPICIOUS",
+      "actual_threat": "SUSPICIOUS",
+      "threat_score": 0.18,
+      "flags": [
+        "BEC_PATTERN_DETECTED"
+      ],
+      "meets_or_exceeds_expected": true
+    },
+    {
+      "source": "teams_chat",
+      "name": "AWS credential harvesting in chat",
+      "attack_type": "credential_harvesting",
+      "expected_threat": "QUARANTINE",
+      "actual_threat": "QUARANTINE",
+      "threat_score": 0.95,
+      "flags": [
+        "API_KEY_DETECTED",
+        "CONNECTION_STRING_DETECTED"
+      ],
+      "meets_or_exceeds_expected": true
+    },
+    {
+      "source": "teams_chat",
+      "name": "Prompt injection in chat",
+      "attack_type": "prompt_injection",
+      "expected_threat": "SUSPICIOUS",
+      "actual_threat": "SUSPICIOUS",
+      "threat_score": 0.08,
+      "flags": [
+        "INJECTION_PATTERN_IN_CHAT"
+      ],
+      "meets_or_exceeds_expected": true
+    },
+    {
+      "source": "outlook_email",
+      "name": "Malicious URL / suspicious TLD",
+      "attack_type": "malicious_url",
+      "expected_threat": "SUSPICIOUS",
+      "actual_threat": "QUARANTINE",
+      "threat_score": 0.85,
+      "flags": [
+        "SUSPICIOUS_TLD_LINK"
+      ],
+      "meets_or_exceeds_expected": true
+    }
+  ]
+}

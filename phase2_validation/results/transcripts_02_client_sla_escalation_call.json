@@ -1,0 +1,251 @@
+{
+  "source_type": "transcript",
+  "fixture_name": "Client SLA escalation call",
+  "fixture_meta": {
+    "name": "Client SLA escalation call",
+    "category": "confidential",
+    "expect_min_threat": "CLEAN",
+    "must_not_be_public": true
+  },
+  "raw_payload": {
+    "id": "transcript-002",
+    "meetingId": "meeting-guid-002",
+    "subject": "Titan Corp SLA Escalation",
+    "content": "[00:00] Priya Nair: Srihari Rajan from Titan Corp is escalating the outage. Their CTO Ramesh Babu is on the line. Account is worth 1.2M ARR.\n[01:00] Srihari Rajan: We've been down since 14:30. This is unacceptable. We need a status update by 15:30 or we invoke SLA penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this month's invoice. Action item: Monish to send the RCA by tomorrow EOD. Follow up with Srihari at +91-22-6789-0123.\n[03:15] Ramesh Babu: Acceptable for now. Send confirmation to ramesh.babu@titancorp.com.",
+    "createdDateTime": "2026-06-15T10:00:00Z",
+    "participants": [
+      "priya.nair@amperatech.ai",
+      "monish.selvanathan@amperatech.ai",
+      "srihari.rajan@titancorp.com",
+      "ramesh.babu@titancorp.com"
+    ]
+  },
+  "normalized": {
+    "source_type": "transcript",
+    "external_id": "transcript-002",
+    "raw_payload": {
+      "id": "transcript-002",
+      "meetingId": "meeting-guid-002",
+      "subject": "Titan Corp SLA Escalation",
+      "content": "[00:00] Priya Nair: Srihari Rajan from Titan Corp is escalating the outage. Their CTO Ramesh Babu is on the line. Account is worth 1.2M ARR.\n[01:00] Srihari Rajan: We've been down since 14:30. This is unacceptable. We need a status update by 15:30 or we invoke SLA penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this month's invoice. Action item: Monish to send the RCA by tomorrow EOD. Follow up with Srihari at +91-22-6789-0123.\n[03:15] Ramesh Babu: Acceptable for now. Send confirmation to ramesh.babu@titancorp.com.",
+      "createdDateTime": "2026-06-15T10:00:00Z",
+      "participants": [
+        "priya.nair@amperatech.ai",
+        "monish.selvanathan@amperatech.ai",
+        "srihari.rajan@titancorp.com",
+        "ramesh.babu@titancorp.com"
+      ]
+    },
+    "body_text": "[00:00] Priya Nair: Srihari Rajan from Titan Corp is escalating the outage. Their CTO Ramesh Babu is on the line. Account is worth 1.2M ARR.\n[01:00] Srihari Rajan: We've been down since 14:30. This is unacceptable. We need a status update by 15:30 or we invoke SLA penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this month's invoice. Action item: Monish to send the RCA by tomorrow EOD. Follow up with Srihari at +91-22-6789-0123.\n[03:15] Ramesh Babu: Acceptable for now. Send confirmation to ramesh.babu@titancorp.com.",
+    "subject": "Titan Corp SLA Escalation",
+    "sender": null,
+    "sender_name": null,
+    "recipients": [],
+    "participants": [
+      "priya.nair@amperatech.ai",
+      "monish.selvanathan@amperatech.ai",
+      "srihari.rajan@titancorp.com",
+      "ramesh.babu@titancorp.com"
+    ],
+    "timestamp": "2026-06-15T10:00:00",
+    "end_time": null,
+    "thread_id": null,
+    "importance": "normal",
+    "has_attachments": false,
+    "metadata": {
+      "meeting_id": "meeting-guid-002",
+      "word_count": 85,
+      "segment_count": 4
+    }
+  },
+  "masked_output": "[00:00] Priya Nair: <PERSON_3> from <ORGANIZATION_4> is escalating the outage. Their CTO <PERSON_1> is on the line. Account is worth 1.2M ARR.\n[01:00] <PERSON_3>: We've been down since <DATE_TIME_3>. This is unacceptable. We need a status update by 15:30 or we invoke <ORGANIZATION_3> penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this <DATE_TIME_2>'s invoice. Action item: Monish to send the <ORGANIZATION_2> by <DATE_TIME_1> <ORGANIZATION_1>. Follow up with <PERSON_2> at <PHONE_NUMBER_1>.\n[03:15] <PERSON_1>: Acceptable for now. Send confirmation to <URL_2>DRESS_1>",
+  "vault_tokens": {
+    "URL_1": {
+      "entity_type": "URL",
+      "original_value": "titancorp.com",
+      "encrypted_hex": "6e2d70acd3974ec945ebac68950016bc12cd6955754db256502be40a685ecccbed42d67a3d94e05ce0",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_1": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "ramesh.babu@titancorp.com",
+      "encrypted_hex": "938ed7f20c98c89a8089304fae0da4713f93983d556076176002036842f6fdcc2c4b7c36f92219b1581ba8082b4c25355c67a1ecad",
+      "blob_bytes": 53,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "URL_2": {
+      "entity_type": "URL",
+      "original_value": "ramesh.ba",
+      "encrypted_hex": "7f1d553f1d8382374af6d01fd6e0e88996e401591fc698a75d54b411a09afb74d8bc9618b3",
+      "blob_bytes": 37,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_1": {
+      "entity_type": "PERSON",
+      "original_value": "Ramesh Babu",
+      "encrypted_hex": "ca30658de59638969b71bfa15b18d3317cabdab65e00a8e4b983677a1d2a3fb0f052545465c4ee",
+      "blob_bytes": 39,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PHONE_NUMBER_1": {
+      "entity_type": "PHONE_NUMBER",
+      "original_value": "+91-22-6789-0123",
+      "encrypted_hex": "d539fdbad89cf94c4544b7dc16e0c6bd075fc085b6989d90c720c8a4c29742660a10cade0590401b474462ec",
+      "blob_bytes": 44,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_2": {
+      "entity_type": "PERSON",
+      "original_value": "Srihari",
+      "encrypted_hex": "8075292d236a131c7cd508797432b047989ab9dcdd89f8ab2d4853af2622c02ec8c4e0",
+      "blob_bytes": 35,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_1": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "EOD",
+      "encrypted_hex": "d8cb690f8a20ec13c3eaab54c5fda77ccdac712946b7d5495e4d0a5da816b0",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_1": {
+      "entity_type": "DATE_TIME",
+      "original_value": "tomorrow",
+      "encrypted_hex": "9966e9e9d0919ec6f608d57566a5c5e28ca072946add0fb8d6aedd3bd91cb21a163ee1bf",
+      "blob_bytes": 36,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_2": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "RCA",
+      "encrypted_hex": "38b7fa0cac13e6663fda9991434b55ef3accfdf4c66d5abcef4bb15d10e599",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_2": {
+      "entity_type": "DATE_TIME",
+      "original_value": "month",
+      "encrypted_hex": "d42a1483699941653f7ee9bc3d922f62b0ca377eec91ea2f20e74dee89694bbfc4",
+      "blob_bytes": 33,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_3": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "SLA",
+      "encrypted_hex": "5318ae46b39044c013e4ec42d00e36d42dcf23efa8b1606dbe2ca3d4a935c1",
+      "blob_bytes": 31,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "DATE_TIME_3": {
+      "entity_type": "DATE_TIME",
+      "original_value": "14:30",
+      "encrypted_hex": "994080dee430c05f68f07355f4d7bc830f4d11dfabce33fc3de983b1b4fd9b60fb",
+      "blob_bytes": 33,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "PERSON_3": {
+      "entity_type": "PERSON",
+      "original_value": "Srihari Rajan",
+      "encrypted_hex": "719031128bb7591e91fa29ad7d2004ba5fcf7ff3f5032a4987851ce62f7de477b628d987e47392cded",
+      "blob_bytes": 41,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "ORGANIZATION_4": {
+      "entity_type": "ORGANIZATION",
+      "original_value": "Titan Corp",
+      "encrypted_hex": "52d06de5f410b27f1a79d5421094411d41c18e0ce291b75f9d77b96c16a70df401189134851a",
+      "blob_bytes": 38,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_2": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "priya.nair@amperatech.ai",
+      "encrypted_hex": "29936af97a8d9a7b8a7bdcfb3dc678dd9c267095aeaf3085859dd44f74f2900985be959c920a775ac41dcb307342029dbff6e4f9",
+      "blob_bytes": 52,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_3": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "monish.selvanathan@amperatech.ai",
+      "encrypted_hex": "a1120d69307ec1bf95eb6e917a10e74edc70723fa1772c462412a45ea326df8152256fbf76d9917f1e45e94a387648735b1f3923408c4b6e9a376e5d",
+      "blob_bytes": 60,
+      "key_version": 1,
+      "roundtrip_ok": true
+    },
+    "EMAIL_ADDRESS_4": {
+      "entity_type": "EMAIL_ADDRESS",
+      "original_value": "srihari.rajan@titancorp.com",
+      "encrypted_hex": "f5dc29c7eb25212c6055eb63f854dcb16822447f2b2f6ee01675f1328775f503caf9046b9518c03057fa51ccfa12ba6b64c6f64505718f",
+      "blob_bytes": 55,
+      "key_version": 1,
+      "roundtrip_ok": true
+    }
+  },
+  "classification": "INTERNAL",
+  "threat_score": 0.0,
+  "threat_label": "CLEAN",
+  "engine_category": "CLEAN",
+  "threat_flags": [],
+  "threat_detail": {
+    "phishing_score": 0.0,
+    "bec_score": 0.0,
+    "credential_risk": 0.0,
+    "urgency_score": 0.0,
+    "injection_score": 0.0,
+    "social_eng_score": 0.0,
+    "link_risk_score": 0.0,
+    "recommended_action": "",
+    "notes": ""
+  },
+  "database_object": {
+    "source_type": "transcript",
+    "external_id": "transcript-002",
+    "sensitivity_label": "INTERNAL",
+    "threat_score": 0.0,
+    "is_quarantined": false,
+    "meeting_id": "meeting-guid-002",
+    "subject_masked": "<ORGANIZATION_4> <ORGANIZATION_3> Escalation",
+    "participant_tokens": [
+      "EMAIL_ADDRESS_2",
+      "EMAIL_ADDRESS_3",
+      "EMAIL_ADDRESS_4",
+      "EMAIL_ADDRESS_1"
+    ],
+    "word_count": 85,
+    "segment_count": 4,
+    "masked_content": "[00:00] Priya Nair: <PERSON_3> from <ORGANIZATION_4> is escalating the outage. Their CTO <PERSON_1> is on the line. Account is worth 1.2M ARR.\n[01:00] <PERSON_3>: We've been down since <DATE_TIME_3>. This is unacceptable. We need a status update by 15:30 or we invoke <ORGANIZATION_3> penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this <DATE_TIME_2>'s invoice. Action item: Monish to send the <ORGANIZATION_2> by <DATE_TIME_1> <ORGANIZATION_1>. Follow up with <PERSON_2> at <PH\u2026"
+  },
+  "audit_event": {
+    "event_type": "INGEST",
+    "actor": "validation_harness",
+    "source_type": "transcript",
+    "external_id": "transcript-002",
+    "resource_type": "transcripts",
+    "outcome": "SUCCESS",
+    "justification": null,
+    "event_data": {
+      "vault_token_count": 17,
+      "threat_category": "CLEAN",
+      "threat_label": "CLEAN",
+      "classification": "INTERNAL",
+      "flags": []
+    },
+    "created_at": "2026-06-15T07:28:45.390711"
+  }
+}

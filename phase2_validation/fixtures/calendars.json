@@ -1,0 +1,120 @@
+[
+  {
+    "meta": {
+      "name": "Architecture design review",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "event-001",
+      "subject": "Auth Service v2.1 — Architecture Design Review",
+      "start": { "dateTime": "2026-06-16T10:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-16T11:30:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Kavitha Subramaniam", "address": "kavitha.s@amperatech.ai" } },
+      "attendees": [
+        { "emailAddress": { "name": "Monish Selvanathan", "address": "monish.selvanathan@amperatech.ai" }, "status": { "response": "accepted" } },
+        { "emailAddress": { "name": "Deepak Krishnamurthy", "address": "deepak.k@amperatech.ai" }, "status": { "response": "tentative" } }
+      ],
+      "body": { "content": "Agenda: token refresh architecture, security review of client_credentials flow, migration timeline sign-off. Please review PR #342 beforehand." },
+      "importance": "normal",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/abc123",
+      "isCancelled": false
+    }
+  },
+  {
+    "meta": {
+      "name": "Candidate interview",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "event-002",
+      "subject": "Interview — Senior Backend Engineer (Arjun Pillai)",
+      "start": { "dateTime": "2026-06-17T14:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-17T15:00:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Lakshmi Iyer", "address": "lakshmi.iyer@amperatech.ai" } },
+      "attendees": [
+        { "emailAddress": { "name": "Deepak Krishnamurthy", "address": "deepak.k@amperatech.ai" }, "status": { "response": "accepted" } },
+        { "emailAddress": { "name": "Arjun Pillai", "address": "arjun.pillai@gmail.com" }, "status": { "response": "accepted" } }
+      ],
+      "body": { "content": "Confidential interview. Candidate contact: arjun.pillai@gmail.com, +91-98765-43210. Do not share the panel feedback outside the hiring committee." },
+      "importance": "high",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/def456",
+      "isCancelled": false
+    }
+  },
+  {
+    "meta": {
+      "name": "Executive strategy meeting",
+      "category": "confidential",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "event-003",
+      "subject": "Executive Strategy — Q3 Growth Plan (Confidential)",
+      "start": { "dateTime": "2026-06-18T09:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-18T10:30:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Rajesh Menon", "address": "rajesh.menon@amperatech.ai" } },
+      "attendees": [
+        { "emailAddress": { "name": "Kavitha Subramaniam", "address": "kavitha.s@amperatech.ai" }, "status": { "response": "accepted" } }
+      ],
+      "body": { "content": "Confidential leadership session. Review the Q3 growth strategy and acquisition targets. Do not distribute. Materials are in the board deck on OneDrive." },
+      "importance": "high",
+      "isOnlineMeeting": false,
+      "onlineMeetingUrl": null,
+      "isCancelled": false
+    }
+  },
+  {
+    "meta": {
+      "name": "Client product demo",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "event-004",
+      "subject": "Titan Corp — Product Demo for Caretaker v2",
+      "start": { "dateTime": "2026-06-19T17:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-19T18:00:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Priya Nair", "address": "priya.nair@amperatech.ai" } },
+      "attendees": [
+        { "emailAddress": { "name": "Srihari Rajan", "address": "srihari.rajan@titancorp.com" }, "status": { "response": "accepted" } },
+        { "emailAddress": { "name": "Monish Selvanathan", "address": "monish.selvanathan@amperatech.ai" }, "status": { "response": "accepted" } }
+      ],
+      "body": { "content": "Live demo of the Caretaker ingestion pipeline for Titan Corp. Walk through dashboards and Q&A." },
+      "importance": "normal",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/ghi789",
+      "isCancelled": false
+    }
+  },
+  {
+    "meta": {
+      "name": "Weekly 1:1",
+      "category": "legit",
+      "expect_min_threat": "CLEAN",
+      "must_not_be_public": true
+    },
+    "payload": {
+      "id": "event-005",
+      "subject": "1:1 — Kavitha / Monish",
+      "start": { "dateTime": "2026-06-16T16:00:00", "timeZone": "Asia/Kolkata" },
+      "end": { "dateTime": "2026-06-16T16:30:00", "timeZone": "Asia/Kolkata" },
+      "organizer": { "emailAddress": { "name": "Kavitha Subramaniam", "address": "kavitha.s@amperatech.ai" } },
+      "attendees": [
+        { "emailAddress": { "name": "Monish Selvanathan", "address": "monish.selvanathan@amperatech.ai" }, "status": { "response": "accepted" } }
+      ],
+      "body": { "content": "Weekly sync. Topics: sprint progress, blockers, career growth." },
+      "importance": "normal",
+      "isOnlineMeeting": true,
+      "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup-join/jkl012",
+      "isCancelled": false
+    }
+  }
+]

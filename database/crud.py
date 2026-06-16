@@ -1,6 +1,9 @@
-from datetime import datetime
+from datetime import timedelta
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+
+from utils.time_utils import utcnow
 
 from database.models import (
     Task,
@@ -16,18 +19,36 @@ from database.models import (
 def create_task(
     db: Session,
     description: str,
-    priority: str
+    priority: str,
+    user_id: int = 1,
 ) -> Task:
 
     task = Task(
         description=description,
         priority=priority,
-        status="pending"
+        status="pending",
+        user_id=user_id,
     )
 
     db.add(task)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # A concurrent insert won the race on uq_task_description
+        # (user_id, description). Return the existing row instead of 500ing.
+        db.rollback()
+        existing = (
+            db.query(Task)
+            .filter(
+                Task.user_id == user_id,
+                Task.description == description,
+            )
+            .first()
+        )
+        if existing is not None:
+            return existing
+        raise
 
     db.refresh(task)
 
@@ -56,8 +77,8 @@ def start_window_session(
 
     session = ActiveWindow(
         window_title=window_title,
-        started_at=datetime.now(),
-        created_at=datetime.now()
+        started_at=utcnow(),
+        created_at=utcnow(),
     )
 
     db.add(session)
@@ -103,9 +124,9 @@ def end_window_session(
 
     # Defensive protection for old/bad rows
     if session.started_at is None:
-        session.started_at = datetime.now()
+        session.started_at = utcnow()
 
-    session.ended_at = datetime.now()
+    session.ended_at = utcnow()
 
     session.duration_seconds = int(
         (
@@ -119,6 +140,43 @@ def end_window_session(
     db.refresh(session)
 
     return session
+
+
+def cleanup_stale_sessions(
+    db: Session,
+    stale_after_minutes: int = 30,
+) -> int:
+    """
+    Close ActiveWindow rows that are still open (ended_at IS NULL) yet started
+    more than `stale_after_minutes` ago — sessions the daemon never ended because
+    it stopped (sleep/crash/quit) while that window was focused.
+
+    The daemon only posts on window switch, so there is no activity signal after
+    started_at. We therefore CAP the attributed focus at the stale window rather
+    than counting the entire wall-clock gap (which could be hours/days of sleep)
+    as focus time.
+
+    Returns the number of rows closed.
+    """
+    cutoff = utcnow() - timedelta(minutes=stale_after_minutes)
+    stale = (
+        db.query(ActiveWindow)
+        .filter(
+            ActiveWindow.ended_at.is_(None),
+            ActiveWindow.started_at < cutoff,
+        )
+        .all()
+    )
+    for row in stale:
+        # No evidence of activity past started_at → cap, don't count the gap.
+        capped_end = row.started_at + timedelta(minutes=stale_after_minutes)
+        row.ended_at = capped_end
+        row.duration_seconds = int(
+            (capped_end - row.started_at).total_seconds()
+        )
+    if stale:
+        db.commit()
+    return len(stale)
 
 
 def get_all_window_events(
@@ -148,8 +206,8 @@ def get_window_by_id(
     )
 def create_memory(db: Session, text: str, memory_type: str = "general"):
     memory = Memory(
-        memory_text=text,
-        memory_type=memory_type
+        text=text,
+        type=memory_type
     )
 
     db.add(memory)

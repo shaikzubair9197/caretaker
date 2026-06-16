@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-06-15T07:28:45.850781",
+  "all_passed": true,
+  "checks_total": 8,
+  "checks_passed": 8,
+  "checks": [
+    {
+      "check": "no_raw_emails_survive_masking",
+      "passed": true,
+      "details": "30/30 items free of raw email addresses",
+      "failures": []
+    },
+    {
+      "check": "no_api_keys_survive_masking",
+      "passed": true,
+      "details": "30/30 items free of AWS/OpenAI keys & connection strings",
+      "failures": []
+    },
+    {
+      "check": "all_vault_tokens_decrypt",
+      "passed": true,
+      "details": "219/219 vault tokens round-tripped via AES-256-GCM",
+      "failures": []
+    },
+    {
+      "check": "threat_engine_catches_phishing",
+      "passed": true,
+      "details": "2/2 phishing items flagged SUSPICIOUS or QUARANTINE",
+      "failures": []
+    },
+    {
+      "check": "threat_engine_catches_injection",
+      "passed": true,
+      "details": "1/1 injection items detected",
+      "failures": []
+    },
+    {
+      "check": "sensitive_never_public",
+      "passed": true,
+      "details": "27/27 sensitive items classified above PUBLIC",
+      "failures": []
+    },
+    {
+      "check": "credentials_quarantined",
+      "passed": true,
+      "details": "4/4 credential items quarantined",
+      "failures": []
+    },
+    {
+      "check": "database_objects_have_required_fields",
+      "passed": true,
+      "details": "30/30 DB objects contain all required fields",
+      "failures": []
+    }
+  ],
+  "recommendations": [
+    "ThreatEngine.category leaves prompt-injection and BEC below the FLAGGED threshold; this harness elevates any item with fired signal flags to SUSPICIOUS. Recommend porting that elevation rule into ThreatEngine so production graph_sync quarantines/flags consistently.",
+    "Presidio's generic API_KEY recognizer matches any 16+ char alphanumeric token at 0.5 confidence. This false-positives on ordinary long filenames and identifiers, which (a) inflates the vault with non-secret tokens and (b) over-classifies documents as CONFIDENTIAL (fail-safe direction, but noisy). Recommend raising the API_KEY pattern confidence or adding a context/length heuristic in PreprocessingService.",
+    "api/graph_sync.py classifies on body text only; PII carried solely in metadata (calendar attendees, email recipients) is missed. This harness classifies on the full vaulted-entity set \u2014 recommend the same in production so attendee-only events are not under-classified as PUBLIC.",
+    "Add a dedicated OneDrive scorer + normalizer to ThreatEngine/GraphNormalizer (currently handled locally in this harness)."
+  ]
+}

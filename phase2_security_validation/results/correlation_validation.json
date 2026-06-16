@@ -1,0 +1,67 @@
+{
+  "test": "TEST 5 \u2014 Cross-Source Correlation",
+  "generated_at": "2026-06-15T12:24:42.511273",
+  "passed": true,
+  "correlation_key": "api-key-handoff",
+  "sources_correlated": [
+    "outlook_email",
+    "teams_chat",
+    "calendar",
+    "transcript"
+  ],
+  "cross_source_intent_detected": true,
+  "concept_terms_per_source": {
+    "Email \u2014 request to send API key": [
+      "api key",
+      "integration",
+      "key"
+    ],
+    "Teams \u2014 follow-up 'did you send it?'": [
+      "integration",
+      "key"
+    ],
+    "Calendar \u2014 security review event": [
+      "rotat",
+      "security review",
+      "integration",
+      "key"
+    ],
+    "Transcript \u2014 'we rotated credentials'": [
+      "rotat",
+      "credential",
+      "integration",
+      "key"
+    ]
+  },
+  "raw_identities_remain_masked": true,
+  "records": [
+    {
+      "source": "outlook_email",
+      "name": "Email \u2014 request to send API key",
+      "correlation_key": "api-key-handoff",
+      "masked_output": "Subject: Send API key to <PERSON_2>, please send the <ORGANIZATION_1> key <API_KEY_1> to <PERSON_1> (<EMAIL_ADDRESS_1>) for the integration test <DATE_TIME_1>.",
+      "raw_identity_leaked": []
+    },
+    {
+      "source": "teams_chat",
+      "name": "Teams \u2014 follow-up 'did you send it?'",
+      "correlation_key": "api-key-handoff",
+      "masked_output": "<PERSON_2>, did you send the <ORGANIZATION_1> key to <PERSON_1> yet? The integration test is blocked on it.",
+      "raw_identity_leaked": []
+    },
+    {
+      "source": "calendar",
+      "name": "Calendar \u2014 security review event",
+      "correlation_key": "api-key-handoff",
+      "masked_output": "Event: Security review \u2014 <ORGANIZATION_2> key rotation\n\nReview the <ORGANIZATION_2> key handoff and confirm rotation of the integration key shared with <ORGANIZATION_1>",
+      "raw_identity_leaked": []
+    },
+    {
+      "source": "transcript",
+      "name": "Transcript \u2014 'we rotated credentials'",
+      "correlation_key": "api-key-handoff",
+      "masked_output": "[00:00] <PERSON_2>: Did we close out the Titan key handoff?\n[00:20] Ananya Krishnan: Yes, we rotated the credentials after the integration test. The old key shared with <PERSON_1> is now revoked.",
+      "raw_identity_leaked": []
+    }
+  ]
+}

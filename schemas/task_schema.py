@@ -13,6 +13,7 @@ class TaskResponse(BaseModel):
     description: str
     priority: str
     status: str
+    source_id: int | None = None
 
     model_config = {
         "from_attributes": True

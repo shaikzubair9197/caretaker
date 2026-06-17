@@ -1,11 +1,15 @@
 """
 EmailConnector — incremental Outlook email sync via Microsoft Graph delta queries.
 
-Endpoint: GET /users/{upn}/messages/delta
+Endpoint: GET /users/{upn}/mailFolders/{folder}/messages/delta
+Message change tracking is NOT supported on the unscoped /messages/delta path
+("Change tracking is not supported against microsoft.graph.message") — it must be
+scoped to a mail folder. We sync the inbox by default.
 Delta tokens stored in graph_sync_state (source_type='outlook_email').
 """
 
-from typing import Iterator, Optional
+import os
+from typing import Optional
 
 from utils.config import settings
 from utils.logger import get_logger
@@ -13,11 +17,11 @@ from services.graph.token_manager import graph_get
 
 logger = get_logger("services.graph.connectors.email")
 
-_TOP = 20   # items per page
 _SELECT = (
     "id,subject,from,toRecipients,ccRecipients,body,receivedDateTime,"
     "hasAttachments,importance,conversationId,internetMessageId,parentFolderId"
 )
+_FOLDER = os.getenv("EMAIL_SYNC_FOLDER", "inbox")
 
 
 class EmailConnector:
@@ -34,8 +38,12 @@ class EmailConnector:
         if not self.upn:
             raise RuntimeError("GRAPH_SERVICE_UPN not configured.")
 
-        path = f"users/{self.upn}/messages/delta"
-        params: dict = {"$top": _TOP, "$select": _SELECT}
+        # Message delta must be scoped to a mail folder (unscoped /messages/delta
+        # returns 400 "Change tracking is not supported against ...message").
+        # Delta endpoints also reject $top — page size is set via the
+        # odata.maxpagesize Prefer header; we use Graph's default + @odata.nextLink.
+        path = f"users/{self.upn}/mailFolders/{_FOLDER}/messages/delta"
+        params: dict = {"$select": _SELECT}
 
         if delta_token:
             # delta_token is the full @odata.deltaLink URL — use as-is

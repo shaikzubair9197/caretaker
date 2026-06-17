@@ -22,6 +22,7 @@ from api.llm_audit import router as llm_audit_router
 from api.source_items import router as source_items_router
 from api.health import router as health_router
 from api.graph_sync import router as graph_sync_router
+from api.meeting_prep import router as meeting_prep_router
 from utils.logger import get_logger
 
 logger = get_logger("app")
@@ -89,6 +90,7 @@ app.include_router(llm_audit_router, dependencies=_auth)
 app.include_router(source_items_router, dependencies=_auth)
 app.include_router(health_router, dependencies=_auth)
 app.include_router(graph_sync_router, dependencies=_auth)
+app.include_router(meeting_prep_router, dependencies=_auth)
 
 # ── Dashboard static files — served at /dashboard/ ───────────────────────────
 _dashboard_dir = Path(__file__).parent / "dashboard"

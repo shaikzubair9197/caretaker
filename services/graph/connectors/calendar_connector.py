@@ -13,10 +13,9 @@ from services.graph.token_manager import graph_get
 
 logger = get_logger("services.graph.connectors.calendar")
 
-_TOP = 20
 _SELECT = (
     "id,subject,start,end,organizer,attendees,body,importance,"
-    "isOnlineMeeting,onlineMeetingUrl,recurrence,isCancelled,isAllDay"
+    "isOnlineMeeting,onlineMeetingUrl,recurrence,isCancelled,isAllDay,hasAttachments"
 )
 
 
@@ -33,8 +32,12 @@ class CalendarConnector:
         if not self.upn:
             raise RuntimeError("GRAPH_SERVICE_UPN not configured.")
 
+        # NOTE: /events/delta (change tracking) rejects $top with 400
+        # ErrorInvalidUrlQuery — page size must be expressed via the
+        # odata.maxpagesize Prefer header, not $top. We rely on Graph's default
+        # page size and follow @odata.nextLink for pagination.
         path = f"users/{self.upn}/events/delta"
-        params: dict = {"$top": _TOP, "$select": _SELECT}
+        params: dict = {"$select": _SELECT}
 
         if delta_token:
             params["$deltatoken"] = delta_token
@@ -66,7 +69,36 @@ class CalendarConnector:
             else:
                 break
 
+        # Enrich events that have attachments with attachment metadata so the
+        # (deterministic, no-AI) meeting-prep document retrieval can surface them.
+        # This is background ingest work — never on the meeting-time path.
+        for ev in items:
+            if ev.get("hasAttachments"):
+                ev["attachments"] = self._fetch_attachments(ev.get("id", ""))
+
         logger.info(
             f"CalendarConnector: fetched {len(items)} events for {self.upn}"
         )
         return items, new_delta_token
+
+    def _fetch_attachments(self, event_id: str) -> list[dict]:
+        """Return [{name, contentType, size}] for an event. Best-effort, fail-soft."""
+        if not event_id:
+            return []
+        try:
+            data = graph_get(
+                f"users/{self.upn}/events/{event_id}/attachments",
+                {"$select": "name,contentType,size"},
+            )
+            return [
+                {
+                    "name": a.get("name"),
+                    "contentType": a.get("contentType"),
+                    "size": a.get("size"),
+                }
+                for a in data.get("value", [])
+                if a.get("name")
+            ]
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Attachment fetch failed for event {event_id}: {e}")
+            return []

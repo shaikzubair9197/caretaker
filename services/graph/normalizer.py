@@ -18,11 +18,23 @@ logger = get_logger("services.graph.normalizer")
 
 
 def _parse_dt(value: Optional[str]) -> Optional[datetime]:
-    """Parse an ISO 8601 string to a naive UTC datetime."""
+    """
+    Parse an ISO 8601 string to a naive UTC datetime.
+
+    Graph returns calendar event times as a naive dateTime in UTC (the companion
+    `timeZone` field is "UTC"). A naive datetime must therefore be treated as UTC —
+    NOT as the host's local timezone. Using .astimezone() on a naive value assumes
+    system-local time, which silently shifts event times by the host's UTC offset
+    (e.g. -5:30 on an IST host). Attaching UTC tzinfo for naive values makes parsing
+    host-timezone-independent. (Email receivedDateTime carries a trailing Z, so it is
+    already tz-aware and unaffected.)
+    """
     if not value:
         return None
     try:
         dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc).replace(tzinfo=None)
     except Exception:
         return None

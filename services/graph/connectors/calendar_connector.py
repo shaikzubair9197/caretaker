@@ -82,19 +82,25 @@ class CalendarConnector:
         return items, new_delta_token
 
     def _fetch_attachments(self, event_id: str) -> list[dict]:
-        """Return [{name, contentType, size}] for an event. Best-effort, fail-soft."""
+        """Return [{id, name, contentType, size, url}] for an event. Best-effort, fail-soft."""
         if not event_id:
             return []
         try:
             data = graph_get(
                 f"users/{self.upn}/events/{event_id}/attachments",
-                {"$select": "name,contentType,size"},
+                {"$select": "id,name,contentType,size"},
             )
             return [
                 {
+                    "id": a.get("id"),
                     "name": a.get("name"),
                     "contentType": a.get("contentType"),
                     "size": a.get("size"),
+                    "url": (
+                        f"https://graph.microsoft.com/v1.0/users/{self.upn}/events/"
+                        f"{event_id}/attachments/{a['id']}/$value"
+                        if a.get("id") else None
+                    ),
                 }
                 for a in data.get("value", [])
                 if a.get("name")

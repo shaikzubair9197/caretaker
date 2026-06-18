@@ -1,6 +1,11 @@
 // Main app entry point — router + navigation + config panel.
 import { cfg } from './api.js';
 import { toast } from './components/toast.js';
+import { PopupManager } from './components/popup.js';
+
+// Global PopupManager — pages register their own triggers against this instance.
+export const popupManager = new PopupManager();
+window._caretakerPopups = popupManager;
 
 // Page registry — lazy-loaded
 const PAGES = {
@@ -35,6 +40,8 @@ async function navigate(hash) {
     currentDestroy();
     currentDestroy = null;
   }
+  // Cancel any popup timers registered by the previous page
+  popupManager.destroy();
 
   try {
     const mod = await loader();

@@ -3,6 +3,9 @@ import { toast } from '../components/toast.js';
 import { fmtTime } from '../components/panel.js';
 
 export async function render(el) {
+  // Register CRO-style in-app popup triggers (meeting alert, pending actions, health warning)
+  const pm = window._caretakerPopups;
+  if (pm) registerDashboardPopups(pm);
   el.innerHTML = `
     <div class="page-header">
       <h1 class="page-title">System Dashboard</h1>
@@ -207,6 +210,105 @@ function skeletonCards(n) {
       <div class="health-card-sub" style="background:var(--bg-elevated);height:10px;border-radius:3px;width:70%"></div>
     </div>
   `).join('');
+}
+
+// ── Dashboard popup triggers ─────────────────────────────────────────────────
+
+/**
+ * Registers three CRO-optimized popup triggers:
+ *
+ *  1. Meeting alert banner   — polls /meeting/prep/next every 60 s;
+ *                              shows when a meeting is ≤ 20 min away.
+ *  2. Pending actions slide-in — delayed 30 s then polls /agent/actions/pending
+ *                              every 60 s; shows when count > 0.
+ *  3. Health warning banner  — immediate check on /health/detailed;
+ *                              shows when Ollama or DB is not ok.
+ */
+function registerDashboardPopups(pm) {
+
+  // 1. Meeting alert ─────────────────────────────────────────────────────────
+  pm.interval(60_000, async () => {
+    try {
+      const data = await api.get('/meeting/prep/next?within_minutes=20');
+      const ev = data?.event;
+      if (!ev) return;
+      const mins = ev.minutes_until ?? '?';
+      const title = ev.title || 'Upcoming meeting';
+      const organizer = ev.organizer?.name ? ` · ${ev.organizer.name}` : '';
+      pm.show({
+        id: `meeting-${ev.external_id || 'next'}`,
+        type: 'banner',
+        variant: 'accent',
+        title: `Meeting in ${mins} min`,
+        body: `${title}${organizer}`,
+        cooldownMs: 15 * 60 * 1000, // 15 min — re-alert if still active
+        actions: [
+          ev.join_url ? {
+            label: 'Join',
+            href: ev.join_url,
+            primary: true,
+            dismissOnClick: true,
+          } : null,
+          {
+            label: 'Prep',
+            action: () => { location.hash = '#meeting'; },
+            dismissOnClick: true,
+          },
+        ].filter(Boolean),
+      });
+    } catch { /* silent — /meeting/prep/next may 404 if no upcoming meeting */ }
+  });
+
+  // 2. Pending agent actions ─────────────────────────────────────────────────
+  pm.delay(30_000, () => {
+    pm.interval(60_000, async () => {
+      try {
+        const data = await api.get('/agent/actions/pending');
+        const count = data?.count ?? 0;
+        if (count === 0) return;
+        pm.show({
+          id: 'pending-actions',
+          type: 'slide-in',
+          variant: 'warning',
+          title: `${count} action${count === 1 ? '' : 's'} need your review`,
+          body: 'Agent proposed changes awaiting approval.',
+          cooldownMs: 60 * 60 * 1000,
+          actions: [{
+            label: 'Review Now',
+            primary: true,
+            action: () => { location.hash = '#agent'; },
+            dismissOnClick: true,
+          }],
+        });
+      } catch { /* silent */ }
+    });
+  });
+
+  // 3. System health warning ─────────────────────────────────────────────────
+  pm.delay(2_000, async () => {
+    try {
+      const h = await api.get('/health/detailed');
+      const down = [];
+      if (h.ollama !== 'ok') down.push('Ollama LLM');
+      if (h.database !== 'ok') down.push('Database');
+      if (!down.length) return;
+      pm.show({
+        id: 'health-warning',
+        type: 'banner',
+        variant: 'danger',
+        title: 'Service issue detected',
+        body: `${down.join(' and ')} unreachable — some features may be unavailable.`,
+        cooldownMs: 30 * 60 * 1000,
+        actions: [{
+          label: 'Details',
+          action: () => {
+            document.getElementById('dash-refresh')?.click();
+          },
+          dismissOnClick: false,
+        }],
+      });
+    } catch { /* silent */ }
+  });
 }
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

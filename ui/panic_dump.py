@@ -14,7 +14,10 @@ import os
 import tkinter as tk
 from tkinter import font as tkfont
 
+from dotenv import load_dotenv
 import requests
+
+load_dotenv()
 
 API_BASE = os.getenv("CARETAKER_API_URL", "http://127.0.0.1:8000")
 _API_KEY = os.getenv("CARETAKER_API_KEY", "")

@@ -13,9 +13,11 @@ All snapshots are built from the plaintext source archive — no masking, no LLM
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from database.connection import SessionLocal
+from services.graph.token_manager import graph_get_stream
 from services.meeting_prep_service import MeetingPrepService
 from utils.config import settings
 from utils.logger import get_logger
@@ -57,6 +59,23 @@ def prep_upcoming(
         }
         for e in events
     ]
+
+
+@router.get("/attachment/{event_id}/{attachment_id}")
+def prep_attachment(event_id: str, attachment_id: str):
+    if not settings.GRAPH_SERVICE_UPN:
+        raise HTTPException(503, "GRAPH_SERVICE_UPN not configured.")
+
+    path = f"users/{settings.GRAPH_SERVICE_UPN}/events/{event_id}/attachments/{attachment_id}/$value"
+    resp = graph_get_stream(path)
+
+    headers = {}
+    if resp.headers.get("content-type"):
+        headers["content-type"] = resp.headers.get("content-type")
+    if resp.headers.get("content-disposition"):
+        headers["content-disposition"] = resp.headers.get("content-disposition")
+
+    return StreamingResponse(resp.iter_bytes(), status_code=resp.status_code, headers=headers)
 
 
 @router.get("/{event_id}")

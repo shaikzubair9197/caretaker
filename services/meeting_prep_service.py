@@ -291,7 +291,7 @@ class MeetingPrepService:
             "agenda": agenda,
             "attendees": attendees,
             "related_emails": MeetingPrepService.related_emails(db, attendee_addresses),
-            "documents": MeetingPrepService.documents(db, raw, attendee_addresses, agenda),
+            "documents": MeetingPrepService.documents(db, raw, attendee_addresses, agenda, event_id=event.external_id),
         }
 
     @staticmethod
@@ -344,6 +344,7 @@ class MeetingPrepService:
         raw: dict,
         attendee_addresses: list[str],
         agenda: str,
+        event_id: Optional[str] = None,
         within_days: int = 30,
         max_items: int = 3,
     ) -> dict:
@@ -357,12 +358,21 @@ class MeetingPrepService:
 
         Precedence when the same doc appears twice: attachment > agenda > email.
         """
-        attachments = [
-            {"label": a["name"], "kind": "attachment", "url": None,
-             "reason": "attached to invite"}
-            for a in (raw.get("attachments") or [])
-            if a.get("name")
-        ]
+        attachments = []
+        for a in (raw.get("attachments") or []):
+            if not a.get("name"):
+                continue
+            attachment_url = None
+            if event_id and a.get("id"):
+                attachment_url = f"/meeting/prep/attachment/{event_id}/{a['id']}"
+            else:
+                attachment_url = a.get("url")
+            attachments.append({
+                "label": a["name"],
+                "kind": "attachment",
+                "url": attachment_url,
+                "reason": "attached to invite",
+            })
         invite_refs = [
             dict(r, reason="named in the agenda") for r in _extract_doc_refs(agenda or "")
         ]

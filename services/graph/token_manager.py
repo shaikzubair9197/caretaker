@@ -87,3 +87,25 @@ def graph_get(path: str, params: Optional[dict] = None) -> dict:
         return resp.json()
 
     raise RuntimeError(f"Graph GET {path} failed after 3 attempts due to rate-limiting.")
+
+
+def graph_get_stream(path: str, params: Optional[dict] = None) -> httpx.Response:
+    """
+    GET https://graph.microsoft.com/v1.0/{path} and return the raw httpx.Response.
+    Handles 429 rate-limit with Retry-After header.
+    """
+    token = get_access_token()
+    url = f"https://graph.microsoft.com/v1.0/{path.lstrip('/')}"
+    headers = {"Authorization": f"Bearer {token}", "ConsistencyLevel": "eventual"}
+
+    for attempt in range(3):
+        resp = httpx.get(url, headers=headers, params=params or {}, timeout=60)
+        if resp.status_code == 429:
+            retry_after = int(resp.headers.get("Retry-After", "5"))
+            logger.warning(f"Graph 429 rate-limit — sleeping {retry_after}s")
+            time.sleep(retry_after)
+            continue
+        resp.raise_for_status()
+        return resp
+
+    raise RuntimeError(f"Graph GET {path} failed after 3 attempts due to rate-limiting.")

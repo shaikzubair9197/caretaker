@@ -421,6 +421,18 @@ def test_attachment_without_name_skipped(db):
     assert labels == ["Real.pdf"]
 
 
+def test_attachment_url_is_preserved(db):
+    raw = {"attachments": [{"name": "Real.pdf", "url": "https://example.com/Real.pdf"}]}
+    out = MeetingPrepService.documents(db, raw, [ATT1], agenda="")
+    assert out["items"][0]["url"] == "https://example.com/Real.pdf"
+
+
+def test_attachment_proxy_url_is_set(db):
+    raw = {"attachments": [{"id": "att-123", "name": "Real.pdf"}]}
+    out = MeetingPrepService.documents(db, raw, [ATT1], agenda="", event_id="ev-1")
+    assert out["items"][0]["url"] == "/meeting/prep/attachment/ev-1/att-123"
+
+
 def test_calendar_naive_datetime_parsed_as_utc():
     """
     Graph returns calendar times as a naive dateTime in UTC. The normalizer must

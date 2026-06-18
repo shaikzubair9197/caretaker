@@ -7,6 +7,10 @@ eagerly parsed here so the viewer never touches the raw bytes directly.
 
 from __future__ import annotations
 
+import shutil
+import subprocess
+import tempfile
+import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -88,6 +92,7 @@ class PptxShape:
     height: int
     text: str = ""
     runs: list[DocxRun] = field(default_factory=list)
+    alignment: str = "left"
     fill_color: str = ""
     line_color: str = ""
     image_data: bytes | None = None
@@ -184,6 +189,59 @@ _CT_FORMAT: dict[str, DocFormat] = {
 
 _XLSX_ROW_LIMIT = 1_000
 
+def _convert_office_to_pdf(path: Path, filename: str) -> Path | None:
+    """Convert a DOCX/PPTX file to PDF using a headless command-line tool."""
+    candidates = (
+        "libreoffice",
+        "soffice",
+        "soffice.bin",
+        "lowriter",
+        "swriter",
+        "unoconv",
+    )
+    tool = None
+    for candidate in candidates:
+        path_to_tool = shutil.which(candidate)
+        if path_to_tool:
+            tool = path_to_tool
+            break
+    if tool is None:
+        return None
+
+    out_dir = Path(tempfile.gettempdir()) / "caretaker_pdf_preview" / uuid.uuid4().hex
+    out_dir.mkdir(parents=True, exist_ok=True)
+    output_path = out_dir / Path(filename).with_suffix(".pdf").name
+
+    if Path(tool).name == "unoconv":
+        cmd = [tool, "-f", "pdf", "-o", str(output_path), str(path)]
+    else:
+        cmd = [tool, "--headless", "--convert-to", "pdf", "--outdir", str(out_dir), str(path)]
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        if proc.returncode != 0:
+            return None
+
+        if output_path.exists():
+            return output_path
+
+        # LibreOffice may write to a file named with the input basename.
+        fallback_path = out_dir / Path(path).with_suffix(".pdf").name
+        if fallback_path.exists():
+            return fallback_path
+
+        pdf_files = list(out_dir.glob("*.pdf"))
+        if pdf_files:
+            return pdf_files[0]
+    except Exception:
+        return None
+    return None
 
 # ── Public entry point ────────────────────────────────────────────────────────
 
@@ -202,10 +260,16 @@ def parse(path: Path, filename: str, content_type: str = "") -> ParsedDoc:
 
     match fmt:
         case DocFormat.DOCX:
+            pdf_path = _convert_office_to_pdf(path, filename)
+            if pdf_path is not None:
+                return _parse_pdf(pdf_path, filename)
             return _parse_docx(path, filename)
         case DocFormat.PDF:
             return _parse_pdf(path, filename)
         case DocFormat.PPTX:
+            pdf_path = _convert_office_to_pdf(path, filename)
+            if pdf_path is not None:
+                return _parse_pdf(pdf_path, filename)
             return _parse_pptx(path, filename)
         case DocFormat.XLSX:
             return _parse_xlsx(path, filename)
@@ -407,6 +471,22 @@ def _pptx_run(run) -> DocxRun:
     )
 
 
+def _pptx_alignment(para) -> str:
+    align = getattr(para, "alignment", None)
+    if align is None:
+        return "left"
+    mapping = {
+        0: "left",
+        1: "center",
+        2: "right",
+        3: "justify",
+    }
+    try:
+        return mapping.get(int(align), "left")
+    except Exception:
+        return "left"
+
+
 def _pptx_shape(shape) -> PptxShape:
     left = int(shape.left / 12700)
     top = int(shape.top / 12700)
@@ -436,13 +516,17 @@ def _pptx_shape(shape) -> PptxShape:
 
     text = ""
     runs: list[DocxRun] = []
+    alignment = "left"
     if getattr(shape, "has_text_frame", False):
         text = shape.text or ""
-        for paragraph in shape.text_frame.paragraphs:
+        paragraphs = list(shape.text_frame.paragraphs)
+        if paragraphs:
+            alignment = _pptx_alignment(paragraphs[0])
+        for paragraph in paragraphs:
             for run in paragraph.runs:
                 if run.text:
                     runs.append(_pptx_run(run))
-            if paragraph is not shape.text_frame.paragraphs[-1]:
+            if paragraph is not paragraphs[-1]:
                 runs.append(DocxRun(text="\n"))
 
     table: list[list[str]] | None = None
@@ -459,6 +543,7 @@ def _pptx_shape(shape) -> PptxShape:
         height=height,
         text=text,
         runs=runs,
+        alignment=alignment,
         fill_color=fill_color,
         line_color=line_color,
         image_data=image_data,

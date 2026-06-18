@@ -16,6 +16,7 @@ from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import (
     QLabel,
     QScrollArea,
+    QSizePolicy,
     QStackedWidget,
     QVBoxLayout,
 )
@@ -29,9 +30,6 @@ if TYPE_CHECKING:
     from ui.renderers.pptx_renderer import PptxRenderer
 
 
-_SLIDE_WIDTH = 920
-
-
 class PptxViewer(AbstractViewer):
     """QStackedWidget of QLabel per slide; slides rendered to QImage off-thread."""
 
@@ -43,9 +41,13 @@ class PptxViewer(AbstractViewer):
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
         self._scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self._scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         layout.addWidget(self._scroll)
 
         self._stack = QStackedWidget()
+        self._stack.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self._stack.setMinimumSize(640, 360)
         self._scroll.setWidget(self._stack)
 
         self._renderer: PptxRenderer | None = None
@@ -56,6 +58,7 @@ class PptxViewer(AbstractViewer):
         self._pending: set[int] = set()
         self._cancel_event = threading.Event()
         self._current_idx: int = 0
+        self._zoom: float = 1.0
 
     # ── AbstractViewer ─────────────────────────────────────────────────────────
 
@@ -69,6 +72,7 @@ class PptxViewer(AbstractViewer):
         self._total = renderer.slide_count()
         self._url = doc.filename
         self._cancel_event = threading.Event()
+        self._zoom = session.zoom if session.zoom > 0 else 1.0
 
         # Clear previous state
         while self._stack.count() > 0:
@@ -91,15 +95,23 @@ class PptxViewer(AbstractViewer):
         self.page_changed.emit(0, self._total)
         start = session.current_page if session.current_page < self._total else 0
         self._show_slide(start)
+        self.zoom_changed.emit(self._zoom)
 
     def supports_zoom(self) -> bool:
-        return False
+        return True
 
     def supports_search(self) -> bool:
         return False
 
     def set_zoom(self, factor: float) -> None:
-        pass
+        factor = max(0.25, min(3.0, factor))
+        if abs(factor - self._zoom) < 0.01:
+            return
+        self._zoom = factor
+        self._image_cache.clear()
+        self._pending.clear()
+        self._show_slide(self._current_idx)
+        self.zoom_changed.emit(self._zoom)
 
     def search(self, query: str) -> None:
         self.search_result.emit(0)
@@ -121,6 +133,8 @@ class PptxViewer(AbstractViewer):
             return
         self._current_idx = idx
         self._stack.setCurrentIndex(idx)
+        self._scroll.horizontalScrollBar().setValue(0)
+        self._scroll.verticalScrollBar().setValue(0)
         self.page_changed.emit(idx, self._total)
 
         if idx in self._image_cache:
@@ -132,11 +146,19 @@ class PptxViewer(AbstractViewer):
             self._schedule_render(idx)
 
     def _schedule_render(self, slide_idx: int) -> None:
+        width = max(
+            self._scroll.viewport().width(),
+            self.width(),
+            self.parent().width() if self.parent() is not None else 0,
+            960,
+        )
+        width = int(width * self._zoom)
+        width = min(width, 2400)
         worker = RenderSlideRunnable(
             url=self._url,
             renderer=self._renderer,
             slide_idx=slide_idx,
-            width_px=_SLIDE_WIDTH,
+            width_px=width,
             cancel_event=self._cancel_event,
         )
         worker.signals.ready.connect(self._on_slide_ready)
@@ -151,17 +173,17 @@ class PptxViewer(AbstractViewer):
         if slide_idx >= len(self._labels):
             return
         lbl = self._labels[slide_idx]
-        w = max(self.width() - 24, 400)
-        h = max(self.height() - 24, 300)
-        # QPixmap.fromImage is safe here — this slot always runs on the main thread
-        pixmap = QPixmap.fromImage(image).scaled(
-            w, h,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation,
-        )
+        pixmap = QPixmap.fromImage(image)
+        if pixmap.isNull():
+            lbl.setText(f"Slide {slide_idx + 1} (render failed)")
+            return
         lbl.setPixmap(pixmap)
         lbl.setFixedSize(pixmap.size())
+        lbl.adjustSize()
+        self._stack.setMinimumSize(pixmap.size())
         lbl.setStyleSheet("QLabel { background-color: #0d1117; }")
+        self._scroll.horizontalScrollBar().setValue(0)
+        self._scroll.verticalScrollBar().setValue(0)
 
     # ── Keyboard shortcuts ─────────────────────────────────────────────────────
 
@@ -185,4 +207,14 @@ class PptxViewer(AbstractViewer):
         super().resizeEvent(event)
         idx = self._current_idx
         if idx in self._image_cache:
-            self._apply_image(idx, self._image_cache[idx])
+            current = self._image_cache[idx]
+            target_width = max(
+                self._scroll.viewport().width(),
+                self.width(),
+                self.parent().width() if self.parent() is not None else 0,
+            )
+            if current.width() < target_width * self._zoom - 50:
+                self._pending.discard(idx)
+                self._schedule_render(idx)
+            else:
+                self._apply_image(idx, current)

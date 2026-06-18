@@ -57,6 +57,7 @@ from PySide6.QtWidgets import (
     QSplitter,
     QStackedWidget,
     QStyledItemDelegate,
+    QStyle,
     QStyleOptionViewItem,
     QTabWidget,
     QTextEdit,
@@ -140,7 +141,7 @@ class AttendeeDelegate(QStyledItemDelegate):
         response = att.get("response", "none").lower()
 
         r = option.rect
-        is_selected = bool(option.state & option.State_Selected)
+        is_selected = bool(option.state & QStyle.State_Selected)
         bg = "#21262d" if is_selected else "transparent"
         painter.fillRect(r, QColor(bg))
 
@@ -392,9 +393,47 @@ class _InlineViewerArea(QWidget):
     def __init__(self, target_height: int = 420, parent=None) -> None:
         super().__init__(parent)
         self._target_h = target_height
+        self._current_viewer = None
+        self._current_url = ""
+        self._current_label = ""
+        self._current_page = 0
+        self._total_pages = 0
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        toolbar = QWidget(self)
+        toolbar_layout = QHBoxLayout(toolbar)
+        toolbar_layout.setContentsMargins(8, 8, 8, 8)
+        toolbar_layout.setSpacing(6)
+
+        self._prev_btn = QPushButton("← Previous")
+        self._prev_btn.setProperty("class", "ghost")
+        self._prev_btn.setFixedWidth(110)
+        self._prev_btn.clicked.connect(self._page_prev)
+        toolbar_layout.addWidget(self._prev_btn)
+
+        self._page_label = QLabel("0 / 0")
+        self._page_label.setStyleSheet("QLabel { color: #8b949e; font-size: 12px; font-weight: 600; }")
+        self._page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._page_label.setFixedWidth(70)
+        toolbar_layout.addWidget(self._page_label)
+
+        self._next_btn = QPushButton("Next →")
+        self._next_btn.setProperty("class", "ghost")
+        self._next_btn.setFixedWidth(110)
+        self._next_btn.clicked.connect(self._page_next)
+        toolbar_layout.addWidget(self._next_btn)
+
+        toolbar_layout.addStretch()
+
+        self._open_btn = QPushButton("Open full view")
+        self._open_btn.setProperty("class", "ghost")
+        self._open_btn.clicked.connect(self._open_full_view)
+        toolbar_layout.addWidget(self._open_btn)
+
+        layout.addWidget(toolbar)
 
         self._stack = QStackedWidget()
         layout.addWidget(self._stack)
@@ -410,24 +449,75 @@ class _InlineViewerArea(QWidget):
         self._anim.setEasingCurve(QEasingCurve.Type.OutCubic)
 
         self.setMaximumHeight(40)
+        self._set_navigation_visible(False)
+
+    def set_source(self, url: str, label: str) -> None:
+        self._current_url = url
+        self._current_label = label
 
     def show_loading(self, hint: str = "") -> None:
+        self._disconnect_viewer()
         if self._stack.count() > 1:
             old = self._stack.widget(1)
             self._stack.removeWidget(old)
             old.deleteLater()
         self._loading.setText(f"Loading {hint}…" if hint else "Loading…")
         self._stack.setCurrentIndex(0)
+        self._set_navigation_visible(False)
         self._expand()
 
     def show_viewer(self, viewer: QWidget) -> None:
+        self._disconnect_viewer()
+        self._current_viewer = viewer
+        self._current_page = 0
+        self._total_pages = 0
         if self._stack.count() > 1:
             old = self._stack.widget(1)
             self._stack.removeWidget(old)
             old.deleteLater()
         self._stack.insertWidget(1, viewer)
         self._stack.setCurrentIndex(1)
+        self._set_navigation_visible(hasattr(viewer, "go_to_page"))
+        if hasattr(viewer, "page_changed"):
+            viewer.page_changed.connect(self._on_page_changed)
+        self._page_label.setText("1 / 1")
         self._expand()
+
+    def _disconnect_viewer(self) -> None:
+        if self._current_viewer is None:
+            return
+        if hasattr(self._current_viewer, "page_changed"):
+            try:
+                self._current_viewer.page_changed.disconnect(self._on_page_changed)
+            except Exception:
+                pass
+        self._current_viewer = None
+
+    def _set_navigation_visible(self, visible: bool) -> None:
+        self._prev_btn.setVisible(visible)
+        self._next_btn.setVisible(visible)
+        self._page_label.setVisible(visible)
+        self._open_btn.setVisible(bool(self._current_url))
+
+    def _on_page_changed(self, current: int, total: int) -> None:
+        self._current_page = current
+        self._total_pages = total
+        self._page_label.setText(f"{current + 1} / {total}")
+
+    def _page_prev(self) -> None:
+        if self._current_viewer is not None and hasattr(self._current_viewer, "go_to_page"):
+            self._current_viewer.go_to_page(max(0, self._current_page - 1))
+
+    def _page_next(self) -> None:
+        if self._current_viewer is not None and hasattr(self._current_viewer, "go_to_page"):
+            self._current_viewer.go_to_page(min(self._total_pages - 1, self._current_page + 1))
+
+    def _open_full_view(self) -> None:
+        if not self._current_url:
+            return
+        from ui.document_viewer_popup import DocumentViewerPopup
+        dlg = DocumentViewerPopup(self, self._current_url, _HEADERS, self._current_label)
+        dlg.exec()
 
     def _expand(self) -> None:
         self._anim.stop()
@@ -559,6 +649,7 @@ class _DocumentsPanel(QWidget):
 
     def _on_open_requested(self, url: str, label: str) -> None:
         full_url = url if not url.startswith("/") else API_BASE.rstrip("/") + url
+        self._viewer_area.set_source(full_url, label)
         self._viewer_area.show_loading(label)
         self._controller.open(full_url, _HEADERS, label)
         self.document_open_requested.emit(full_url, label)

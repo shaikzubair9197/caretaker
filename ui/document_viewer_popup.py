@@ -286,6 +286,7 @@ class DocumentViewerDialog(QDialog):
             self._toolbar.show_zoom(True)
             self._toolbar._zoom_combo.currentIndexChanged.connect(self._on_zoom_combo_changed)
             viewer.zoom_changed.connect(self._sync_zoom_combo)
+            self._sync_zoom_combo(getattr(viewer, "_zoom", 1.0))
         else:
             self._toolbar.show_zoom(False)
 

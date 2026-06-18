@@ -31,6 +31,9 @@ _FG = "#e6edf3"
 
 def _run_html(run: "DocxRun") -> str:
     """Convert a single DocxRun to an HTML span fragment."""
+    if run.text == "\n":
+        return "<br/>"
+
     styles = []
     if run.bold:
         styles.append("font-weight:bold")
@@ -108,17 +111,20 @@ class PptxRenderer:
         self, painter: QPainter, shape: "PptxShape", x: int, y: int, w: int, h: int
     ) -> None:
         doc = QTextDocument()
+        doc.setDocumentMargin(0)
         doc.setPageSize(QSizeF(w, h))
+        doc.setTextWidth(w)
+        alignment = getattr(shape, "alignment", "left")
+        style = (
+            f"color:{_FG};font-size:12pt;text-align:{alignment};"
+            "white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;"
+        )
         if shape.runs:
-            html_parts = [_run_html(r) for r in shape.runs if r.text]
-            html = (
-                f'<div style="color:{_FG};font-size:12pt;">'
-                + "".join(html_parts)
-                + "</div>"
-            )
+            html_parts = [_run_html(r) for r in shape.runs]
+            html = f'<div style="{style}">' + "".join(html_parts) + "</div>"
             doc.setHtml(html)
         else:
-            doc.setDefaultStyleSheet(f"* {{ color: {_FG}; font-size: 12pt; }}")
+            doc.setDefaultStyleSheet(f"* {{ {style} }}")
             doc.setPlainText(shape.text or "")
         painter.save()
         painter.translate(x, y)
@@ -129,16 +135,17 @@ class PptxRenderer:
         self, painter: QPainter, image_data: bytes, x: int, y: int, w: int, h: int
     ) -> None:
         try:
-            src = QImage()
+            src = QPixmap()
             src.loadFromData(image_data)
             if src.isNull():
                 return
             scaled = src.scaled(
-                w, h,
+                w,
+                h,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
-            painter.drawImage(x, y, scaled)
+            painter.drawPixmap(x, y, scaled)
         except Exception:
             pass
 

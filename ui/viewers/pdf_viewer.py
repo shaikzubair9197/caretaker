@@ -147,7 +147,10 @@ class PdfViewer(AbstractViewer):
     def go_to_page(self, n: int) -> None:
         n = max(0, min(self._total - 1, n))
         if n < len(self._page_labels):
-            self._scroll.ensureWidgetVisible(self._page_labels[n])
+            lbl = self._page_labels[n]
+            self._scroll.ensureWidgetVisible(lbl)
+            self._scroll.verticalScrollBar().setValue(lbl.y())
+            self._scroll.horizontalScrollBar().setValue(0)
         self.page_changed.emit(n, self._total)
 
     def save_session(self, session: "DocumentSession") -> None:

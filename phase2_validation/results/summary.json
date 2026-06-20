@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-06-15T07:28:45.849601",
+  "generated_at": "2026-06-19T09:17:39.499679",
   "total_processed": 30,
   "clean": 20,
-  "suspicious": 5,
-  "quarantine": 5,
+  "suspicious": 4,
+  "quarantine": 6,
   "public": 1,
   "internal": 13,
   "confidential": 8,
   "restricted": 8,
-  "vault_items_created": 219,
+  "vault_items_created": 188,
   "by_source": {
     "outlook_email": 5,
     "teams_chat": 5,

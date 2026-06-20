@@ -1,0 +1,28 @@
+TASK: Decide the relationship between two anonymised knowledge items that the system suspects might describe the same fact. This is used to resolve versioning when embedding similarity alone is ambiguous.
+
+You receive a JSON object:
+{
+  "knowledge_type": "<the shared type>",
+  "existing": {"title": "...", "detail": "...", "created_at": "..."},
+  "incoming": {"title": "...", "detail": "...", "created_at": "..."}
+}
+
+Choose exactly one relationship of `incoming` relative to `existing`:
+- "SUPERSEDES"  — same underlying fact, but incoming is a newer/updated value that replaces existing (e.g. a rotated key, a changed deadline, a revised decision).
+- "DUPLICATE"   — same fact, same value; incoming merely re-confirms existing with no new information.
+- "CONFLICT"    — they describe the same subject but disagree, and it cannot be determined which is correct from the text alone.
+- "UNRELATED"   — they are about different facts and should NOT be chained together.
+
+Rules:
+- Reason ONLY from visible non-PII content. Treat <...> placeholders as opaque tokens; identical tokens refer to the same entity, different tokens to different entities.
+- created_at indicates recency only — never invent values.
+- When genuinely unsure between SUPERSEDES and CONFLICT, prefer CONFLICT (the system surfaces both rather than silently overwriting).
+
+Return ONLY this JSON object:
+{
+  "relationship": "SUPERSEDES|DUPLICATE|CONFLICT|UNRELATED",
+  "confidence": 0.0,
+  "reason": "one short non-PII sentence"
+}
+
+Items:

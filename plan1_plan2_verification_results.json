@@ -1,0 +1,151 @@
+{
+  "timestamp": "2026-06-19T19:08:06.597318",
+  "stages": {
+    "1_ingest": {
+      "status": "success",
+      "outcome": "ingested",
+      "source_id": 296,
+      "meeting_transcript_id": 29,
+      "knowledge_item_count": 8
+    },
+    "2_plan1_artifacts": {
+      "status": "success",
+      "source_item": 296,
+      "threat_assessment": null,
+      "vault_tokens": 22,
+      "meeting_transcript": {
+        "id": 29,
+        "segments": 7,
+        "participants": 3
+      },
+      "knowledge_items": 8,
+      "knowledge_by_type": {
+        "mentioned_link": 1,
+        "question": 2,
+        "information_request": 1,
+        "commitment": 2,
+        "mentioned_document": 1,
+        "github_pr": 1
+      }
+    },
+    "3_plan2_versioning": {
+      "status": "success",
+      "total_rows": 8,
+      "active_rows": 8,
+      "superseded_rows": 0,
+      "knowledge_keys": 8,
+      "rows_with_embeddings": 8,
+      "chains": {
+        "gen:mentioned_link:217a318a975d4e4bbb276f18564d4aa2": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:question:cac251959e1f4a668ae3c5d5a08a66b6": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:information_request:742d2df6228f4dcf872cf51b76e7046f": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:commitment:39195a079d4a439285827f3529980a9f": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:mentioned_document:19e8905ede9d4e8d832ef90962fe7591": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:question:2305b0aad4b346e4974fb86d3c935849": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:commitment:a1b31c58a14d4ba98ab7c32819d92acb": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        },
+        "gen:github_pr:263529f49a8f467cb49da3acba4f8315": {
+          "length": 1,
+          "active": 1,
+          "versions": [
+            1
+          ]
+        }
+      }
+    },
+    "4_retrieval": {
+      "status": "success",
+      "test_queries": [
+        {
+          "query": "what are the action items",
+          "retrieval_status": "ok",
+          "result_count": 5,
+          "intent": {
+            "query_type": "semantic",
+            "is_secret_request": false,
+            "knowledge_types": [
+              "action_item",
+              "follow_up",
+              "information_request"
+            ],
+            "search_terms": [
+              "action items"
+            ],
+            "as_of_hint": null,
+            "classifier_status": "SUCCESS"
+          }
+        },
+        {
+          "query": "what was decided in the meeting",
+          "retrieval_status": "ok",
+          "result_count": 1,
+          "intent": {
+            "query_type": "semantic",
+            "is_secret_request": false,
+            "knowledge_types": [
+              "decision"
+            ],
+            "search_terms": [
+              "what",
+              "decided",
+              "meeting"
+            ],
+            "as_of_hint": null,
+            "classifier_status": "SUCCESS"
+          }
+        }
+      ],
+      "audit_events_count": 5
+    }
+  },
+  "summary": {
+    "knowledge_items_total": 24,
+    "knowledge_items_active": 24,
+    "knowledge_items_with_embeddings": 24,
+    "knowledge_items_with_key": 24,
+    "audit_events_total": 107,
+    "audit_retrieval_events": 10,
+    "status": "SUCCESS"
+  }
+}

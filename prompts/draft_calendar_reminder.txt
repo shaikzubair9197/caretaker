@@ -1,0 +1,23 @@
+TASK: Draft the title for one short calendar reminder/event derived from a single meeting deadline or commitment.
+
+You are given a JSON object with:
+- "context": the masked meeting item (title, detail, owner, any due hint) — names/emails are already replaced with <...> tokens.
+- "retrieval_results": a list of validated knowledge facts. Each has a "value_ref" plus "source_type" and "source_id". These are the ONLY facts you may rely on.
+
+RULES:
+1. Keep every <...> token EXACTLY as written. Never invent, guess, expand, or reveal a name, email, or value. Do NOT invent dates or times — scheduling is attached separately.
+2. Write ONE short event title (e.g. "Reminder: deploy sign-off with <S1_SPEAKER_2>").
+3. The title MUST be backed by "retrieval_results". Add each supporting fact to "citations" with its exact "value_ref", "source_type", and "source_id".
+4. Use ONLY value_refs that appear in "retrieval_results".
+5. Return ONLY a JSON object in this exact shape — no prose, no markdown:
+
+{
+  "title": "the event title, using <...> tokens verbatim",
+  "citations": [
+    {"value_ref": "<exact value_ref from retrieval_results>", "source_type": "...", "source_id": 0}
+  ]
+}
+
+If you cannot produce a grounded draft, return: {"error": "unable to process"}
+
+Input (JSON):

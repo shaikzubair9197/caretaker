@@ -33,9 +33,11 @@ from services.graph.normalizer import GraphNormalizer, GraphSourceItem
 from services.graph.connectors.email_connector import EmailConnector
 from services.graph.connectors.chat_connector import ChatConnector
 from services.graph.connectors.calendar_connector import CalendarConnector
+from services.graph.connectors.transcript_connector import TranscriptConnector
 from services.preprocessing_service import PreprocessingService
 from services.vault_service import VaultService
 from services.threat_engine import ThreatEngine, ThreatScore
+from services import transcript_ingestion_service
 from utils.config import settings
 from utils.logger import get_logger
 from utils.time_utils import utcnow
@@ -201,6 +203,65 @@ def _ingest_one(
         return "error", e
 
 
+def _run_transcript_source(upn: str, db: Session, dry_run: bool, force_reextract: bool) -> SyncResult:
+    """
+    Transcript ingestion takes a dedicated path: TranscriptIngestionService owns
+    archive/threat-scan/mask/persist/extract/knowledge-persist internally (including
+    its own LLM extraction step), so this bypasses GraphNormalizer.normalize() and
+    _write_source_table() — that generic dispatch was built for the lighter email/
+    chat/calendar pipeline, not for a step that also calls the LLM.
+    """
+    result = SyncResult(
+        source_type="transcript", fetched=0, ingested=0,
+        skipped_dup=0, quarantined=0, errors=0, delta_updated=False,
+    )
+
+    try:
+        state = _get_sync_state(db, "transcript", upn)
+        if not dry_run:
+            db.commit()
+
+        connector = TranscriptConnector(upn)
+        transcripts, new_cursor = connector.fetch_since(state.delta_token)
+        result.fetched = len(transcripts)
+
+        if dry_run:
+            return result
+
+        for transcript in transcripts:
+            try:
+                outcome = transcript_ingestion_service.ingest(transcript, db, force_reextract=force_reextract)
+            except Exception as e:
+                logger.error(f"Transcript ingestion failed for {transcript.metadata.external_id}: {e}")
+                result.errors += 1
+                continue
+
+            if outcome["outcome"] == "ingested":
+                result.ingested += 1
+            elif outcome["outcome"] == "quarantined":
+                result.quarantined += 1
+                result.ingested += 1
+            elif outcome["outcome"] in ("skipped_dup", "skipped_idempotent"):
+                result.skipped_dup += 1
+
+        if new_cursor and new_cursor != state.delta_token:
+            state.delta_token = new_cursor
+            state.last_synced_at = utcnow()
+            state.items_synced = (state.items_synced or 0) + result.ingested
+            db.commit()
+            result.delta_updated = True
+
+    except Exception as e:
+        logger.error(f"_run_transcript_source failed: {e}")
+        result.errors += 1
+        try:
+            db.rollback()
+        except Exception:
+            pass
+
+    return result
+
+
 def _write_source_table(
     item: GraphSourceItem,
     source_id: int,
@@ -295,7 +356,7 @@ def _sensitivity_from_threat(threat: ThreatScore) -> str:
 def trigger_sync(
     source: str = Query(
         default="email",
-        description="Source type: email | chat | calendar | all",
+        description="Source type: email | chat | calendar | transcript | all",
     ),
     upn: Optional[str] = Query(
         default=None,
@@ -304,6 +365,10 @@ def trigger_sync(
     dry_run: bool = Query(
         default=False,
         description="Validate pipeline without writing to DB",
+    ),
+    force_reextract: bool = Query(
+        default=False,
+        description="transcript source only — bypass the idempotency check and re-run LLM extraction",
     ),
     db: Session = Depends(get_db),
 ):
@@ -322,14 +387,14 @@ def trigger_sync(
             "Add VAULT_MASTER_KEY=<64-hex-chars> to .env and restart."
         )
 
-    sources_to_run = ["email", "chat", "calendar"] if source == "all" else [source]
+    sources_to_run = ["email", "chat", "calendar", "transcript"] if source == "all" else [source]
     total = SyncResult(
         source_type=source, fetched=0, ingested=0,
         skipped_dup=0, quarantined=0, errors=0, delta_updated=False,
     )
 
     for src in sources_to_run:
-        result = _run_source(src, target_upn, db, dry_run)
+        result = _run_source(src, target_upn, db, dry_run, force_reextract=force_reextract)
         total.fetched     += result.fetched
         total.ingested    += result.ingested
         total.skipped_dup += result.skipped_dup
@@ -345,11 +410,14 @@ def trigger_sync(
     return total
 
 
-def _run_source(source: str, upn: str, db: Session, dry_run: bool) -> SyncResult:
+def _run_source(source: str, upn: str, db: Session, dry_run: bool, force_reextract: bool = False) -> SyncResult:
     result = SyncResult(
         source_type=source, fetched=0, ingested=0,
         skipped_dup=0, quarantined=0, errors=0, delta_updated=False,
     )
+
+    if source == "transcript":
+        return _run_transcript_source(upn, db, dry_run, force_reextract)
 
     try:
         state = _get_sync_state(db, source, upn)
@@ -420,5 +488,56 @@ def _run_source(source: str, upn: str, db: Session, dry_run: bool) -> SyncResult
             db.rollback()
         except Exception:
             pass
+
+    return result
+
+
+@router.post("/sync/transcript/mock-trigger", response_model=SyncResult)
+def trigger_mock_transcript_sync(
+    since_iso: Optional[str] = Query(
+        default=None,
+        description="Only ingest mock transcripts created after this ISO timestamp",
+    ),
+    force_reextract: bool = Query(
+        default=False,
+        description="Bypass the idempotency check and re-run LLM extraction",
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Development-only: manually trigger transcript ingestion against the
+    MockTranscriptProvider fixtures, without waiting on meeting_scheduler's
+    post-meeting poll. Disabled outside development to avoid exposing a
+    synthetic-data ingestion path in production.
+    """
+    if settings.APP_ENV == "production":
+        raise HTTPException(404, "Not available outside development.")
+    if settings.TRANSCRIPT_PROVIDER != "mock":
+        raise HTTPException(
+            400,
+            f"TRANSCRIPT_PROVIDER is {settings.TRANSCRIPT_PROVIDER!r} — this endpoint only drives the mock provider.",
+        )
+
+    connector = TranscriptConnector(settings.GRAPH_SERVICE_UPN)
+    transcripts, _cursor = connector.fetch_since(since_iso)
+
+    result = SyncResult(
+        source_type="transcript", fetched=len(transcripts), ingested=0,
+        skipped_dup=0, quarantined=0, errors=0, delta_updated=False,
+    )
+    for transcript in transcripts:
+        try:
+            outcome = transcript_ingestion_service.ingest(transcript, db, force_reextract=force_reextract)
+        except Exception as e:
+            logger.error(f"mock-trigger: ingestion failed for {transcript.metadata.external_id}: {e}")
+            result.errors += 1
+            continue
+        if outcome["outcome"] == "ingested":
+            result.ingested += 1
+        elif outcome["outcome"] == "quarantined":
+            result.quarantined += 1
+            result.ingested += 1
+        elif outcome["outcome"] in ("skipped_dup", "skipped_idempotent"):
+            result.skipped_dup += 1
 
     return result

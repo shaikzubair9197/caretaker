@@ -109,8 +109,8 @@
       "arjun.pillai@gmail.com"
     ],
     "participants": [],
-    "timestamp": "2026-06-17T08:30:00",
-    "end_time": "2026-06-17T09:30:00",
+    "timestamp": "2026-06-17T14:00:00",
+    "end_time": "2026-06-17T15:00:00",
     "thread_id": null,
     "importance": "high",
     "has_attachments": false,
@@ -121,28 +121,20 @@
       "is_cancelled": false
     }
   },
-  "masked_output": "Event: Interview \u2014 Senior Backend Engineer (<PERSON_1>)\n\nConfidential interview. Candidate contact: <EMAIL_ADDRESS_1><PHONE_NUMBER_1>. Do not share the panel feedback outside the hiring committee.",
+  "masked_output": "Event: Interview \u2014 Senior Backend Engineer (<PERSON_1>)\n\nConfidential interview. Candidate contact: <EMAIL_ADDRESS_1>, <PHONE_NUMBER_1>. Do not share the panel feedback outside the hiring committee.",
   "vault_tokens": {
     "PHONE_NUMBER_1": {
       "entity_type": "PHONE_NUMBER",
       "original_value": "+91-98765-43210",
-      "encrypted_hex": "4c496c10b05eda194ebbe97f39f0b904bf165268ffeeac1409b629eb5507f03aff5887e238258efb90fda4",
+      "encrypted_hex": "b25fce8ab6073bd835cc301c46f51886f9ba61b3c822e0cd3537bd7a514b378d422fac646401edccafa550",
       "blob_bytes": 43,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "gmail.com",
-      "encrypted_hex": "ba860adff10d6e5c5f26ad1bfe1d95970edb48b3072a36fdcd7325b80abd2d0008f828bfc0",
-      "blob_bytes": 37,
       "key_version": 1,
       "roundtrip_ok": true
     },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "arjun.pillai@gmail.com",
-      "encrypted_hex": "bd5817262058add73d12d4c0fb4cdbb519e86a479b6ef51678002bac9b25ad6d7cbe06292ba6e49cd4a9c0c9756a5999ca47",
+      "encrypted_hex": "b76813c1e65e19caed942c65307dd63f6aaa74c981d9eaa4d6c5baab54675f0c312e1627c94b36739ea49adece865f68b29e",
       "blob_bytes": 50,
       "key_version": 1,
       "roundtrip_ok": true
@@ -150,7 +142,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Arjun Pillai",
-      "encrypted_hex": "0a862cf527036f2fd7bbf0c6b66a3b51393bb939a9d9f3d009651e73e7585e9ea7f720b5a702adfa",
+      "encrypted_hex": "e0191ff27210dbe4b1d96780df8f46b93e4e961e6e32835663c2c627dfc0cdbb95b762dd1747e821",
       "blob_bytes": 40,
       "key_version": 1,
       "roundtrip_ok": true
@@ -158,7 +150,7 @@
     "EMAIL_ADDRESS_2": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "lakshmi.iyer@amperatech.ai",
-      "encrypted_hex": "dcabffb23437747fc135f6c5cd5c1d15d8684becca815705eb314cdd7c0344660b84238ede2ffab97aad5b9d4dc91ca6d127c7f3102d",
+      "encrypted_hex": "bb757a8fcd5a7cfca19e16f01b07265dcfdbad314f503aa9548462d29343978fc79b1718f43265989074bb5d29aeac065b23b3864b51",
       "blob_bytes": 54,
       "key_version": 1,
       "roundtrip_ok": true
@@ -166,7 +158,7 @@
     "PERSON_2": {
       "entity_type": "PERSON",
       "original_value": "Lakshmi Iyer",
-      "encrypted_hex": "7d187b2f89a0956f7afcf3b8875bd9b64eca0317aed59daad472c14f7546eb4f53bd70bcf37dcd8a",
+      "encrypted_hex": "d7c463fdfeba2de67c689696129d777389dc29edd772a9fd11625da67b11b3735d5180806bb58d10",
       "blob_bytes": 40,
       "key_version": 1,
       "roundtrip_ok": true
@@ -174,7 +166,7 @@
     "EMAIL_ADDRESS_3": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "deepak.k@amperatech.ai",
-      "encrypted_hex": "dfda9b42a2c4ca0238e9e285a3bed7aae30eef79d3cdc63385c652e0b5bb9d2293a392a2e0611d21e94dc8f89d3bd8655f87",
+      "encrypted_hex": "27409f2139fd61dfbc1788b730bfb2ac255a7189853db6f66e2bf9af8b3412fa099e32b679ebeccbeca8f851027c851d4501",
       "blob_bytes": 50,
       "key_version": 1,
       "roundtrip_ok": true
@@ -208,8 +200,8 @@
       "EMAIL_ADDRESS_3",
       "EMAIL_ADDRESS_1"
     ],
-    "start_at": "2026-06-17T08:30:00",
-    "end_at": "2026-06-17T09:30:00",
+    "start_at": "2026-06-17T14:00:00",
+    "end_at": "2026-06-17T15:00:00",
     "is_online_meeting": true,
     "importance": "high"
   },
@@ -222,12 +214,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 7,
+      "vault_token_count": 6,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "INTERNAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.580345"
+    "created_at": "2026-06-19T09:17:39.296089"
   }
 }

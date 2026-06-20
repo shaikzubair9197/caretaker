@@ -70,7 +70,7 @@
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "ext-guid",
-      "encrypted_hex": "570e0c63fdb56fbca3f5a347bdc212af7ed10c6b6dbd8cb4d8901c0cdc6bd4d369cb4e56",
+      "encrypted_hex": "e5433d0283be37aacf18fd1a7e67b73850943f43548d6964d11585e9dff2c1f5b1a0701b",
       "blob_bytes": 36,
       "key_version": 1,
       "roundtrip_ok": true
@@ -78,7 +78,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Unknown External",
-      "encrypted_hex": "d47906fcdf301cfa3cb257b1a97d45a6e595d5ff688fdf28ed25ca9ffec93852d7975b50ff9751b2cee3cbff",
+      "encrypted_hex": "df3919c489c61a1e1e4f7b16c6ed91784e59623b78bbb6d6873fd6321a02e383b0f2f0ab365731eaaf06c514",
       "blob_bytes": 44,
       "key_version": 1,
       "roundtrip_ok": true
@@ -133,6 +133,6 @@
         "INJECTION_PATTERN_IN_CHAT"
       ]
     },
-    "created_at": "2026-06-15T07:28:45.214263"
+    "created_at": "2026-06-19T09:17:39.025139"
   }
 }

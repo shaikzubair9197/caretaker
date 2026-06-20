@@ -55,20 +55,12 @@
       "is_shared": false
     }
   },
-  "masked_output": "Document: <API_KEY_1>.xlsx\nPath: /drive/root:/HR/Confidential\nOwner: <EMAIL_ADDRESS_1>modified by: <EMAIL_ADDRESS_1>",
+  "masked_output": "Document: <API_KEY_1>.xlsx\nPath: /drive/root:/HR/Confidential\nOwner: <EMAIL_ADDRESS_1>\nLast modified by: <EMAIL_ADDRESS_1>",
   "vault_tokens": {
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "amperatech.ai",
-      "encrypted_hex": "c86030852eed45d7045cf1a3a2e7ac87036d6a8abf84220102dccc4f3cadc0d5b8ee9a1e820bf02801",
-      "blob_bytes": 41,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "lakshmi.iyer@amperatech.ai",
-      "encrypted_hex": "74043a9958e1a86afc272d4b27be1cde0520315eb93d6a593c628dfe426f79fc03ad85da4d345943480483bf11ce88ae4052f3338878",
+      "encrypted_hex": "45ba5e7ca2d39c27d2e564babad37c9a63314f5e6aa13691b34b6d5f7f549c273151f4aa1f980dc20267b7e3c74823876bbeb2191200",
       "blob_bytes": 54,
       "key_version": 1,
       "roundtrip_ok": true
@@ -76,7 +68,7 @@
     "API_KEY_1": {
       "entity_type": "API_KEY",
       "original_value": "Compensation_Review_2026_DO_NOT_SHARE",
-      "encrypted_hex": "8b84f053d677a1da30373eb4633cbe704d240a62c48a16791f8f35f000d4f45a4a79c1522995795d1242fec59e5c51d31f48e786ebca7e7d5349217dc96761a928",
+      "encrypted_hex": "9ce6983cdb62f39240c4dda86d67d800a6152bceadf78f96c430716e5e55255b4fa4bffc89ef331b39977898c567dc183efcf64a30e83f1d393f9afe09fbec095e",
       "blob_bytes": 65,
       "key_version": 1,
       "roundtrip_ok": true
@@ -84,7 +76,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Lakshmi Iyer",
-      "encrypted_hex": "60a6c09d2365cb374998af802e41d1cb45329a0eaa74b7a0c2e4064927c5a60acb742629d826da47",
+      "encrypted_hex": "3e236fba29ff605e8a8431592f39b8716d1f9eed61e791baf76ffbd10a62a36a572f8a0439991469",
       "blob_bytes": 40,
       "key_version": 1,
       "roundtrip_ok": true
@@ -130,12 +122,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 4,
+      "vault_token_count": 3,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "CONFIDENTIAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.791203"
+    "created_at": "2026-06-19T09:17:39.454895"
   }
 }

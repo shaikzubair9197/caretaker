@@ -61,6 +61,22 @@ def prep_upcoming(
     ]
 
 
+@router.get("/recently-completed")
+def prep_recently_completed(
+    within_minutes: int = Query(default=30, ge=1, le=240),
+    db: Session = Depends(get_db),
+):
+    """Online meetings that ended within the window and have no transcript yet — drives the scheduler's post-meeting poll."""
+    events = MeetingPrepService.get_recently_completed_needing_transcript(db, within_minutes)
+    return [
+        {
+            "external_id": e.external_id,
+            "end": e.end_at.isoformat() if e.end_at else None,
+        }
+        for e in events
+    ]
+
+
 @router.get("/attachment/{event_id}/{attachment_id}")
 def prep_attachment(event_id: str, attachment_id: str):
     if not settings.GRAPH_SERVICE_UPN:

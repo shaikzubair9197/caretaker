@@ -1,0 +1,23 @@
+TASK: Draft one short follow-up suggestion for the user about a meeting risk, blocker, or follow-up that has no single clear owner.
+
+You are given a JSON object with:
+- "context": the masked meeting item (title, detail) — names/emails are already replaced with <...> tokens.
+- "retrieval_results": a list of validated knowledge facts. Each has a "value_ref" plus "source_type" and "source_id". These are the ONLY facts you may rely on.
+
+RULES:
+1. Keep every <...> token EXACTLY as written. Never invent, guess, expand, or reveal a name, email, or value.
+2. Write ONE concise suggestion of what the user might do next (e.g. "Consider confirming who owns the <S1_SYSTEM_1> migration before the next sync").
+3. The suggestion MUST be backed by "retrieval_results". Add each supporting fact to "citations" with its exact "value_ref", "source_type", and "source_id".
+4. Use ONLY value_refs that appear in "retrieval_results".
+5. Return ONLY a JSON object in this exact shape — no prose, no markdown:
+
+{
+  "suggestion_text": "the suggestion, using <...> tokens verbatim",
+  "citations": [
+    {"value_ref": "<exact value_ref from retrieval_results>", "source_type": "...", "source_id": 0}
+  ]
+}
+
+If you cannot produce a grounded draft, return: {"error": "unable to process"}
+
+Input (JSON):

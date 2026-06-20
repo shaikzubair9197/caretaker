@@ -1,5 +1,5 @@
 from sqlalchemy import DateTime, JSON, ForeignKey, BigInteger, Boolean, LargeBinary, Numeric
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, Index, text
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Column, Integer, String, Text
 
@@ -166,10 +166,19 @@ class LLMCallLog(Base):
 
     model = Column(String, nullable=False)
     call_type = Column(String, nullable=False)
-    # "panic_extract" | "intent_reason"
+    # "panic_extract" | "intent_reason" | "meeting_intelligence_extract"
 
     prompt_sha256 = Column(String, nullable=False)
     # SHA-256 of the full prompt — hash only, never the prompt text
+
+    prompt_version = Column(String, nullable=True)
+    # version tag of the prompt template used, e.g. "meeting_intelligence_extract.v1"
+
+    extraction_version = Column(String, nullable=True)
+    # version tag of the extraction logic/schema, for future reprocessing/auditing
+
+    source_id = Column(Integer, ForeignKey("source_items.id"), nullable=True)
+    # links this call back to the SourceItem it was extracted from (e.g. a transcript)
 
     entity_types = Column(JSON, nullable=True)
     # PII categories present: ["EMAIL_ADDRESS", "PERSON"]
@@ -287,8 +296,25 @@ class MeetingTranscript(Base):
     meeting_start       = Column(DateTime, nullable=True)
     meeting_end         = Column(DateTime, nullable=True)
     organizer_token     = Column(String(64), nullable=True)
+    content_hash        = Column(String(64), nullable=True)
+    # SHA-256 of the raw archived payload — used for idempotent re-ingestion checks
     user_id             = Column(Integer, default=1)
     created_at          = Column(DateTime, default=utcnow)
+
+
+class TranscriptSegment(Base):
+    """Per-utterance breakdown of a meeting transcript, for speaker/timestamp attribution."""
+
+    __tablename__ = "transcript_segments"
+
+    id              = Column(Integer, primary_key=True)
+    transcript_id   = Column(Integer, ForeignKey("meeting_transcripts.id", ondelete="CASCADE"), nullable=False)
+    speaker_token   = Column(String(64), nullable=True)
+    start_ms        = Column(Integer, nullable=True)
+    end_ms          = Column(Integer, nullable=True)
+    text_masked     = Column(Text, nullable=True)
+    sequence_index  = Column(Integer, nullable=False)
+    created_at      = Column(DateTime, default=utcnow)
 
 
 class CalendarEvent(Base):
@@ -385,7 +411,9 @@ class KnowledgeItem(Base):
     id              = Column(Integer, primary_key=True)
     source_id       = Column(Integer, ForeignKey("source_items.id"), nullable=True)
     knowledge_type  = Column(String(30), nullable=False)
-    # task|commitment|decision|risk|escalation|reminder|approval|alert
+    # task|commitment|decision|risk|escalation|reminder|approval|alert|
+    # question|information_request|mentioned_document|mentioned_link|
+    # system_reference|github_pr|jira_ticket|credential_reference
     title_masked    = Column(Text, nullable=False)
     detail_masked   = Column(Text, nullable=True)
     owner_token     = Column(String(64), nullable=True)
@@ -397,9 +425,51 @@ class KnowledgeItem(Base):
     embedding       = Column(JSON, nullable=True)
     source_type     = Column(String(50), nullable=True)
     vault_refs      = Column(JSON, default=list)
+    extra_data      = Column(JSON, nullable=True)
+    # type-specific fields, shape determined by knowledge_type — see
+    # services/knowledge_persistence_service.py for the per-type schema
+    llm_call_log_id = Column(Integer, ForeignKey("llm_call_logs.id"), nullable=True)
+    # links this item back to the single extraction call that produced it
+
+    # ── Plan 2: knowledge retrieval, versioning & supersession ───────────────
+    # All additive/nullable so existing Plan 1 rows are unaffected until the
+    # backfill (migrations/005 + scripts/backfill_knowledge_versioning.py) runs.
+    knowledge_key     = Column(String(128), nullable=True, index=True)
+    # groups every version of "the same fact" — deterministic for structured
+    # types, semantically/UUID-generated for free-text. See
+    # services/knowledge_evolution_service.derive_knowledge_key.
+    version           = Column(Integer, default=1)
+    is_active         = Column(Boolean, default=True, index=True)
+    # exactly one active row per knowledge_key — enforced by the partial unique
+    # index ux_knowledge_items_active_key below + the evolution service's
+    # transactional, row-locked supersession.
+    superseded_by_id  = Column(Integer, ForeignKey("knowledge_items.id"), nullable=True)
+    valid_from        = Column(DateTime, nullable=True)
+    valid_to          = Column(DateTime, nullable=True)
+    resolution_method = Column(String(30), nullable=True)
+    # new_chain | supersedes | duplicate_confirmation | semantic | llm_adjudicated
+
     user_id         = Column(Integer, default=1)
     created_at      = Column(DateTime, default=utcnow)
     resolved_at     = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        # Retrieval hot paths: active-version lookup by key, and the structured
+        # "same owner + same type" candidate scan used during identity resolution.
+        Index("ix_knowledge_items_key_active", "knowledge_key", "is_active"),
+        Index("ix_knowledge_items_type_owner", "knowledge_type", "owner_token"),
+        # At most one active version per knowledge_key, enforced at the DB layer
+        # independent of application logic (belt-and-suspenders for the
+        # evolution service's transactional guarantee). NULL knowledge_keys are
+        # distinct under a unique index, so un-backfilled/unkeyed rows coexist.
+        Index(
+            "ux_knowledge_items_active_key",
+            "knowledge_key",
+            unique=True,
+            postgresql_where=text("is_active = true"),
+            sqlite_where=text("is_active = 1"),
+        ),
+    )
 
 
 class ThreatAssessment(Base):

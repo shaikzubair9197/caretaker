@@ -3,7 +3,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from database.models import Memory
+from database.models import KnowledgeItem, Memory
 from utils.logger import get_logger
 
 logger = get_logger("embeddings.vector_search")
@@ -57,4 +57,59 @@ def search_similar(
             "score": round(score, 4),
         }
         for score, m in scored[:limit]
+    ]
+
+
+def search_similar_knowledge(
+    db: Session,
+    query_embedding: list[float],
+    knowledge_type: Optional[str] = None,
+    only_active: bool = True,
+    limit: int = 5,
+    min_score: float = 0.3,
+    user_id: int = 1,
+) -> list[dict]:
+    """
+    Semantic retrieval over KnowledgeItem rows — same in-memory cosine pattern
+    as search_similar() (no pgvector; scaling risk noted in Plan 2 §9).
+
+    Returns the matched KnowledgeItem ids with their similarity scores. Callers
+    re-load full rows so this stays a lightweight scoring pass. Never returns
+    decrypted values — only references the rows by id (Plan 2 §10).
+    """
+    items = (
+        db.query(KnowledgeItem)
+        .filter(
+            KnowledgeItem.embedding.isnot(None),
+            KnowledgeItem.user_id == user_id,
+        )
+    )
+    if only_active:
+        items = items.filter(KnowledgeItem.is_active.is_(True))
+    if knowledge_type is not None:
+        items = items.filter(KnowledgeItem.knowledge_type == knowledge_type)
+    items = items.all()
+
+    if not items:
+        return []
+
+    scored = []
+    for k in items:
+        try:
+            score = _cosine_similarity(query_embedding, k.embedding)
+            if score >= min_score:
+                scored.append((score, k))
+        except Exception:
+            continue
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+
+    return [
+        {
+            "id": k.id,
+            "knowledge_key": k.knowledge_key,
+            "knowledge_type": k.knowledge_type,
+            "score": round(score, 4),
+        }
+        for score, k in scored[:limit]
     ]

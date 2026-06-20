@@ -28,13 +28,21 @@ class LLMAuditService:
         preflight_data:     Optional[dict]  = None,
         prompt_preview:     Optional[str]   = None,
         prompt_size_chars:  Optional[int]   = None,
-    ) -> None:
+        # ── Extraction metadata (meeting intelligence and similar) ────────
+        prompt_version:     Optional[str]   = None,
+        extraction_version: Optional[str]   = None,
+        source_id:          Optional[int]   = None,
+    ) -> Optional[int]:
         """
         Write one audit record for an LLM call using an independent DB session.
 
         Independent session guarantees:
         - A caller rollback does NOT erase the audit entry.
         - An audit failure does NOT rollback the caller's transaction.
+
+        Returns the new LLMCallLog.id (or None if the write failed), so callers
+        that need to link other rows back to this specific call (e.g.
+        KnowledgeItem.llm_call_log_id) can do so without a second query.
         """
         from database.connection import SessionLocal
 
@@ -46,7 +54,7 @@ class LLMAuditService:
 
         audit_db = SessionLocal()
         try:
-            audit_db.add(LLMCallLog(
+            row = LLMCallLog(
                 model              = model,
                 call_type          = call_type,
                 prompt_sha256      = prompt_hash,
@@ -60,16 +68,22 @@ class LLMAuditService:
                 preflight_data     = preflight_data,
                 prompt_preview     = prompt_preview,
                 prompt_size_chars  = prompt_size_chars,
-            ))
+                prompt_version     = prompt_version,
+                extraction_version = extraction_version,
+                source_id          = source_id,
+            )
+            audit_db.add(row)
             audit_db.commit()
             logger.info(
                 f"LLM audit — call_type={call_type} model={model} "
                 f"status={status} duration_ms={duration_ms} "
                 f"exc={exception_type or '-'}"
             )
+            return row.id
         except Exception as e:
             audit_db.rollback()
             logger.error(f"Failed to write LLM audit log: {e}")
+            return None
         finally:
             audit_db.close()
 
@@ -80,4 +94,18 @@ class LLMAuditService:
             .order_by(LLMCallLog.created_at.desc())
             .limit(limit)
             .all()
+        )
+
+    @staticmethod
+    def find_successful_call(db: Session, source_id: int, call_type: str) -> Optional[LLMCallLog]:
+        """Most recent successful call of `call_type` for a given source — used for idempotency checks."""
+        return (
+            db.query(LLMCallLog)
+            .filter(
+                LLMCallLog.source_id == source_id,
+                LLMCallLog.call_type == call_type,
+                LLMCallLog.status == "SUCCESS",
+            )
+            .order_by(LLMCallLog.created_at.desc())
+            .first()
         )

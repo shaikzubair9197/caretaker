@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import QRect, QRectF, QSizeF, Qt
+from PySide6.QtCore import QRect, QRectF, Qt
 from PySide6.QtGui import (
     QColor,
     QFont,
@@ -49,6 +49,10 @@ def _run_html(run: "DocxRun") -> str:
         styles.append(f"font-family:'{run.font_name}'")
     style_str = ";".join(styles)
     text = run.text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    # Defensive: any run carrying a literal newline (not just the synthetic
+    # paragraph/line-break separators) must still render as a break — Qt's
+    # rich-text engine doesn't reliably honor "white-space: pre-wrap".
+    text = text.replace("\n", "<br/>")
     if style_str:
         return f'<span style="{style_str}">{text}</span>'
     return text
@@ -112,7 +116,9 @@ class PptxRenderer:
     ) -> None:
         doc = QTextDocument()
         doc.setDocumentMargin(0)
-        doc.setPageSize(QSizeF(w, h))
+        # Only constrain the wrap width, not the page height: setPageSize(w, h)
+        # would put the document in paginated mode, which truncates content
+        # taller than h instead of letting it lay out fully.
         doc.setTextWidth(w)
         alignment = getattr(shape, "alignment", "left")
         style = (
@@ -126,16 +132,20 @@ class PptxRenderer:
         else:
             doc.setDefaultStyleSheet(f"* {{ {style} }}")
             doc.setPlainText(shape.text or "")
+        # Text that doesn't fit the shape's nominal box (autofit-shrunk text,
+        # under-measured boxes, etc.) must overflow visibly rather than be
+        # clipped away — draw at the document's actual laid-out height.
+        content_height = max(float(h), doc.size().height())
         painter.save()
         painter.translate(x, y)
-        doc.drawContents(painter, QRectF(0, 0, w, h))
+        doc.drawContents(painter, QRectF(0, 0, w, content_height))
         painter.restore()
 
     def _paint_image(
         self, painter: QPainter, image_data: bytes, x: int, y: int, w: int, h: int
     ) -> None:
         try:
-            src = QPixmap()
+            src = QImage()
             src.loadFromData(image_data)
             if src.isNull():
                 return
@@ -145,7 +155,7 @@ class PptxRenderer:
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
-            painter.drawPixmap(x, y, scaled)
+            painter.drawImage(x, y, scaled)
         except Exception:
             pass
 

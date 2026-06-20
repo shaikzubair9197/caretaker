@@ -7,6 +7,8 @@ load_dotenv()
 
 class Settings:
 
+    APP_ENV = os.getenv("APP_ENV", "development")
+
     DB_HOST = os.getenv("DB_HOST")
     DB_PORT = os.getenv("DB_PORT")
     DB_NAME = os.getenv("DB_NAME")
@@ -20,6 +22,11 @@ class Settings:
     GRAPH_CLIENT_ID     = os.getenv("GRAPH_CLIENT_ID")     or os.getenv("client_id", "")
     GRAPH_CLIENT_SECRET = os.getenv("GRAPH_CLIENT_SECRET") or os.getenv("client_secret", "")
     GRAPH_SERVICE_UPN   = os.getenv("GRAPH_SERVICE_UPN", "care.taker@amperatech.ai")
+
+    # ── Transcript provider ───────────────────────────────────────────────────
+    # "mock" (default) uses MockTranscriptProvider; "graph" will use
+    # GraphTranscriptProvider once implemented in a future plan.
+    TRANSCRIPT_PROVIDER = os.getenv("TRANSCRIPT_PROVIDER", "mock")
 
     # ── Vault (AES-256-GCM) ───────────────────────────────────────────────────
     # 64 hex chars = 32 bytes = 256-bit key. Generate with:

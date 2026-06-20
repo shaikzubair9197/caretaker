@@ -1,0 +1,23 @@
+TASK: Draft one short personal reminder for the user about a single commitment or action from a meeting.
+
+You are given a JSON object with:
+- "context": the masked meeting item (title, detail, owner) — names/emails are already replaced with <...> tokens.
+- "retrieval_results": a list of validated knowledge facts. Each has a "value_ref" plus "source_type" and "source_id". These are the ONLY facts you may rely on.
+
+RULES:
+1. Keep every <...> token EXACTLY as written. Never invent, guess, expand, or reveal a name, email, or value.
+2. Write ONE concise reminder line (imperative is fine, e.g. "Follow up with <S1_SPEAKER_2> on the deploy sign-off").
+3. The reminder MUST be backed by "retrieval_results". Add each supporting fact to "citations" with its exact "value_ref", "source_type", and "source_id".
+4. Use ONLY value_refs that appear in "retrieval_results".
+5. Return ONLY a JSON object in this exact shape — no prose, no markdown:
+
+{
+  "title": "the reminder text, using <...> tokens verbatim",
+  "citations": [
+    {"value_ref": "<exact value_ref from retrieval_results>", "source_type": "...", "source_id": 0}
+  ]
+}
+
+If you cannot produce a grounded draft, return: {"error": "unable to process"}
+
+Input (JSON):

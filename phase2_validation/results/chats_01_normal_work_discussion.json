@@ -70,7 +70,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Monish",
-      "encrypted_hex": "ff4a1a681f49e57d9bee288d820c83094dbec3e5c7efe3230b62cb647e5b61333ce7",
+      "encrypted_hex": "9653c7fca59aa64a22a429ae5a2cfe420ab7b690a878a2c4f65c12687e5e3efa31f4",
       "blob_bytes": 34,
       "key_version": 1,
       "roundtrip_ok": true
@@ -78,7 +78,7 @@
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "deepak-guid",
-      "encrypted_hex": "1d208f3603787f5ef505dc78903da5e71efce759f3147393517c5ab7d020a91c87d0b122c8ec81",
+      "encrypted_hex": "85687dd07f75ebe308db74f2818aa1a67ff968f00c80bb9d408f37a575a2beec6bcf61cf9d3470",
       "blob_bytes": 39,
       "key_version": 1,
       "roundtrip_ok": true
@@ -86,7 +86,7 @@
     "PERSON_2": {
       "entity_type": "PERSON",
       "original_value": "Deepak Krishnamurthy",
-      "encrypted_hex": "fa5433977693d41a9902bef71ded0d69744bb835e1bc025c898617d7fd34bd98a363a354d5a4bd351a36e9653b720217",
+      "encrypted_hex": "1a1b9f079d99da99cc49dc686ee20757e3e550e842ad1893b3f46df74eaf7dfcc42c0be0228c96efc9de02b36ee6d9de",
       "blob_bytes": 48,
       "key_version": 1,
       "roundtrip_ok": true
@@ -137,6 +137,6 @@
       "classification": "CONFIDENTIAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.120884"
+    "created_at": "2026-06-19T09:17:38.950992"
   }
 }

@@ -1,0 +1,34 @@
+{
+  "transcript_metadata": {
+    "id": "transcript-platform-sync-demo-001",
+    "meetingId": "meeting-platform-sync-demo-001",
+    "createdDateTime": "2026-06-18T15:35:00Z",
+    "meetingOrganizer": {"user": {"id": "aad-9001", "displayName": "Maria Gonzalez"}}
+  },
+  "meeting_metadata": {
+    "id": "meeting-platform-sync-demo-001",
+    "subject": "Weekly Platform Sync",
+    "startDateTime": "2026-06-18T15:30:00Z",
+    "endDateTime": "2026-06-18T16:00:00Z",
+    "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/platform-sync-demo-001",
+    "participants": {
+      "organizer": {
+        "identity": {"user": {"id": "aad-9001", "displayName": "Maria Gonzalez"}},
+        "upn": "maria.gonzalez@contoso.com"
+      },
+      "attendees": [
+        {
+          "identity": {"user": {"id": "aad-9002", "displayName": "Tom Becker"}},
+          "upn": "tom.becker@contoso.com",
+          "role": "attendee"
+        },
+        {
+          "identity": {"user": {"id": "aad-9003", "displayName": "Aisha Rahman"}},
+          "upn": "aisha.rahman@contoso.com",
+          "role": "attendee"
+        }
+      ]
+    }
+  },
+  "vtt_content": "WEBVTT\n\n00:00:01.000 --> 00:00:08.000\n<v Maria Gonzalez>Morning all, let's get through this quickly. Tom, where are we on PROJ-561, the billing export PR?\n\n00:00:08.500 --> 00:00:17.000\n<v Tom Becker>PR #418 is up on github.com/contoso/billing-service, ready for review. Aisha, can you review it by Friday?\n\n00:00:17.500 --> 00:00:20.500\n<v Aisha Rahman>Sure, I'll review PR #418 by Friday.\n\n00:00:21.000 --> 00:00:30.000\n<v Maria Gonzalez>Good. Next, we've decided to move the release from this Thursday to next Monday so QA has the full weekend buffer.\n\n00:00:30.500 --> 00:00:39.000\n<v Aisha Rahman>Makes sense. Quick flag though, I'm blocked on INFRA-203, I still don't have access to the staging database for the export tests.\n\n00:00:39.500 --> 00:00:45.000\n<v Tom Becker>I'll ping infra and get your access sorted by tomorrow.\n\n00:00:45.500 --> 00:00:58.000\n<v Dev Patel>Sorry I'm late, joining from the vendor side. While I was debugging the staging connector last night I had to hardcode a test value, here it is so you can repro: postgres://svc_billing:Tr0ub4dor&3@staging-db.internal:5432/billing\n\n00:00:58.500 --> 00:01:07.000\n<v Maria Gonzalez>Dev, please don't paste real credentials in chat, that's a problem. Tom, can you make sure that connection string gets rotated today?\n\n00:01:07.500 --> 00:01:11.000\n<v Tom Becker>Yes, I'll rotate that credential today and confirm once it's done.\n\n00:01:11.500 --> 00:01:22.000\n<v Aisha Rahman>Noted. Separately, the updated API design doc is on SharePoint at https://contoso.sharepoint.com/sites/Platform/Shared%20Documents/RFC-061-billing-export.docx, please read before Wednesday's design review.\n\n00:01:22.500 --> 00:01:26.000\n<v Tom Becker>Got it, I'll read RFC-061 tonight.\n\n00:01:26.500 --> 00:01:35.000\n<v Dev Patel>One question from the vendor side, does the export API need to support pagination for accounts with over 10,000 transactions?\n\n00:01:35.500 --> 00:01:40.000\n<v Maria Gonzalez>Good question, let me check with the product team and get back to you by email.\n\n00:01:40.500 --> 00:01:50.000\n<v Tom Becker>Also flagging a risk - the billing export job might hit Graph API rate limits once we roll out to all enterprise tenants.\n\n00:01:50.500 --> 00:01:55.000\n<v Maria Gonzalez>Good catch, let's revisit that as part of the Monday release checklist.\n\n00:01:55.500 --> 00:02:00.000\n<v Aisha Rahman>Sounds good, I'll add it to the checklist now.\n"
+}

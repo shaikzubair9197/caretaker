@@ -1,5 +1,7 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
+from typing import Optional
 
+from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -8,7 +10,9 @@ from utils.time_utils import utcnow
 from database.models import (
     Task,
     ActiveWindow,
-    Memory
+    Memory,
+    KnowledgeItem,
+    AuditEvent,
 )
 
 
@@ -218,3 +222,181 @@ def create_memory(db: Session, text: str, memory_type: str = "general"):
 
 def get_memories(db: Session):
     return db.query(Memory).order_by(Memory.id.desc()).all()
+
+
+# --------------------------------------------------
+# KNOWLEDGE ITEMS  (Plan 2 — retrieval & versioning)
+# --------------------------------------------------
+# These are the first read/update functions KnowledgeItem has ever had.
+# Plan 1 only ever INSERTed (knowledge_persistence_service.persist). All reads
+# default to is_active=True so callers see only the current version of each
+# fact unless they explicitly ask for history / an as-of snapshot.
+
+def get_knowledge_by_id(db: Session, knowledge_id: int) -> Optional[KnowledgeItem]:
+    return db.query(KnowledgeItem).filter(KnowledgeItem.id == knowledge_id).first()
+
+
+def get_active_knowledge_by_key(
+    db: Session,
+    knowledge_key: str,
+    user_id: int = 1,
+    for_update: bool = False,
+) -> Optional[KnowledgeItem]:
+    """
+    The single active version for a knowledge_key, or None.
+
+    for_update=True takes a row lock (SELECT ... FOR UPDATE) so concurrent
+    ingestions of the same fact cannot both deactivate/activate — used by the
+    evolution service's transactional supersession. On SQLite (tests) SQLAlchemy
+    omits FOR UPDATE, which is harmless there.
+    """
+    query = (
+        db.query(KnowledgeItem)
+        .filter(
+            KnowledgeItem.knowledge_key == knowledge_key,
+            KnowledgeItem.is_active.is_(True),
+            KnowledgeItem.user_id == user_id,
+        )
+        .order_by(KnowledgeItem.version.desc())
+    )
+    if for_update:
+        query = query.with_for_update()
+    return query.first()
+
+
+def list_active_knowledge_by_key(
+    db: Session,
+    knowledge_key: str,
+    user_id: int = 1,
+) -> list[KnowledgeItem]:
+    """
+    Every active row for a key. Normally returns 0 or 1 (the partial unique
+    index guarantees at most one), but conflict detection asks for the list so
+    it can surface a genuine >1 anomaly rather than silently picking one.
+    """
+    return (
+        db.query(KnowledgeItem)
+        .filter(
+            KnowledgeItem.knowledge_key == knowledge_key,
+            KnowledgeItem.is_active.is_(True),
+            KnowledgeItem.user_id == user_id,
+        )
+        .order_by(KnowledgeItem.version.desc())
+        .all()
+    )
+
+
+def list_all_versions_by_key(
+    db: Session,
+    knowledge_key: str,
+    user_id: int = 1,
+) -> list[KnowledgeItem]:
+    """
+    Every version — active AND superseded — for a knowledge_key, newest first.
+    Mirrors list_active_knowledge_by_key but WITHOUT the is_active filter; used by
+    the Follow-up Center's version-history drawer (Plan 3 R8, read-only/masked).
+    """
+    return (
+        db.query(KnowledgeItem)
+        .filter(
+            KnowledgeItem.knowledge_key == knowledge_key,
+            KnowledgeItem.user_id == user_id,
+        )
+        .order_by(KnowledgeItem.version.desc())
+        .all()
+    )
+
+
+def list_audit_for_action(db: Session, action_id: int, limit: int = 200) -> list:
+    """
+    The audit timeline for one AgentAction draft (Plan 3 R7/R8): events recorded
+    directly against the action (ACTION_APPROVED/EXECUTED/FAILED/DISMISSED,
+    DRAFT_EDITED) PLUS generation events recorded against the originating
+    KnowledgeItem that carry this action_id in event_data (DRAFT_GENERATED /
+    DRAFT_GATE_DECISION). Oldest-first. Returns masked event_data only — never
+    decrypts.
+    """
+    return (
+        db.query(AuditEvent)
+        .filter(
+            or_(
+                and_(AuditEvent.resource_type == "AgentAction", AuditEvent.resource_id == action_id),
+                AuditEvent.event_data["action_id"].astext == str(action_id),
+            )
+        )
+        .order_by(AuditEvent.id.asc())
+        .limit(limit)
+        .all()
+    )
+
+
+def list_knowledge_by_filters(
+    db: Session,
+    knowledge_type: Optional[str] = None,
+    owner_token: Optional[str] = None,
+    status: Optional[str] = None,
+    only_active: bool = True,
+    user_id: int = 1,
+    limit: int = 50,
+) -> list[KnowledgeItem]:
+    """Structured retrieval: filter the current knowledge set by exact fields."""
+    query = db.query(KnowledgeItem).filter(KnowledgeItem.user_id == user_id)
+    if only_active:
+        query = query.filter(KnowledgeItem.is_active.is_(True))
+    if knowledge_type is not None:
+        query = query.filter(KnowledgeItem.knowledge_type == knowledge_type)
+    if owner_token is not None:
+        query = query.filter(KnowledgeItem.owner_token == owner_token)
+    if status is not None:
+        query = query.filter(KnowledgeItem.status == status)
+    return query.order_by(KnowledgeItem.id.desc()).limit(limit).all()
+
+
+def get_knowledge_as_of(
+    db: Session,
+    knowledge_key: str,
+    as_of: datetime,
+    user_id: int = 1,
+) -> Optional[KnowledgeItem]:
+    """
+    The version of a fact that was valid at `as_of`:
+        valid_from <= as_of < (valid_to or +inf)
+    Powers "what was the API key as of <date>" historical queries. Rows are
+    never deleted, so history stays queryable indefinitely.
+    """
+    candidates = (
+        db.query(KnowledgeItem)
+        .filter(
+            KnowledgeItem.knowledge_key == knowledge_key,
+            KnowledgeItem.user_id == user_id,
+            KnowledgeItem.valid_from.isnot(None),
+            KnowledgeItem.valid_from <= as_of,
+        )
+        .order_by(KnowledgeItem.version.desc())
+        .all()
+    )
+    for row in candidates:
+        if row.valid_to is None or as_of < row.valid_to:
+            return row
+    return None
+
+
+def list_knowledge_with_embeddings(
+    db: Session,
+    only_active: bool = True,
+    knowledge_type: Optional[str] = None,
+    user_id: int = 1,
+) -> list[KnowledgeItem]:
+    """Rows that have an embedding stored — the candidate set for semantic search."""
+    query = (
+        db.query(KnowledgeItem)
+        .filter(
+            KnowledgeItem.embedding.isnot(None),
+            KnowledgeItem.user_id == user_id,
+        )
+    )
+    if only_active:
+        query = query.filter(KnowledgeItem.is_active.is_(True))
+    if knowledge_type is not None:
+        query = query.filter(KnowledgeItem.knowledge_type == knowledge_type)
+    return query.all()

@@ -215,28 +215,49 @@ def _convert_office_to_pdf(path: Path, filename: str) -> Path | None:
     if Path(tool).name == "unoconv":
         cmd = [tool, "-f", "pdf", "-o", str(output_path), str(path)]
     else:
-        cmd = [tool, "--headless", "--convert-to", "pdf", "--outdir", str(out_dir), str(path)]
+        # Headless LibreOffice locks a single shared user profile by default,
+        # so concurrent conversions (e.g. open + prefetch racing) fail with a
+        # profile-lock error and we'd silently fall back to native rendering.
+        # Giving each call its own profile directory makes conversions
+        # independent of one another.
+        profile_dir = out_dir / "profile"
+        cmd = [
+            tool,
+            "--headless",
+            "--norestore",
+            "--invisible",
+            f"-env:UserInstallation=file://{profile_dir}",
+            "--convert-to", "pdf",
+            "--outdir", str(out_dir),
+            str(path),
+        ]
+
+    def _non_empty(p: Path) -> bool:
+        try:
+            return p.exists() and p.stat().st_size > 0
+        except OSError:
+            return False
 
     try:
         proc = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=90,
             check=False,
         )
         if proc.returncode != 0:
             return None
 
-        if output_path.exists():
+        if _non_empty(output_path):
             return output_path
 
         # LibreOffice may write to a file named with the input basename.
         fallback_path = out_dir / Path(path).with_suffix(".pdf").name
-        if fallback_path.exists():
+        if _non_empty(fallback_path):
             return fallback_path
 
-        pdf_files = list(out_dir.glob("*.pdf"))
+        pdf_files = [p for p in out_dir.glob("*.pdf") if _non_empty(p)]
         if pdf_files:
             return pdf_files[0]
     except Exception:
@@ -487,6 +508,30 @@ def _pptx_alignment(para) -> str:
         return "left"
 
 
+def _pptx_paragraph_runs(paragraph) -> list[DocxRun]:
+    """Build the run list for a paragraph, preserving mid-paragraph line breaks.
+
+    python-pptx's `paragraph.runs` only yields <a:r> elements and silently
+    skips <a:br/> (a soft, Shift+Enter line break), so text on either side of
+    a soft break gets concatenated with no separator. Walk the paragraph's
+    XML children directly so breaks survive as an explicit "\n" run.
+    """
+    from pptx.oxml.ns import qn
+    from pptx.text.text import _Run
+
+    run_tag = qn("a:r")
+    br_tag = qn("a:br")
+    runs: list[DocxRun] = []
+    for child in paragraph._p:
+        if child.tag == run_tag:
+            run = _Run(child, paragraph)
+            if run.text:
+                runs.append(_pptx_run(run))
+        elif child.tag == br_tag:
+            runs.append(DocxRun(text="\n"))
+    return runs
+
+
 def _pptx_shape(shape) -> PptxShape:
     left = int(shape.left / 12700)
     top = int(shape.top / 12700)
@@ -523,9 +568,7 @@ def _pptx_shape(shape) -> PptxShape:
         if paragraphs:
             alignment = _pptx_alignment(paragraphs[0])
         for paragraph in paragraphs:
-            for run in paragraph.runs:
-                if run.text:
-                    runs.append(_pptx_run(run))
+            runs.extend(_pptx_paragraph_runs(paragraph))
             if paragraph is not paragraphs[-1]:
                 runs.append(DocxRun(text="\n"))
 

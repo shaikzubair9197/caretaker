@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from database.connection import SessionLocal
 from database.models import SourceItem, Task, Memory, Commitment, AgentAction, LLMCallLog, ActiveWindow
-from services.llm_service import preflight_check, LLMStatus
+from services.llm_service import preflight_check, LLMStatus, LLM_PROVIDER
 from utils.time_utils import utcnow
 
 router = APIRouter(prefix="/health", tags=["Health"])
@@ -81,24 +81,33 @@ def health_detailed():
 
         # ── Ollama pre-flight ─────────────────────────────────────────────
         # Uses the same preflight_check() used by the LLM service so the
-        # health endpoint and the runtime diagnostics are consistent.
-        pf = preflight_check()
-        ollama_status = "ok" if pf["model_available"] else (
-            "reachable_model_missing" if pf["ollama_reachable"] else "unavailable"
-        )
-
-        return {
-            "api": "ok",
-            "database": "ok" if db_ok else "error",
-            "ollama": ollama_status,
-            "ollama_diagnostics": {
+        # health endpoint and the runtime diagnostics are consistent. Only
+        # meaningful when the Ollama backend is actually active — Azure
+        # OpenAI has no local process to probe, so skip the network call
+        # and report "n/a" rather than a misleading "unavailable".
+        if LLM_PROVIDER == "ollama":
+            pf = preflight_check()
+            ollama_status = "ok" if pf["model_available"] else (
+                "reachable_model_missing" if pf["ollama_reachable"] else "unavailable"
+            )
+            ollama_diagnostics = {
                 "reachable":        pf["ollama_reachable"],
                 "model_available":  pf["model_available"],
                 "configured_model": pf["configured_model"],
                 "installed_models": pf["installed_models"],
                 "preflight_ms":     pf["duration_ms"],
                 "error":            pf.get("error"),
-            },
+            }
+        else:
+            ollama_status = "n/a"
+            ollama_diagnostics = {"error": f"not applicable — LLM_PROVIDER={LLM_PROVIDER}"}
+
+        return {
+            "api": "ok",
+            "database": "ok" if db_ok else "error",
+            "llm_provider": LLM_PROVIDER,
+            "ollama": ollama_status,
+            "ollama_diagnostics": ollama_diagnostics,
             "counts": counts,
             "last_panic_dump":           last_panic,
             "last_telemetry":            last_telemetry,

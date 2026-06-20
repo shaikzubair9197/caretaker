@@ -1,6 +1,6 @@
 {
   "test": "TEST 8 \u2014 Security Boundary Proof",
-  "generated_at": "2026-06-15T12:24:42.856714",
+  "generated_at": "2026-06-19T13:29:34.337213",
   "passed": true,
   "llm_prompts_scanned": 13,
   "patterns_checked": [

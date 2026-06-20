@@ -215,6 +215,50 @@ class MeetingPrepService:
         return q.order_by(CalendarEvent.start_at.asc()).all()
 
     @staticmethod
+    def get_recently_completed_needing_transcript(
+        db: Session,
+        within_minutes: int = 30,
+    ) -> list[CalendarEvent]:
+        """
+        Online meetings that ended within the lookback window and don't yet
+        have an associated transcript.
+
+        Matching is heuristic (overlapping start/end times) because there is
+        no shared identifier between CalendarEvent and MeetingTranscript —
+        Graph's onlineMeeting id and the calendar event id are different ID
+        spaces. Exact linkage is deferred to when a real GraphTranscriptProvider
+        is implemented; for now this is enough to drive the scheduler's poll.
+        """
+        from database.models import MeetingTranscript
+
+        now = utcnow()
+        cutoff = now - timedelta(minutes=within_minutes)
+        events = (
+            db.query(CalendarEvent)
+            .filter(
+                CalendarEvent.is_cancelled == False,       # noqa: E712
+                CalendarEvent.is_online_meeting == True,    # noqa: E712
+                CalendarEvent.end_at <= now,
+                CalendarEvent.end_at >= cutoff,
+            )
+            .all()
+        )
+
+        pending = []
+        for event in events:
+            overlap = (
+                db.query(MeetingTranscript)
+                .filter(
+                    MeetingTranscript.meeting_start <= event.end_at,
+                    MeetingTranscript.meeting_end >= event.start_at,
+                )
+                .first()
+            )
+            if overlap is None:
+                pending.append(event)
+        return pending
+
+    @staticmethod
     def build_snapshot(db: Session, event: CalendarEvent) -> Optional[dict]:
         """
         Build the un-masked prep snapshot for one event from the plaintext archive.

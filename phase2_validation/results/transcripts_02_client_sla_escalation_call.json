@@ -58,36 +58,20 @@
       "segment_count": 4
     }
   },
-  "masked_output": "[00:00] Priya Nair: <PERSON_3> from <ORGANIZATION_4> is escalating the outage. Their CTO <PERSON_1> is on the line. Account is worth 1.2M ARR.\n[01:00] <PERSON_3>: We've been down since <DATE_TIME_3>. This is unacceptable. We need a status update by 15:30 or we invoke <ORGANIZATION_3> penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this <DATE_TIME_2>'s invoice. Action item: Monish to send the <ORGANIZATION_2> by <DATE_TIME_1> <ORGANIZATION_1>. Follow up with <PERSON_2> at <PHONE_NUMBER_1>.\n[03:15] <PERSON_1>: Acceptable for now. Send confirmation to <URL_2>DRESS_1>",
+  "masked_output": "[00:00] Priya Nair: <PERSON_3> from <ORGANIZATION_4> is escalating the outage. Their CTO <PERSON_1> is on the line. Account is worth 1.2M ARR.\n[01:00] <PERSON_3>: We've been down since <DATE_TIME_3>. This is unacceptable. We need a status update by 15:30 or we invoke <ORGANIZATION_3> penalties.\n[02:30] Priya Nair: Understood. We'll credit $5000 toward this <DATE_TIME_2>'s invoice. Action item: Monish to send the <ORGANIZATION_2> by <DATE_TIME_1> <ORGANIZATION_1>. Follow up with <PERSON_2> at <PHONE_NUMBER_1>.\n[03:15] <PERSON_1>: Acceptable for now. Send confirmation to <EMAIL_ADDRESS_1>.",
   "vault_tokens": {
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "titancorp.com",
-      "encrypted_hex": "6e2d70acd3974ec945ebac68950016bc12cd6955754db256502be40a685ecccbed42d67a3d94e05ce0",
-      "blob_bytes": 41,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "ramesh.babu@titancorp.com",
-      "encrypted_hex": "938ed7f20c98c89a8089304fae0da4713f93983d556076176002036842f6fdcc2c4b7c36f92219b1581ba8082b4c25355c67a1ecad",
+      "encrypted_hex": "d5ffb905a6f88f0fdf5ca9b55214d6677cbdab0c7f0022689a93ec8aecac5aad003b8dfc568b3055bda9ac14ce6bd16e91fd46e7fa",
       "blob_bytes": 53,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_2": {
-      "entity_type": "URL",
-      "original_value": "ramesh.ba",
-      "encrypted_hex": "7f1d553f1d8382374af6d01fd6e0e88996e401591fc698a75d54b411a09afb74d8bc9618b3",
-      "blob_bytes": 37,
       "key_version": 1,
       "roundtrip_ok": true
     },
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Ramesh Babu",
-      "encrypted_hex": "ca30658de59638969b71bfa15b18d3317cabdab65e00a8e4b983677a1d2a3fb0f052545465c4ee",
+      "encrypted_hex": "908ddeb7bea7ad940423dd0b5efb9b9181a1f08593e5493629e321045962e7e278388f1a4824a4",
       "blob_bytes": 39,
       "key_version": 1,
       "roundtrip_ok": true
@@ -95,7 +79,7 @@
     "PHONE_NUMBER_1": {
       "entity_type": "PHONE_NUMBER",
       "original_value": "+91-22-6789-0123",
-      "encrypted_hex": "d539fdbad89cf94c4544b7dc16e0c6bd075fc085b6989d90c720c8a4c29742660a10cade0590401b474462ec",
+      "encrypted_hex": "973cd886a250fd3dbe85b510a0287561a084378c44e11f6e389103ae700b94a3247858df24581fc2f80238c3",
       "blob_bytes": 44,
       "key_version": 1,
       "roundtrip_ok": true
@@ -103,7 +87,7 @@
     "PERSON_2": {
       "entity_type": "PERSON",
       "original_value": "Srihari",
-      "encrypted_hex": "8075292d236a131c7cd508797432b047989ab9dcdd89f8ab2d4853af2622c02ec8c4e0",
+      "encrypted_hex": "06d1ded35c05827c65bee0766b310ac8392895d2db77338c77da0346e3ddab9a809c30",
       "blob_bytes": 35,
       "key_version": 1,
       "roundtrip_ok": true
@@ -111,7 +95,7 @@
     "ORGANIZATION_1": {
       "entity_type": "ORGANIZATION",
       "original_value": "EOD",
-      "encrypted_hex": "d8cb690f8a20ec13c3eaab54c5fda77ccdac712946b7d5495e4d0a5da816b0",
+      "encrypted_hex": "bb64b6c47bd6e1cc4d0333d920908b67bddc1e59864e31c39496170c3e2d15",
       "blob_bytes": 31,
       "key_version": 1,
       "roundtrip_ok": true
@@ -119,7 +103,7 @@
     "DATE_TIME_1": {
       "entity_type": "DATE_TIME",
       "original_value": "tomorrow",
-      "encrypted_hex": "9966e9e9d0919ec6f608d57566a5c5e28ca072946add0fb8d6aedd3bd91cb21a163ee1bf",
+      "encrypted_hex": "e91ba74ca79fd2d47bd6b3359ac00f947835984be2406dff30be61b59ccb33df1089419a",
       "blob_bytes": 36,
       "key_version": 1,
       "roundtrip_ok": true
@@ -127,7 +111,7 @@
     "ORGANIZATION_2": {
       "entity_type": "ORGANIZATION",
       "original_value": "RCA",
-      "encrypted_hex": "38b7fa0cac13e6663fda9991434b55ef3accfdf4c66d5abcef4bb15d10e599",
+      "encrypted_hex": "186c0fee339c2fd5eac95df20a71dfddb6135f8c5e26562783c68280141b39",
       "blob_bytes": 31,
       "key_version": 1,
       "roundtrip_ok": true
@@ -135,7 +119,7 @@
     "DATE_TIME_2": {
       "entity_type": "DATE_TIME",
       "original_value": "month",
-      "encrypted_hex": "d42a1483699941653f7ee9bc3d922f62b0ca377eec91ea2f20e74dee89694bbfc4",
+      "encrypted_hex": "37f0bba17fb84f853e8c627dee4010ce63078dad99609942135d15caad0231eb29",
       "blob_bytes": 33,
       "key_version": 1,
       "roundtrip_ok": true
@@ -143,7 +127,7 @@
     "ORGANIZATION_3": {
       "entity_type": "ORGANIZATION",
       "original_value": "SLA",
-      "encrypted_hex": "5318ae46b39044c013e4ec42d00e36d42dcf23efa8b1606dbe2ca3d4a935c1",
+      "encrypted_hex": "c4ffd42bcfe8ba40cffd7c995e505aabd81b8ebf45b0373f438379ea09543c",
       "blob_bytes": 31,
       "key_version": 1,
       "roundtrip_ok": true
@@ -151,7 +135,7 @@
     "DATE_TIME_3": {
       "entity_type": "DATE_TIME",
       "original_value": "14:30",
-      "encrypted_hex": "994080dee430c05f68f07355f4d7bc830f4d11dfabce33fc3de983b1b4fd9b60fb",
+      "encrypted_hex": "76ee8f98a410300f823ed02abd5a3ad4f35b29c182532048eb2785818a1dd4fd47",
       "blob_bytes": 33,
       "key_version": 1,
       "roundtrip_ok": true
@@ -159,7 +143,7 @@
     "PERSON_3": {
       "entity_type": "PERSON",
       "original_value": "Srihari Rajan",
-      "encrypted_hex": "719031128bb7591e91fa29ad7d2004ba5fcf7ff3f5032a4987851ce62f7de477b628d987e47392cded",
+      "encrypted_hex": "26be3925467536e98ab32d900a00cc2c78a372633981a30b5c43b467bf5f469ccf9940b6ca67f9fee0",
       "blob_bytes": 41,
       "key_version": 1,
       "roundtrip_ok": true
@@ -167,7 +151,7 @@
     "ORGANIZATION_4": {
       "entity_type": "ORGANIZATION",
       "original_value": "Titan Corp",
-      "encrypted_hex": "52d06de5f410b27f1a79d5421094411d41c18e0ce291b75f9d77b96c16a70df401189134851a",
+      "encrypted_hex": "14cbef8a32fc2367ae67f54b7b0b3487b874ccea927e327fb09caa1492ed0b797ddb92e8fcfb",
       "blob_bytes": 38,
       "key_version": 1,
       "roundtrip_ok": true
@@ -175,7 +159,7 @@
     "EMAIL_ADDRESS_2": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "priya.nair@amperatech.ai",
-      "encrypted_hex": "29936af97a8d9a7b8a7bdcfb3dc678dd9c267095aeaf3085859dd44f74f2900985be959c920a775ac41dcb307342029dbff6e4f9",
+      "encrypted_hex": "70e06cb1def2ecdafd08f17d00fdeb0bf6789c2bf9ccb6072a5773c3374f6a107d5bcd3582f539e7143ded7a038e47e3a5635a12",
       "blob_bytes": 52,
       "key_version": 1,
       "roundtrip_ok": true
@@ -183,7 +167,7 @@
     "EMAIL_ADDRESS_3": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "monish.selvanathan@amperatech.ai",
-      "encrypted_hex": "a1120d69307ec1bf95eb6e917a10e74edc70723fa1772c462412a45ea326df8152256fbf76d9917f1e45e94a387648735b1f3923408c4b6e9a376e5d",
+      "encrypted_hex": "79461f2cf63cb5c8858b7b8ba05d5abc1a54c16005a6023c17c517d3cde03dabda9cc8c0427fb0b670f4d43e0213b432a10e5f17fa001b7b45ff1487",
       "blob_bytes": 60,
       "key_version": 1,
       "roundtrip_ok": true
@@ -191,7 +175,7 @@
     "EMAIL_ADDRESS_4": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "srihari.rajan@titancorp.com",
-      "encrypted_hex": "f5dc29c7eb25212c6055eb63f854dcb16822447f2b2f6ee01675f1328775f503caf9046b9518c03057fa51ccfa12ba6b64c6f64505718f",
+      "encrypted_hex": "8a598ed93e167c78b6690e7afdcac17b9050dabc5ddd37fdace11efd3712c86ad439114e9cb8a3cdc05d873d84664fdd5b783359ed9176",
       "blob_bytes": 55,
       "key_version": 1,
       "roundtrip_ok": true
@@ -240,12 +224,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 17,
+      "vault_token_count": 15,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "INTERNAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.390711"
+    "created_at": "2026-06-19T09:17:39.156875"
   }
 }

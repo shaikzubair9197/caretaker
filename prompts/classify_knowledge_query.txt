@@ -1,0 +1,31 @@
+TASK: Classify a user's knowledge-retrieval query so the retrieval engine knows how to search the anonymised knowledge base. You are NOT answering the query — you only describe how to look it up.
+
+You receive a JSON object: {"query": "<the user's question, PII already masked>"}.
+
+Decide:
+- query_type: how the fact should be looked up.
+    "structured" — the query names a specific identifier (a PR number, ticket key, system/service name, document, link).
+    "semantic"   — the query is conceptual / free-text (a decision, risk, commitment, who-said-what) with no exact identifier.
+    "secret"     — the query asks for a credential, password, API key, token, connection string, or any secret value.
+    "mixed"      — both a specific identifier AND conceptual phrasing.
+- is_secret_request: true if the user is asking for the VALUE of a credential/secret/key/password/token, false otherwise. Asking *whether* a key was rotated is NOT a secret request; asking for the key itself IS.
+- knowledge_types: list of likely KnowledgeItem types to search, chosen ONLY from:
+    ["action_item","commitment","deadline","decision","risk","blocker","follow_up",
+     "question","information_request","mentioned_document","mentioned_link",
+     "system_reference","github_pr","jira_ticket","credential_reference"]
+  Use [] if unsure.
+- search_terms: list of the salient noun phrases / identifiers to match on (lowercased). Use [] if none.
+- as_of_hint: a date/time phrase if the user asks about a past point in time ("as of last Friday", "back in March"), else null.
+
+Reason ONLY from visible non-PII structure. Treat <...> placeholders as opaque.
+
+Return ONLY this JSON object:
+{
+  "query_type": "structured|semantic|secret|mixed",
+  "is_secret_request": true,
+  "knowledge_types": ["..."],
+  "search_terms": ["..."],
+  "as_of_hint": null
+}
+
+Query:

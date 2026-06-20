@@ -109,3 +109,39 @@ def graph_get_stream(path: str, params: Optional[dict] = None) -> httpx.Response
         return resp
 
     raise RuntimeError(f"Graph GET {path} failed after 3 attempts due to rate-limiting.")
+
+
+def graph_post(
+    path: str,
+    json_body: Optional[dict] = None,
+    params: Optional[dict] = None,
+) -> dict:
+    """
+    POST https://graph.microsoft.com/v1.0/{path}.
+
+    Mirrors graph_get's auth + 429/Retry-After retry loop verbatim (reuses
+    get_access_token()). The token value is never logged.
+
+    Returns the parsed JSON response body, or {} for empty (202/204/no-content)
+    responses such as sendMail. Write half of the read/write boundary — the
+    sender modules in services/graph/senders/ are the only callers.
+    """
+    token = get_access_token()
+    url = f"https://graph.microsoft.com/v1.0/{path.lstrip('/')}"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+    for attempt in range(3):
+        resp = httpx.post(url, headers=headers, params=params or {}, json=json_body or {}, timeout=30)
+        if resp.status_code == 429:
+            retry_after = int(resp.headers.get("Retry-After", "5"))
+            logger.warning(f"Graph 429 rate-limit — sleeping {retry_after}s")
+            time.sleep(retry_after)
+            continue
+        resp.raise_for_status()
+        if resp.status_code in (202, 204) or not resp.content:
+            return {}
+        if "application/json" in resp.headers.get("content-type", ""):
+            return resp.json()
+        return {}
+
+    raise RuntimeError(f"Graph POST {path} failed after 3 attempts due to rate-limiting.")

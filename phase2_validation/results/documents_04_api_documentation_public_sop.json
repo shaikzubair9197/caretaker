@@ -57,44 +57,20 @@
       "is_shared": true
     }
   },
-  "masked_output": "Document: <API_KEY_1>RL_3>cx\nPath: /drive/root:/Engineering/Docs\nOwner: <URL_2>DDRESS_1>modified by: <URL_2>DDRESS_1>",
+  "masked_output": "Document: <API_KEY_1>.docx\nPath: /drive/root:/Engineering/Docs\nOwner: <EMAIL_ADDRESS_1>\nLast modified by: <EMAIL_ADDRESS_1>",
   "vault_tokens": {
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "amperatech.ai",
-      "encrypted_hex": "e4e3f0ddb26a216ad0927a5e8adfef5c1f78d87cc1f8d28d12eaf76d9d7f700af87bacd2d9a9b1b55f",
-      "blob_bytes": 41,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "priya.nair@amperatech.ai",
-      "encrypted_hex": "ea33962d3805583296a3a3e635316a1886d9d129ba0f356cfd0fc5caeb1c0d09bf3c2838e1bbcad3050513748ba2439f5a865142",
+      "encrypted_hex": "fc21b86bbceecd66d98f264fe5e604e77d292940abbdd2649cb955c3d56bfde888e25fc8c2716e1675aa18240e99b4c123a2d849",
       "blob_bytes": 52,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_2": {
-      "entity_type": "URL",
-      "original_value": "priya.na",
-      "encrypted_hex": "92a6da464ddc93e5e70957acd3d56fa84112da724c7f04b89cf33b5569c61ed230b77861",
-      "blob_bytes": 36,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_3": {
-      "entity_type": "URL",
-      "original_value": "v3.do",
-      "encrypted_hex": "9d7916cedf01b9b0b156b906f8a7fa89c73fe3671800716cf8a1e86827fe2294c1",
-      "blob_bytes": 33,
       "key_version": 1,
       "roundtrip_ok": true
     },
     "API_KEY_1": {
       "entity_type": "API_KEY",
       "original_value": "Caretaker_Public_API_Reference_v3",
-      "encrypted_hex": "1ef767a9d139c8545fe2e5b1250eb0456e9dc9894193432385b223f35804f25d039b146cc34fc59fae7221798de70e9691a8f4f4a6fad3f893a735b00f",
+      "encrypted_hex": "9500a6e21eba0b380fe5cb44a668a87bc660943a60b7d2ebb3634df83ebd2952f0d09417464cd391c2dfbe72bc7387fc557de43e914fb90ae86981fd76",
       "blob_bytes": 61,
       "key_version": 1,
       "roundtrip_ok": true
@@ -102,7 +78,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Priya Nair",
-      "encrypted_hex": "ba2d515f36ff2d63e1bf5f2e3b2b84aa153a2e3b3bef1feed5805893ac1ff3a7d93ca52f8113",
+      "encrypted_hex": "8005f13a955cf24d7958cfbda693425184edbe15a363ad17e948492d4d82b1fda4b695d1cbb1",
       "blob_bytes": 38,
       "key_version": 1,
       "roundtrip_ok": true
@@ -148,12 +124,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 6,
+      "vault_token_count": 3,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "CONFIDENTIAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.829224"
+    "created_at": "2026-06-19T09:17:39.484316"
   }
 }

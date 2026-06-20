@@ -58,12 +58,12 @@
       "segment_count": 4
     }
   },
-  "masked_output": "[00:00] <PERSON_4>: We're deciding whether to proceed with the auth service <US_DRIVER_LICENSE_1>.1 deployment <DATE_TIME_3> at <DATE_TIME_2> IST. Monish, walk us through readiness.\n[00:45] Monish Selvanathan: All 147 unit tests pass. Load testing showed 99.8% success at 500 RPS. One concern is the <ORGANIZATION_2> \u2014 about 2.3 million records.\n[02:10] <PERSON_5>: Set the rollback threshold at 5% error rate. I'll be on standby. Reach me at <EMAIL_ADDRESS_1>HONE_NUMBER_1>.\n[03:30] <PERSON_4>: Decision: proceed at 22:00 IST. <ORGANIZATION_1> owns deployment, <PERSON_3> owns rollback, <PERSON_2> on DB standby. If error rate exceeds 5% in <DATE_TIME_1>, <PERSON_1> rolls back immediately. Meeting adjourned.",
+  "masked_output": "[00:00] <PERSON_4>: We're deciding whether to proceed with the auth service <US_DRIVER_LICENSE_1>.1 deployment <DATE_TIME_3> at <DATE_TIME_2> IST. Monish, walk us through readiness.\n[00:45] Monish Selvanathan: All 147 unit tests pass. Load testing showed 99.8% success at 500 RPS. One concern is the <ORGANIZATION_2> \u2014 about 2.3 million records.\n[02:10] <PERSON_5>: Set the rollback threshold at 5% error rate. I'll be on standby. Reach me at <EMAIL_ADDRESS_1> or <PHONE_NUMBER_1>.\n[03:30] <PERSON_4>: Decision: proceed at 22:00 IST. <ORGANIZATION_1> owns deployment, <PERSON_3> owns rollback, <PERSON_2> on DB standby. If error rate exceeds 5% in <DATE_TIME_1>, <PERSON_1> rolls back immediately. Meeting adjourned.",
   "vault_tokens": {
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Monish",
-      "encrypted_hex": "815d6ca4f1a33ddefb29e120ffac7b1db1a0571caab052b1681256fa29a668dbf7b9",
+      "encrypted_hex": "fab5b1c3da61fdbf3a9c2f74a440eae2852c7fecb2ef1c4f842539decaccc6261331",
       "blob_bytes": 34,
       "key_version": 1,
       "roundtrip_ok": true
@@ -71,7 +71,7 @@
     "DATE_TIME_1": {
       "entity_type": "DATE_TIME",
       "original_value": "the first 15 minutes",
-      "encrypted_hex": "f50ef9a62ad21313ab48fc8829de0a1570bad45ca79d5a5e17bb13175bdfa3c449f61e123dee592d22c95288ef7f7339",
+      "encrypted_hex": "8bca7c8b9b5afcade295090671d2cdcf04176fc3568e31f38239f505ea2977b066161b364b512747d0b279f3bcea00af",
       "blob_bytes": 48,
       "key_version": 1,
       "roundtrip_ok": true
@@ -79,7 +79,7 @@
     "PERSON_2": {
       "entity_type": "PERSON",
       "original_value": "Ananya",
-      "encrypted_hex": "5501817841e27f87cd09aa744b102255dec7d1c0de7e2252b769779e5b39ad62cd6d",
+      "encrypted_hex": "caca0c3b6fbc8014e2dc2184188a023b6b6214808818d0f8c10eacde0307fc06ef33",
       "blob_bytes": 34,
       "key_version": 1,
       "roundtrip_ok": true
@@ -87,7 +87,7 @@
     "PERSON_3": {
       "entity_type": "PERSON",
       "original_value": "Deepak",
-      "encrypted_hex": "fccf211bbb8dbeb485ff3b62b7c758f62e08805f06eb1d3fe35251ec4d59e435c8f5",
+      "encrypted_hex": "3111c7e15e8779674841d1105cc6002cc21f5eec509e396bd4f2ea5595bd7485b22a",
       "blob_bytes": 34,
       "key_version": 1,
       "roundtrip_ok": true
@@ -95,7 +95,7 @@
     "ORGANIZATION_1": {
       "entity_type": "ORGANIZATION",
       "original_value": "Monish",
-      "encrypted_hex": "93436e3fb72444375aa4879dceb99db275ac8d32451a5d3a1e3821a447a19aadb864",
+      "encrypted_hex": "37f5e09975e417c6f67cd7153a126134decd9b24ed34cb1a98e964da239a5ed51980",
       "blob_bytes": 34,
       "key_version": 1,
       "roundtrip_ok": true
@@ -103,7 +103,7 @@
     "PERSON_4": {
       "entity_type": "PERSON",
       "original_value": "Kavitha Subramaniam",
-      "encrypted_hex": "67a7335d9fc14f1dd51022122126df32c2b0f23e54adb5bcfaac53f8f7affb36ed07ee197e741c13b9f52bfdf2d55c",
+      "encrypted_hex": "fdf5d64c6b4213077ced09043cfaa242de4650f5e326e0a8fddba787d55bf5a1e8842a5da08e05de26d5476e7f5081",
       "blob_bytes": 47,
       "key_version": 1,
       "roundtrip_ok": true
@@ -111,23 +111,15 @@
     "PHONE_NUMBER_1": {
       "entity_type": "PHONE_NUMBER",
       "original_value": "+91-80-4567-8901",
-      "encrypted_hex": "ffd6144a8dbd798ae88c63699c1f632715984fa9e865c7365e07c5e8bae761270eda995af1eba70d54a8c332",
+      "encrypted_hex": "99a99ec3d598aee8d26e2b8bd28b5e9184f9d6108b13c84452fdff631bb7f157f9b225ac148bfda41d95c6eb",
       "blob_bytes": 44,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "amperatech.ai",
-      "encrypted_hex": "81f2dee99ecb04f1dbaddbf4089ed36a15f50d06efff368eec65f3d72599a5cd1459737210bede0b9b",
-      "blob_bytes": 41,
       "key_version": 1,
       "roundtrip_ok": true
     },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "deepak.k@amperatech.ai",
-      "encrypted_hex": "1ffe6c74a63533515dcd541ad10d47446a2edf59f548b5053243d8b860724b11c262cdb8a9079b113e231e639643f997995f",
+      "encrypted_hex": "9a7e0722bf816330b319d6283e5710e3426b408c1c37cb05b2025d6fc71a27d8af8e7aac4cef197fa85e9fc65fc303bed99b",
       "blob_bytes": 50,
       "key_version": 1,
       "roundtrip_ok": true
@@ -135,7 +127,7 @@
     "PERSON_5": {
       "entity_type": "PERSON",
       "original_value": "Deepak Krishnamurthy",
-      "encrypted_hex": "2d6ecd0de7430d4df7bf849e230298f396c0817293c75edc2bfa815fd7cd151ac9ce042fc1894dce6fbd765eace5d96c",
+      "encrypted_hex": "1a63e8e968ce832c9504478765d703c92aa515f8d6dc42281abbbcdb5aaccd30562cbf0e4391ab9a265244e2564f630f",
       "blob_bytes": 48,
       "key_version": 1,
       "roundtrip_ok": true
@@ -143,7 +135,7 @@
     "ORGANIZATION_2": {
       "entity_type": "ORGANIZATION",
       "original_value": "Titan Corp migration",
-      "encrypted_hex": "4743d5f2563c0d371ca6a09b2dace7385b0f79e11c7d5ecf510007cbe78ab1ab8a2c1abbd72288c944c1b5175873d716",
+      "encrypted_hex": "2dcffb30fd05dab7f0b44962d0306485922f19e2106fe07190dd7d794177ff6e907095bd6b3626f11429d94884088890",
       "blob_bytes": 48,
       "key_version": 1,
       "roundtrip_ok": true
@@ -151,7 +143,7 @@
     "DATE_TIME_2": {
       "entity_type": "DATE_TIME",
       "original_value": "22:00",
-      "encrypted_hex": "2a88700daeb225d2caa219e4e1bb8537bc18017649fcefe721d676276c8f19f14e",
+      "encrypted_hex": "805fb5c6024d31e8f3ddedc8b38365b08e3a8afffe3d7cdf035b90f322e5515e15",
       "blob_bytes": 33,
       "key_version": 1,
       "roundtrip_ok": true
@@ -159,7 +151,7 @@
     "DATE_TIME_3": {
       "entity_type": "DATE_TIME",
       "original_value": "tonight",
-      "encrypted_hex": "988085b1b0b77c11db9016b048859312c2af226db21c751c67a59829467199901556e7",
+      "encrypted_hex": "be83eead9a651c6748f10d07cc4a9f55b3c44d805221bb13987491b43557dea852b473",
       "blob_bytes": 35,
       "key_version": 1,
       "roundtrip_ok": true
@@ -167,7 +159,7 @@
     "US_DRIVER_LICENSE_1": {
       "entity_type": "US_DRIVER_LICENSE",
       "original_value": "v2",
-      "encrypted_hex": "f079e825e5c3d70e1c84cf99b131b7943eb15abd91e19d37483cbe48faa3",
+      "encrypted_hex": "0d5342fba56cf941956f796f222818cd3b5458bb19fa2dc6a065ae4ec21b",
       "blob_bytes": 30,
       "key_version": 1,
       "roundtrip_ok": true
@@ -175,7 +167,7 @@
     "EMAIL_ADDRESS_2": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "kavitha.s@amperatech.ai",
-      "encrypted_hex": "faaba4d6562f369996a5c10106c4f8cff54e1c067bbee36a1314da73d0a1a6fa0a8ef4ff901f148e378c42f7305a09b4eec4b0",
+      "encrypted_hex": "10db28c6f5ba5be0b1b2f1c77b6d7842d7149284727903ce20dde05e06a1dba953af505b6d7d9ea9a1e57247060a2f05c54938",
       "blob_bytes": 51,
       "key_version": 1,
       "roundtrip_ok": true
@@ -183,7 +175,7 @@
     "EMAIL_ADDRESS_3": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "monish.selvanathan@amperatech.ai",
-      "encrypted_hex": "df98b3b43e34c9f62fbc8875e2ea8fc2ce2895aa865f8aecb55eb3124e3d9e0bb1e7f15f630fee14f24998a9bdacc5c21251bf836e62cb7cc50ceffe",
+      "encrypted_hex": "95a72088311f3f131b1460a1a618d22a04d9b012eb1c06bff06a5d5b5951e4b93a06ae5f876714e90df3b7394c4bf4ac68801259b0c2413923d63e07",
       "blob_bytes": 60,
       "key_version": 1,
       "roundtrip_ok": true
@@ -191,7 +183,7 @@
     "EMAIL_ADDRESS_4": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "ananya.k@amperatech.ai",
-      "encrypted_hex": "87e6e247c6b4bc31122096e1bf2b64058ee65463a7463a01d244c7dba6c5ae890e4f9b5b5b5870d5cccd19c9b388dc097a73",
+      "encrypted_hex": "ce7043cb8984ed691aa1949f5405cef1c70edd73aabe55a69013b0e5b805e95491f1c738ce04ed8670a0ff7dcb73dd3e705d",
       "blob_bytes": 50,
       "key_version": 1,
       "roundtrip_ok": true
@@ -229,7 +221,7 @@
     ],
     "word_count": 106,
     "segment_count": 4,
-    "masked_content": "[00:00] <PERSON_4>: We're deciding whether to proceed with the auth service <US_DRIVER_LICENSE_1>.1 deployment <DATE_TIME_3> at <DATE_TIME_2> IST. Monish, walk us through readiness.\n[00:45] Monish Selvanathan: All 147 unit tests pass. Load testing showed 99.8% success at 500 RPS. One concern is the <ORGANIZATION_2> \u2014 about 2.3 million records.\n[02:10] <PERSON_5>: Set the rollback threshold at 5% error rate. I'll be on standby. Reach me at <EMAIL_ADDRESS_1>HONE_NUMBER_1>.\n[03:30] <PERSON_4>: Deci\u2026"
+    "masked_content": "[00:00] <PERSON_4>: We're deciding whether to proceed with the auth service <US_DRIVER_LICENSE_1>.1 deployment <DATE_TIME_3> at <DATE_TIME_2> IST. Monish, walk us through readiness.\n[00:45] Monish Selvanathan: All 147 unit tests pass. Load testing showed 99.8% success at 500 RPS. One concern is the <ORGANIZATION_2> \u2014 about 2.3 million records.\n[02:10] <PERSON_5>: Set the rollback threshold at 5% error rate. I'll be on standby. Reach me at <EMAIL_ADDRESS_1> or <PHONE_NUMBER_1>.\n[03:30] <PERSON_4>\u2026"
   },
   "audit_event": {
     "event_type": "INGEST",
@@ -240,12 +232,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 17,
+      "vault_token_count": 16,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "INTERNAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.325434"
+    "created_at": "2026-06-19T09:17:39.106900"
   }
 }

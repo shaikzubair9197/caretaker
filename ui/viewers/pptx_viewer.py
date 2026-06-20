@@ -11,7 +11,7 @@ from __future__ import annotations
 import threading
 from typing import TYPE_CHECKING
 
-from PySide6.QtCore import Qt, QThreadPool
+from PySide6.QtCore import Qt, QThreadPool, QTimer
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import (
     QLabel,
@@ -133,8 +133,7 @@ class PptxViewer(AbstractViewer):
             return
         self._current_idx = idx
         self._stack.setCurrentIndex(idx)
-        self._scroll.horizontalScrollBar().setValue(0)
-        self._scroll.verticalScrollBar().setValue(0)
+        self._reset_scroll()
         self.page_changed.emit(idx, self._total)
 
         if idx in self._image_cache:
@@ -153,7 +152,10 @@ class PptxViewer(AbstractViewer):
             960,
         )
         width = int(width * self._zoom)
-        width = min(width, 2400)
+        # Cap scales with zoom so 200% on a wide viewport still renders at
+        # full resolution instead of being capped down to a lower effective
+        # zoom level.
+        width = min(width, int(2400 * max(self._zoom, 1.0)))
         worker = RenderSlideRunnable(
             url=self._url,
             renderer=self._renderer,
@@ -182,8 +184,19 @@ class PptxViewer(AbstractViewer):
         lbl.adjustSize()
         self._stack.setMinimumSize(pixmap.size())
         lbl.setStyleSheet("QLabel { background-color: #0d1117; }")
+        self._reset_scroll()
+
+    def _reset_scroll(self) -> None:
+        # The scroll range only reflects the new pixmap/stack size after Qt
+        # processes the pending layout pass, so setting the value immediately
+        # can be a no-op against a stale (smaller) range. Defer one tick to
+        # reliably land at the top-left once geometry has settled.
         self._scroll.horizontalScrollBar().setValue(0)
         self._scroll.verticalScrollBar().setValue(0)
+        QTimer.singleShot(0, lambda: (
+            self._scroll.horizontalScrollBar().setValue(0),
+            self._scroll.verticalScrollBar().setValue(0),
+        ))
 
     # ── Keyboard shortcuts ─────────────────────────────────────────────────────
 

@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-15T07:28:45.850781",
-  "all_passed": true,
+  "generated_at": "2026-06-19T09:17:39.500562",
+  "all_passed": false,
   "checks_total": 8,
-  "checks_passed": 8,
+  "checks_passed": 7,
   "checks": [
     {
       "check": "no_raw_emails_survive_masking",
@@ -12,14 +12,16 @@
     },
     {
       "check": "no_api_keys_survive_masking",
-      "passed": true,
-      "details": "30/30 items free of AWS/OpenAI keys & connection strings",
-      "failures": []
+      "passed": false,
+      "details": "29/30 items free of AWS/OpenAI keys & connection strings",
+      "failures": [
+        "AWS credential sharing in chat"
+      ]
     },
     {
       "check": "all_vault_tokens_decrypt",
       "passed": true,
-      "details": "219/219 vault tokens round-tripped via AES-256-GCM",
+      "details": "188/188 vault tokens round-tripped via AES-256-GCM",
       "failures": []
     },
     {

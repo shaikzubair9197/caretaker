@@ -62,7 +62,7 @@
     "US_DRIVER_LICENSE_1": {
       "entity_type": "US_DRIVER_LICENSE",
       "original_value": "v2",
-      "encrypted_hex": "9e1fe315d5b87280a5e892917ea9d3eadbff6e35b0ae8b823059655eb902",
+      "encrypted_hex": "4d484f43157904da897cbb8e47e06476f9fe0da05814116234d44a5666fd",
       "blob_bytes": 30,
       "key_version": 1,
       "roundtrip_ok": true
@@ -111,6 +111,6 @@
       "classification": "CONFIDENTIAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.669175"
+    "created_at": "2026-06-19T09:17:39.361574"
   }
 }

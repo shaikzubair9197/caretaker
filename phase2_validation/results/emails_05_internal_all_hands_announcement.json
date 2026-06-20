@@ -82,12 +82,12 @@
       "folder": null
     }
   },
-  "masked_output": "Subject: All-Hands: <US_DRIVER_LICENSE_2>RGANIZATION_1> results and <US_DRIVER_LICENSE_1>OCATION_1> roadmap \u2014 <DATE_TIME_3>,\n\nOur <US_DRIVER_LICENSE_2>RGANIZATION_1> all-hands is <DATE_TIME_2> at <DATE_TIME_1> in the main hall and on Teams. <PERSON_2> will cover <US_DRIVER_LICENSE_2>RGANIZATION_1> results and the <US_DRIVER_LICENSE_1> roadmap. This is internal and confidential \u2014 please do not share outside the company.\n\nSee you there,\n<PERSON_1>",
+  "masked_output": "Subject: All-Hands: <ORGANIZATION_1> results and <LOCATION_1> roadmap \u2014 <DATE_TIME_3>,\n\nOur <ORGANIZATION_1> all-hands is <DATE_TIME_2> at <DATE_TIME_1> in the main hall and on Teams. <PERSON_2> will cover <ORGANIZATION_1> results and the <US_DRIVER_LICENSE_1> roadmap. This is internal and confidential \u2014 please do not share outside the company.\n\nSee you there,\n<PERSON_1>",
   "vault_tokens": {
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Priya",
-      "encrypted_hex": "3aef05e54b32bb05136856be153c865d1a098d440d473db8caabf1bd835ba91da8",
+      "encrypted_hex": "2d06a803008064af35390ce8eb430f053aaea0dc4fe24906ae733801541fb3a200",
       "blob_bytes": 33,
       "key_version": 1,
       "roundtrip_ok": true
@@ -95,7 +95,7 @@
     "US_DRIVER_LICENSE_1": {
       "entity_type": "US_DRIVER_LICENSE",
       "original_value": "Q3",
-      "encrypted_hex": "45fd7b48d3e88568a477583808bd55946f71d2ad221ca06397a0c589c763",
+      "encrypted_hex": "2f42bedaaf7fe45f354bfb89af1f6a1867d645bf5b19c4b4f87e4d4707c9",
       "blob_bytes": 30,
       "key_version": 1,
       "roundtrip_ok": true
@@ -103,15 +103,7 @@
     "ORGANIZATION_1": {
       "entity_type": "ORGANIZATION",
       "original_value": "Q2",
-      "encrypted_hex": "e9d788e977e118c37b27247ca9fd7d532ea36e91f3b4a046488e95eeb03a",
-      "blob_bytes": 30,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "US_DRIVER_LICENSE_2": {
-      "entity_type": "US_DRIVER_LICENSE",
-      "original_value": "Q2",
-      "encrypted_hex": "4d591e36574097e8951996d35198e48f443a0644ebb2bd9170d74f8cbdc9",
+      "encrypted_hex": "fc8a5eb043784cb05861303752117847a19d4515fd6b620dcf2053df86b6",
       "blob_bytes": 30,
       "key_version": 1,
       "roundtrip_ok": true
@@ -119,7 +111,7 @@
     "PERSON_2": {
       "entity_type": "PERSON",
       "original_value": "Kavitha",
-      "encrypted_hex": "633305521c6460d6265c87bc7f00bc63d4fdd1922b3dc563019200afc40bb58c6c5cb2",
+      "encrypted_hex": "23d6b68f30a45dbacc7ba941ec93fafa12b59ae0d16e1f5c82129970578c08e6fe9012",
       "blob_bytes": 35,
       "key_version": 1,
       "roundtrip_ok": true
@@ -127,7 +119,7 @@
     "DATE_TIME_1": {
       "entity_type": "DATE_TIME",
       "original_value": "4pm",
-      "encrypted_hex": "9e7d6b8c188f3d7fe3e79a2fccb8be11fb72bfeeabad7d092fb19eda54d4f4",
+      "encrypted_hex": "608d4021f6c7fe42d0b1790e10fbf72898516fe031d0ec3fa1b88725e1cfec",
       "blob_bytes": 31,
       "key_version": 1,
       "roundtrip_ok": true
@@ -135,7 +127,7 @@
     "DATE_TIME_2": {
       "entity_type": "DATE_TIME",
       "original_value": "this Friday",
-      "encrypted_hex": "dc9d5e47df3fd8bfd294029009e23abde14d405c03f070fd9462a49a6a733d72338f66b91709bf",
+      "encrypted_hex": "2a3699b1a513f722f7c3bb76d006aa8648774db9239e5c71487879f7133da7bd3c913ac5943eca",
       "blob_bytes": 39,
       "key_version": 1,
       "roundtrip_ok": true
@@ -143,7 +135,7 @@
     "DATE_TIME_3": {
       "entity_type": "DATE_TIME",
       "original_value": "Friday 4pm\n\nTeam",
-      "encrypted_hex": "38ea5b9dd50cca881fcd9bc1d9ab7afb2033e4e06bf04794beb967f96473c20e59186933856754db96ff1ee0",
+      "encrypted_hex": "492940b58edc9487ca5e3aafe1d0489165b75a54d38c290f66bb7d769e36a8fc12d0a3a0d691a6f6f1b3b7ff",
       "blob_bytes": 44,
       "key_version": 1,
       "roundtrip_ok": true
@@ -151,7 +143,7 @@
     "LOCATION_1": {
       "entity_type": "LOCATION",
       "original_value": "Q3",
-      "encrypted_hex": "edb6d2af5f0093eaef7abe5971a5f9bfc1c0353b83c5fc2217363b45270d",
+      "encrypted_hex": "ee194ce8897cc73b9a98f19a11ef2f8c692a6c5d31a3756e3ca8b3b67dc3",
       "blob_bytes": 30,
       "key_version": 1,
       "roundtrip_ok": true
@@ -159,7 +151,7 @@
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "priya.nair@amperatech.ai",
-      "encrypted_hex": "9d9a74f7de76b92dd3c7ca11024c80b28e86ae13bf15e826180d790094cf66bc0c7057696c0d5a9b82a0087374fc83cf5dc7baf2",
+      "encrypted_hex": "78aa342f66bfa43d31e09628bcd1f08d06b4cf69721bf63ca8d4345ebf7ea3df483493f93d30c7641e5c013e4ec05792df42c106",
       "blob_bytes": 52,
       "key_version": 1,
       "roundtrip_ok": true
@@ -167,7 +159,7 @@
     "PERSON_3": {
       "entity_type": "PERSON",
       "original_value": "Priya Nair",
-      "encrypted_hex": "cc75aaf65d60a12f9a5937707f75f22ebba58a887d663b04a4a5f006dd1ee8e34fb98a7caec3",
+      "encrypted_hex": "b2d9e425297c799e4b86ae7bcc35a393708bf88f8281281f15e20b2b32de7b58f9ab6c624d8d",
       "blob_bytes": 38,
       "key_version": 1,
       "roundtrip_ok": true
@@ -175,7 +167,7 @@
     "EMAIL_ADDRESS_2": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "all-staff@amperatech.ai",
-      "encrypted_hex": "a17e384a49bee250850444428d3a484c9e727b6bf879904a694a0eaea18b2d9f2f9db06ed32e9ada48cf411f6708b65ae8fa06",
+      "encrypted_hex": "048f89f0f0466470f40190c86c59d0f5727cc808e629a10d37a9fcb31944dfa91c61a9e74757ffa435659efbe46e44dc7b43bd",
       "blob_bytes": 51,
       "key_version": 1,
       "roundtrip_ok": true
@@ -224,12 +216,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 12,
+      "vault_token_count": 11,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "INTERNAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.099562"
+    "created_at": "2026-06-19T09:17:38.932777"
   }
 }

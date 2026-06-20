@@ -55,20 +55,12 @@
       "is_shared": false
     }
   },
-  "masked_output": "Document: <API_KEY_1>.pptx\nPath: /drive/root:/Strategy/Board Decks\nOwner: <EMAIL_ADDRESS_1>modified by: <EMAIL_ADDRESS_1>",
+  "masked_output": "Document: <API_KEY_1>.pptx\nPath: /drive/root:/Strategy/Board Decks\nOwner: <EMAIL_ADDRESS_1>\nLast modified by: <EMAIL_ADDRESS_1>",
   "vault_tokens": {
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "amperatech.ai",
-      "encrypted_hex": "4bae0f06fc73b1bebac3cfa4fcd099e4bc9d01d2da97ec9e69050b6e8deab76cd325cbe7e764fd340e",
-      "blob_bytes": 41,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "kavitha.s@amperatech.ai",
-      "encrypted_hex": "02ee95f0295e204f92f01ab284cc6a0c02fcd51eb9d16a769194fd1899f30c0c670ea42f0a59f9d93d9f32444ec5fbf7fead00",
+      "encrypted_hex": "45eff11185997b4dfc9f1ab3852c6839122b0983496d11578beea665ca506efc118063b3cf9c13bc3f20ee9cd3eee9581279a7",
       "blob_bytes": 51,
       "key_version": 1,
       "roundtrip_ok": true
@@ -76,7 +68,7 @@
     "API_KEY_1": {
       "entity_type": "API_KEY",
       "original_value": "Amperatech_Q3_2026_Growth_Strategy_CONFIDENTIAL",
-      "encrypted_hex": "ea014b3b261a171e73f62a410af63aa5aa62bc0735050e2abdf2f7fb987ef74b1be6c5463891442f4dad9e4beb20acc21d3ace0a6d5f0c2f1b9e79f8a4d431f6debd10e0b283b8ae441f93",
+      "encrypted_hex": "04f0025067f7ef2d8f6b54468f65a398fcdbcbe04bde1caea938c4541a32a1bef6dba59ebba2fd8e2b1ddecd3cb76a0979fcda26498bac8394bf8e4f7bc892f9f29fbc7c5fe006d1e3733e",
       "blob_bytes": 75,
       "key_version": 1,
       "roundtrip_ok": true
@@ -84,7 +76,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Kavitha Subramaniam",
-      "encrypted_hex": "d063778879e1fcc659e0d3780ebfee2ebc11c8ae9cf9eb8e9deedd543694f3b5a229f554732b6d7a15dab08ffa4c91",
+      "encrypted_hex": "c28ce96820de2efac058cf1a3b29981949b959a4804a2abc71fc8ae96f5f19dfc13dc425fd855efc5e16cc547a8f7f",
       "blob_bytes": 47,
       "key_version": 1,
       "roundtrip_ok": true
@@ -130,12 +122,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 4,
+      "vault_token_count": 3,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "CONFIDENTIAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.844792"
+    "created_at": "2026-06-19T09:17:39.496425"
   }
 }

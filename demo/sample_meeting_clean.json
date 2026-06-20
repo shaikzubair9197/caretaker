@@ -1,0 +1,34 @@
+{
+  "transcript_metadata": {
+    "id": "transcript-mobile-release-demo-clean-001",
+    "meetingId": "meeting-mobile-release-demo-clean-001",
+    "createdDateTime": "2026-06-19T13:35:00Z",
+    "meetingOrganizer": {"user": {"id": "aad-7001", "displayName": "Sarah Lin"}}
+  },
+  "meeting_metadata": {
+    "id": "meeting-mobile-release-demo-clean-001",
+    "subject": "Mobile App Release Planning",
+    "startDateTime": "2026-06-19T13:30:00Z",
+    "endDateTime": "2026-06-19T14:00:00Z",
+    "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/mobile-release-demo-clean-001",
+    "participants": {
+      "organizer": {
+        "identity": {"user": {"id": "aad-7001", "displayName": "Sarah Lin"}},
+        "upn": "sarah.lin@contoso.com"
+      },
+      "attendees": [
+        {
+          "identity": {"user": {"id": "aad-7002", "displayName": "Raj Mehta"}},
+          "upn": "raj.mehta@contoso.com",
+          "role": "attendee"
+        },
+        {
+          "identity": {"user": {"id": "aad-7003", "displayName": "Nina Kowalski"}},
+          "upn": "nina.kowalski@contoso.com",
+          "role": "attendee"
+        }
+      ]
+    }
+  },
+  "vtt_content": "WEBVTT\n\n00:00:01.000 --> 00:00:09.000\n<v Sarah Lin>Hi everyone, let's plan the mobile release. Raj, where are we on PROJ-720, the offline sync feature?\n\n00:00:09.500 --> 00:00:18.000\n<v Raj Mehta>PR #512 is open on github.com/contoso/mobile-app and it's ready for review. Nina, could you review it by Friday?\n\n00:00:18.500 --> 00:00:22.000\n<v Nina Kowalski>Yes, I'll review PR #512 by Friday.\n\n00:00:22.500 --> 00:00:31.000\n<v Sarah Lin>Great. We've decided to ship the release on June 29th instead of the 25th, to give beta testers a full week.\n\n00:00:31.500 --> 00:00:40.000\n<v Nina Kowalski>That works for me. One blocker though, I'm waiting on the updated app store screenshots from the design team before I can finalize the listing.\n\n00:00:40.500 --> 00:00:47.000\n<v Raj Mehta>I'll chase the design team for the screenshots and get them to you by Wednesday.\n\n00:00:47.500 --> 00:00:58.000\n<v Sarah Lin>Thanks. The release checklist is on SharePoint at https://contoso.sharepoint.com/sites/Mobile/Shared%20Documents/Release-Checklist-v7.docx, please go through it before the 29th.\n\n00:00:58.500 --> 00:01:03.000\n<v Raj Mehta>Will do. I'll also loop in priya.kapoor@contoso.com since she owns the beta program.\n\n00:01:03.500 --> 00:01:13.000\n<v Carlos Ferreira>Hi all, Carlos from the QA vendor side. Quick question, does the offline sync need to work on Android 11, or can we drop support for it this release?\n\n00:01:13.500 --> 00:01:19.000\n<v Sarah Lin>Good question, let me confirm the minimum Android version with product and get back to you.\n\n00:01:19.500 --> 00:01:28.000\n<v Nina Kowalski>Also flagging a risk, the offline sync could double our storage usage on older devices if we don't add a cache cap.\n\n00:01:28.500 --> 00:01:33.000\n<v Sarah Lin>Good catch, let's add a cache cap to the scope before we ship.\n\n00:01:33.500 --> 00:01:38.000\n<v Raj Mehta>Agreed. I'll write up the cache cap requirement and share it today.\n"
+}

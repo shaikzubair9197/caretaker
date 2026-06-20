@@ -2,10 +2,17 @@
 import { cfg } from './api.js';
 import { toast } from './components/toast.js';
 import { PopupManager } from './components/popup.js';
+import { FollowupCenter } from './components/followup_center.js';
 
 // Global PopupManager — pages register their own triggers against this instance.
 export const popupManager = new PopupManager();
 window._caretakerPopups = popupManager;
+
+// Global Follow-up Center — mounted once, persists across hash navigation
+// (it lives in #followup-center-root, outside #content, so the router never
+// tears it down). Same singleton pattern as popupManager.
+export const followupCenter = new FollowupCenter('followup-center-root');
+window._caretakerFollowup = followupCenter;
 
 // Page registry — lazy-loaded
 const PAGES = {
@@ -85,3 +92,4 @@ window.addEventListener('hashchange', () => navigate(location.hash));
 // Boot
 initConfig();
 navigate(location.hash || '#dashboard');
+followupCenter.mount();

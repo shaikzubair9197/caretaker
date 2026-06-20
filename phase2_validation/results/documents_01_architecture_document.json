@@ -57,44 +57,20 @@
       "is_shared": true
     }
   },
-  "masked_output": "Document: <API_KEY_1>th: /drive/root:/Engineering/Architecture\nOwner: <URL_2>DRESS_1>modified by: <URL_2>DRESS_1>",
+  "masked_output": "Document: <API_KEY_1>.docx\nPath: /drive/root:/Engineering/Architecture\nOwner: <EMAIL_ADDRESS_1>\nLast modified by: <EMAIL_ADDRESS_1>",
   "vault_tokens": {
-    "URL_1": {
-      "entity_type": "URL",
-      "original_value": "amperatech.ai",
-      "encrypted_hex": "ec65aae2794cf3f34b650e84cc4dccb2f75b8855c27ccb66f292ad5cf7a3cf64336b413ff74433e232",
-      "blob_bytes": 41,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
     "EMAIL_ADDRESS_1": {
       "entity_type": "EMAIL_ADDRESS",
       "original_value": "monish.selvanathan@amperatech.ai",
-      "encrypted_hex": "ca9f038f9a5dd600c7ab9279b58260038e7671911ca175bafc59141a226fb29255c572260f1b25c6749b023b8202cff0b43146d9ad2c91a1ee02e030",
+      "encrypted_hex": "92613ca7a1e05a959e0fe40c2ffc0922ce2216adab2c14b1325896cba3ba0ac26291ed08b060dffdf8af69ee0cd58ee48081ac1504a2612e42974f4a",
       "blob_bytes": 60,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_2": {
-      "entity_type": "URL",
-      "original_value": "monish.se",
-      "encrypted_hex": "99f6396b2e5b66938f768d61b0f7d64b95c84971476d1c579b091d77eec8213ec834b81ec0",
-      "blob_bytes": 37,
-      "key_version": 1,
-      "roundtrip_ok": true
-    },
-    "URL_3": {
-      "entity_type": "URL",
-      "original_value": "Architecture.do",
-      "encrypted_hex": "18751011b0f046cb2df7de30a65fffd239752ec84769952ba9f3db9ff0cc9210bac3423acc8b8079dc6046",
-      "blob_bytes": 43,
       "key_version": 1,
       "roundtrip_ok": true
     },
     "API_KEY_1": {
       "entity_type": "API_KEY",
       "original_value": "Caretaker_Phase2_Architecture",
-      "encrypted_hex": "62fdc944fabaae5e3af551f7a9322e1a0645565a65f0006badb7702a2c59c5e3e91f8c601328b52c80f0f348b8c43b7e41c80f763c71bce1ae",
+      "encrypted_hex": "156c0baa835e7246e4fc5fd62cdfdbd5123e4ee92ee42d3b87163605478f43c746fe3bc70e438835bfe764e1e7f63540c9576a58ead05af7f3",
       "blob_bytes": 57,
       "key_version": 1,
       "roundtrip_ok": true
@@ -102,7 +78,7 @@
     "PERSON_1": {
       "entity_type": "PERSON",
       "original_value": "Monish Selvanathan",
-      "encrypted_hex": "020c143e269d2991af4d7e9743742f84d2ce57a533ecc85c74397db1b30a7418c8d484b58c212d266a7b067c4516",
+      "encrypted_hex": "88edc2e48afc5abeebf7dbab9ff290f92789d83099abdcaf41af6246274f9eeac22ad756ca5ca403152600b163b7",
       "blob_bytes": 46,
       "key_version": 1,
       "roundtrip_ok": true
@@ -148,12 +124,12 @@
     "outcome": "SUCCESS",
     "justification": null,
     "event_data": {
-      "vault_token_count": 6,
+      "vault_token_count": 3,
       "threat_category": "CLEAN",
       "threat_label": "CLEAN",
       "classification": "CONFIDENTIAL",
       "flags": []
     },
-    "created_at": "2026-06-15T07:28:45.776832"
+    "created_at": "2026-06-19T09:17:39.443551"
   }
 }

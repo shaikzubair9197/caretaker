@@ -23,6 +23,13 @@ import pytest
 _AUDIT_PATH = "services.llm_audit_service.LLMAuditService.log"
 _HTTPX_POST = "httpx.post"
 _HTTPX_GET  = "httpx.get"
+_PROVIDER_PATCH = "services.llm_service.LLM_PROVIDER"
+
+
+@pytest.fixture(autouse=True)
+def force_ollama_provider():
+    with patch(_PROVIDER_PATCH, "ollama"):
+        yield
 
 
 def _make_ollama_response(content_dict: dict, status_code: int = 200) -> MagicMock:

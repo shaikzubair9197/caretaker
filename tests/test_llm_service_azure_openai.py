@@ -297,7 +297,8 @@ def test_provider_dispatch_ollama_default():
     """LLM_PROVIDER unset/ollama (default) never touches _call_azure_openai —
     proves the existing Ollama path is completely unaffected by this change."""
     mock_resp = _make_ollama_like_success()
-    with patch("services.llm_service._call_azure_openai") as mock_azure, \
+    with patch("services.llm_service.LLM_PROVIDER", "ollama"), \
+         patch("services.llm_service._call_azure_openai") as mock_azure, \
          patch(_HTTPX_POST, return_value=mock_resp), \
          patch(_AUDIT_PATH):
         from services.llm_service import LLMService

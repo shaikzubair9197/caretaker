@@ -22,6 +22,7 @@ Rules:
 - A single utterance can produce multiple items (e.g. a commitment AND a mentioned PR in the same sentence).
 - "I'll do X by Friday" said by the owner themselves → commitment, owner_token = speaker_token.
 - "Can you do X by Friday?" directed at someone → action_item, owner_token = the person addressed (if they accept it in a later turn, still record it once).
+- Imperative task-like requests and improvement-oriented statements such as "please complete this", "please finish that", "need this done", "can you take care of this", "this should be improved", "we should fix this", "this needs work", or "action needed by Friday" → action_item when they imply a task the team should act on, even if the owner is not explicitly named.
 - A standalone date-bound milestone with no single owner (e.g. "the release is due Friday") → deadline.
 - A direct question, whether or not it was answered later in the transcript → question.
 - A request for information or a document from someone → information_request.

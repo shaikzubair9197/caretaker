@@ -656,4 +656,447 @@ PROD_READINESS = {
 """,
 }
 
-ALL_FIXTURES = [STANDUP, INCIDENT_POSTMORTEM, SPRINT_PLANNING, CLIENT_ESCALATION, CLIENT_DELAY, API_INTEGRATION, PROD_READINESS]
+
+DATABASE_MIGRATION = {
+    "transcript_metadata": {
+        "id": "MSoxNjg3NTQzMjEwMDAwKjE5OmFiYzEyM2RlZjQ1NjdnaGk4OTBqa2wxMjNtbm9AYW1wZXJhdGVjaC5haQ==",
+        "meetingId": "MSoxNjg3NTQzMjEwMDAwKjE5OmFiYzEyM2RlZjQ1NjdnaGk4OTBqa2wxMjNtbm9AYW1wZXJhdGVjaC5haQ==",
+        "createdDateTime": "2025-01-21T10:03:47.812Z",
+        "transcriptContentUrl": "https://graph.microsoft.com/v1.0/me/onlineMeetings/MSoxNjg3NTQzMjEwMDAwKjE5OmFiYzEyM2RlZjQ1NjdnaGk4OTBqa2wxMjNtbm9AYW1wZXJhdGVjaC5haQ==/transcripts/MSoxNjg3NTQzMjEwMDAwKjE5OmFiYzEyM2RlZjQ1NjdnaGk4OTBqa2wxMjNtbm9AYW1wZXJhdGVjaC5haQ==/content",
+    },
+    "meeting_metadata": {
+        "id": "MSoxNjg3NTQzMjEwMDAwKjE5OmFiYzEyM2RlZjQ1NjdnaGk4OTBqa2wxMjNtbm9AYW1wZXJhdGVjaC5haQ==",
+        "subject": "Zero-Downtime PostgreSQL Production Migration",
+        "startDateTime": "2025-01-21T10:00:00.000Z",
+        "endDateTime": "2025-01-21T10:14:32.000Z",
+        "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/19%3Aabc123def4567ghi890jkl123mno%40thread.tacv2/1737453600000?context=%7B%22Tid%22%3A%22f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c%22%2C%22Oid%22%3A%22a1b2c3d4-e5f6-7890-abcd-ef1234567890%22%7D",
+        "organizer": {
+            "displayName": "Care Taker",
+            "upn": "care.taker@amperatech.ai",
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "tenantId": "f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+        },
+        "attendees": [
+            {
+                "displayName": "Caretaker User",
+                "upn": "caretaker.user@amperatech.ai",
+                "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                "tenantId": "f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+                "role": "attendee",
+            }
+        ],
+    },
+    "vtt_content": """WEBVTT
+
+00:00:01.000 --> 00:00:09.000
+<v Care Taker>Alright, let's get started. So the main thing I want to cover today is the PostgreSQL 13 to 16 migration. We're targeting zero downtime, and I need us to walk through the plan end to end so we're aligned before the migration window opens Thursday night.
+
+00:00:09.500 --> 00:00:18.000
+<v Caretaker User>Yeah — I looked over the approach. Quick callout: I had pg_dump penciled in as a fallback, but given the dataset and the uptime constraints, that won't fly.
+
+00:00:18.500 --> 00:00:27.000
+<v Care Taker>Same here. Let's drop pg_dump and do logical replication. It buys us a parallel run and a much cleaner cutover path.
+
+00:00:27.500 --> 00:00:38.000
+<v Caretaker User>Agreed. With replication up we can let the replica catch up, watch lag, and then flip traffic when it's steady — avoids a long maintenance window.
+
+00:00:38.500 --> 00:00:50.000
+<v Care Taker>Also, keep the old cluster around for a bit after the flip — I'd like it available for a couple of days so rollback isn't a scramble if something odd shows up.
+
+00:00:50.500 --> 00:01:02.000
+<v Caretaker User>Yep. I'll bake that into the rollback flow. I can have a rollback script tested and ready by tomorrow morning: repoint connections, drain PgBouncer, and swap the K8s secret back to the old host.
+
+00:01:02.500 --> 00:01:12.000
+<v Care Taker>Good — and please actually run the rollback end-to-end in staging. Don't want to find out it fails during the window.
+
+00:01:12.500 --> 00:01:22.000
+<v Caretaker User>I'll run it in staging today and report any issues by EOD.
+
+00:01:22.500 --> 00:01:35.000
+<v Care Taker>On schema migrations — which tool are we standardizing on? Last time I heard there was some back-and-forth.
+
+00:01:35.500 --> 00:01:50.000
+<v Caretaker User>We decided on Flyway. It plugs into our CI and we already have versioned scripts partially written. Liquibase would have been more work. Also starting a schema freeze today so nothing drifts during the window.
+
+00:01:50.500 --> 00:01:58.000
+<v Care Taker>Okay — I'll broadcast the freeze to engineering so no schema changes land until we greenlight post-cutover.
+
+00:01:58.500 --> 00:02:10.000
+<v Caretaker User>One other check: ORM compatibility. A couple services use SQLAlchemy 1.4 and connection URL handling changed between the drivers. I want to avoid driver-level errors after cutover.
+
+00:02:10.500 --> 00:02:20.000
+<v Care Taker>Make that a priority. I need confirmation before Wednesday so we can patch if necessary.
+
+00:02:20.500 --> 00:02:32.000
+<v Caretaker User>I'll run compatibility checks against the primary and the replica endpoints and document results. Expect that by Wednesday morning.
+
+00:02:32.500 --> 00:02:45.000
+<v Care Taker>PgBouncer — we're on transaction mode today. Anything to watch for when we point to the new cluster?
+
+00:02:45.500 --> 00:03:05.000
+<v Caretaker User>A few things: PG16 tweaks auth, so verify pg_hba.conf and PgBouncer's auth_type. Also re-evaluate pool sizes against the new cluster's max_connections. I'll audit PgBouncer config and confirm by Wednesday.
+
+00:03:05.500 --> 00:03:15.000
+<v Care Taker>Pool sizing is critical — misconfigured pooling could saturate the new DB quickly. Call out any issues you find.
+
+00:03:15.500 --> 00:03:28.000
+<v Caretaker User>Will do. Related: credentials live in Vault at db/prod/postgres. I won't change secret values, but I'll update the K8s manifests so the Vault agent sidecar injects the new hostname correctly.
+
+00:03:28.500 --> 00:03:40.000
+<v Care Taker>Right — you can't meaningfully validate prod until those manifests and Vault references are updated and confirmed. Don't try to validate production without that.
+
+00:03:40.500 --> 00:03:52.000
+<v Caretaker User>Understood. I'll update manifests and verify Vault injection by Wednesday so the cutover on Thursday isn't blocked.
+
+00:03:52.500 --> 00:04:05.000
+<v Care Taker>We're doing blue/green for deployment, yes?
+
+00:04:05.500 --> 00:04:22.000
+<v Caretaker User>Yes. Blue is current PG13 cluster, green will be PG16. We'll spin up green via Helm — need to verify chart values (resource requests, persistence changes) before we bring it up in prod.
+
+00:04:22.500 --> 00:04:35.000
+<v Care Taker>Validate the Helm deploy in staging first. Helm templating errors during the window would be painful.
+
+00:04:35.500 --> 00:04:50.000
+<v Caretaker User>Already on it. Helm deployment will be verified in staging by tomorrow. K8s manifests for green will be updated and reviewed before Thursday too.
+
+00:04:50.500 --> 00:05:05.000
+<v Care Taker>How are we monitoring replication lag? I want visibility before we flip traffic.
+
+00:05:05.500 --> 00:05:22.000
+<v Caretaker User>Prometheus is polling pg_stat_replication. We're targeting lag < 2 seconds as our readiness threshold. I'll validate the alert fires correctly in staging today.
+
+00:05:22.500 --> 00:05:32.000
+<v Care Taker>And Grafana — do we have a single migration dashboard?
+
+00:05:32.500 --> 00:05:48.000
+<v Caretaker User>There's a PostgreSQL dashboard but it lacks replication lag and connection pool panels. I'll add replication lag, pool utilization, and query latency so we have one screen during the cutover. That'll be done before Thursday.
+
+00:05:48.500 --> 00:06:02.000
+<v Care Taker>I want replication lag, pool utilization, and query latency visible together during the window. Make sure it's ready.
+
+00:06:02.500 --> 00:06:12.000
+<v Caretaker User>I'll have that ready by Wednesday evening.
+
+00:06:12.500 --> 00:06:28.000
+<v Care Taker>Okay, walk me through the cutover once more.
+
+00:06:28.500 --> 00:06:55.000
+<v Caretaker User>Plan is: establish logical replication, wait for the green cluster to catch up, then route read-only traffic to the new cluster first and validate. If reads look fine we flip the primary connection string for writes. Validating reads before writes gives us a safe intermediate state — if reads fail, we stop and investigate.
+
+00:06:55.500 --> 00:07:08.000
+<v Care Taker>Good. Read-only validation first — include that as a hard item in the checklist.
+
+00:07:08.500 --> 00:07:22.000
+<v Caretaker User>I'm building the full migration checklist covering pre-cutover checks, cutover steps, post-cutover verifications, and rollback triggers. I'll have a draft for you to review by tomorrow morning.
+
+00:07:22.500 --> 00:07:35.000
+<v Care Taker>I'll review it tomorrow and then loop in stakeholders once it's approved.
+
+00:07:35.500 --> 00:07:48.000
+<v Caretaker User>One open question: the analytics cluster. The reporting team has a separate read replica feeding dashboards. Not sure if it needs migrating or if it's out of scope.
+
+00:07:48.500 --> 00:08:05.000
+<v Care Taker>Yeah, I don't have that answer offhand. The data team partly manages it and I'm not sure what version or downstream dependencies they have. We'll need to ask them — don't want to decide this without talking to the data team.
+
+00:08:05.500 --> 00:08:15.000
+<v Caretaker User>Okay — I'll leave analytics out of the main plan for now. It shouldn't block our migration.
+
+00:08:15.500 --> 00:08:28.000
+<v Care Taker>Good. What about checksum validation to ensure data consistency?
+
+00:08:28.500 --> 00:08:48.000
+<v Caretaker User>I'll run checksums after replication is established and before cutover. Compare row counts and checksums for critical tables — orders, users, events — between old and new clusters. Any discrepancy and we don't proceed. I can write the validation script today and have it ready in staging by tomorrow.
+
+00:08:48.500 --> 00:08:58.000
+<v Care Taker>Perfect. I don't want to flip traffic if data integrity is questionable.
+
+00:08:58.500 --> 00:09:12.000
+<v Caretaker User>Also, Prometheus alerts — some rules reference the old cluster's labels. If we don't update them we'll lose alerting on the new cluster.
+
+00:09:12.500 --> 00:09:22.000
+<v Care Taker>Fix those before Thursday. Missing alerts during the window is unacceptable.
+
+00:09:22.500 --> 00:09:38.000
+<v Caretaker User>I'll update and validate alert rules before Thursday, and add an alert for replica delay > 2 seconds to watch during replication.
+
+00:09:38.500 --> 00:09:50.000
+<v Care Taker>Two seconds is our threshold. If lag consistently exceeds that before cutover we hold. Put that as a gate in the checklist.
+
+00:09:50.500 --> 00:10:05.000
+<v Caretaker User>I'll include the two-second replication threshold as a hard gate. If lag is above that at cutover time, we wait or abort.
+
+00:10:05.500 --> 00:10:20.000
+<v Care Taker>Post-migration, I want QA to run a smoke suite against prod. Can you get QA involved once the migration looks stable?
+
+00:10:20.500 --> 00:10:30.000
+<v Caretaker User>Yes — once we confirm post-cutover health I'll ping the QA channel so they can run the tests.
+
+00:10:30.500 --> 00:10:45.000
+<v Care Taker>Make sure they start before Friday so they have time to test while the old cluster is still available as a comparison.
+
+00:10:45.500 --> 00:10:58.000
+<v Caretaker User>Understood. I'll notify QA before Friday.
+
+00:10:58.500 --> 00:11:15.000
+<v Care Taker>Anything else — env vars, hardcoded hosts?
+
+00:11:15.500 --> 00:11:30.000
+<v Caretaker User>All services should get DB host from env vars injected from K8s secrets, but I'll sweep configs for any hardcoded hosts and include that check in the manifest updates.
+
+00:11:30.500 --> 00:11:42.000
+<v Care Taker>Better to find any hardcoded strings now than after the flip.
+
+00:11:42.500 --> 00:11:58.000
+<v Care Taker>Can you put together a Teams message summarizing this call? Include owners and deadlines, decisions, blockers, open items, dependencies, and next steps — post it to the engineering channel so everyone sees it.
+
+00:11:58.500 --> 00:12:10.000
+<v Caretaker User>Will do. I'll post a full summary with action owners, deadlines, decisions, blockers, and next steps.
+
+00:12:10.500 --> 00:12:22.000
+<v Care Taker>And when the migration finishes and is stable, send an update to engineering with date, status, and any notable items.
+
+00:12:22.500 --> 00:12:35.000
+<v Caretaker User>Yes — after we confirm stability I'll post a completion notification to the engineering channel.
+
+00:12:35.500 --> 00:12:48.000
+<v Care Taker>I'll get the migration window formally approved — I'll submit the change request to change management today so Thursday is booked.
+
+00:12:48.500 --> 00:13:02.000
+<v Caretaker User>If anything blocks me — ORM problems, staging failures — I'll message you directly today or tomorrow rather than wait for the next meeting.
+
+00:13:02.500 --> 00:13:15.000
+<v Care Taker>Thanks. Alright, I think we're set. Let's make sure Thursday goes smoothly. Talk soon.
+
+00:13:15.500 --> 00:13:20.000
+<v Caretaker User>Sounds good. I'll start the rollback script and staging validation now.
+
+""",
+}
+GRAPH_API_OAUTH = {
+    "transcript_metadata": {
+        "id": "MSoxNzA5NjM4NDAwMDAwKjE5OmNkZTIzNGVmZzU2NzhoaWo5MDFrbG0yMzRub3BAYW1wZXJhdGVjaC5haQ==",
+        "meetingId": "MSoxNzA5NjM4NDAwMDAwKjE5OmNkZTIzNGVmZzU2NzhoaWo5MDFrbG0yMzRub3BAYW1wZXJhdGVjaC5haQ==",
+        "createdDateTime": "2025-02-04T14:03:11.204Z",
+        "transcriptContentUrl": "https://graph.microsoft.com/v1.0/me/onlineMeetings/MSoxNzA5NjM4NDAwMDAwKjE5OmNkZTIzNGVmZzU2NzhoaWo5MDFrbG0yMzRub3BAYW1wZXJhdGVjaC5haQ==/transcripts/MSoxNzA5NjM4NDAwMDAwKjE5OmNkZTIzNGVmZzU2NzhoaWo5MDFrbG0yMzRub3BAYW1wZXJhdGVjaC5haQ==/content",
+    },
+    "meeting_metadata": {
+        "id": "MSoxNzA5NjM4NDAwMDAwKjE5OmNkZTIzNGVmZzU2NzhoaWo5MDFrbG0yMzRub3BAYW1wZXJhdGVjaC5haQ==",
+        "subject": "Graph API Integration & OAuth Token Management Review",
+        "startDateTime": "2025-02-04T14:00:00.000Z",
+        "endDateTime": "2025-02-04T14:16:48.000Z",
+        "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/19%3Acde234efg5678hij901klm234nop%40thread.tacv2/1738677600000?context=%7B%22Tid%22%3A%22f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c%22%2C%22Oid%22%3A%22a1b2c3d4-e5f6-7890-abcd-ef1234567890%22%7D",
+        "organizer": {
+            "displayName": "Care Taker",
+            "upn": "care.taker@amperatech.ai",
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "tenantId": "f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+        },
+        "attendees": [
+            {
+                "displayName": "Caretaker User",
+                "upn": "caretaker.user@amperatech.ai",
+                "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+                "tenantId": "f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+                "role": "attendee",
+            }
+        ],
+    },
+    "vtt_content": """WEBVTT
+
+00:00:01.000 --> 00:00:12.000
+<v Care Taker>Okay, good. Let's jump in — I know you've been heads-down on the Graph API integration this week. Before I forget, did the client secret issue from last Thursday get resolved?
+
+00:00:12.500 --> 00:00:28.000
+<v Caretaker User>Partially. The immediate thing that was blocking us — the OAuth client credentials flow wasn't completing — I tracked that down to an expired client secret in Azure Key Vault. The secret itself had a one-year expiry and nobody rotated it. I've since pulled the new one from Key Vault and updated the app registration, but we need a longer-term answer for rotation.
+
+00:00:28.500 --> 00:00:40.000
+<v Care Taker>Right, and that's actually one of the things I wanted to talk through today. But first — can you pull up the current client secret reference from Key Vault and just confirm what expiry we're looking at now? I don't want to get caught off-guard again.
+
+00:00:40.500 --> 00:00:55.000
+<v Caretaker User>Yeah, I can check that. The secret is stored under the path graph-api/prod/client-secret in Key Vault — I won't paste the value here obviously, but I can retrieve the metadata and confirm the expiry. Give me until this afternoon and I'll send you a message with the expiry date and a note on whether we need to plan rotation soon.
+
+00:00:55.500 --> 00:01:07.000
+<v Care Taker>Good. And while you're at it, can you also verify the OAuth refresh token for the delegated permissions flow? There's a separate token we use for the mail send scope, and I want to make sure that one's not about to expire too.
+
+00:01:07.500 --> 00:01:22.000
+<v Caretaker User>I'll check both. The delegated token — that one's stored differently, it's not in Key Vault, it's in our Redis cache with a TTL. I'll check what TTL we set and whether there's a background refresh job keeping it alive. I suspect there might not be, which would be a problem.
+
+00:01:22.500 --> 00:01:32.000
+<v Care Taker>Yeah that would be a problem. Look into that today if you can. If there's no refresh job, that needs to be built before we go live. That's not optional.
+
+00:01:32.500 --> 00:01:45.000
+<v Caretaker User>Understood. I'll look into it today. If the refresh job is missing I'll flag it as a blocker and we'll need to decide whether to delay the go-live.
+
+00:01:45.500 --> 00:02:00.000
+<v Care Taker>Agreed. Let's not go live with a token that's going to silently expire in production. Okay, stepping back — where are we overall with the Graph API integration? Walk me through what's working and what's not.
+
+00:02:00.500 --> 00:02:22.000
+<v Caretaker User>So the core stuff is in decent shape. The application permissions flow — client credentials — is working again now that the secret is rotated. We can call the Users endpoint, pull profile data, and the mail send via the sendMail action is working in staging. The Draft API is where things get interesting. We're using the createDraft endpoint to generate email drafts on behalf of users, and that's been mostly working but I hit an issue yesterday.
+
+00:02:22.500 --> 00:02:35.000
+<v Care Taker>What kind of issue?
+
+00:02:35.500 --> 00:02:58.000
+<v Caretaker User>So the createDraft endpoint requires the Mail.ReadWrite delegated permission. In staging our test account has that scope, no problem. But in the production app registration I noticed the permission is listed but it hasn't been admin-consented yet. So in production, any call to createDraft is going to fail with a 403 until someone with Global Admin or an appropriate admin role consents to that permission for the tenant.
+
+00:02:58.500 --> 00:03:10.000
+<v Care Taker>Okay. That's a blocker. Who do we need for that — is that something I can do or does Security need to be involved?
+
+00:03:10.500 --> 00:03:25.000
+<v Caretaker User>It depends on how the tenant is configured. In some tenants individual users can consent to delegated permissions, but in most enterprise setups admin consent is required for Mail scopes. We'll need to check with Security whether they require a formal request or whether you can go in and consent directly as an admin.
+
+00:03:25.500 --> 00:03:38.000
+<v Care Taker>I'll ask Security today. Can you send me the exact permission name and the app registration ID so I can give them everything they need in one message? I don't want to go back and forth.
+
+00:03:38.500 --> 00:03:50.000
+<v Caretaker User>Sure. It's the Mail.ReadWrite delegated permission, application display name is AmperaTech-GraphIntegration-Prod. I'll send you the app registration object ID as well. I can have that to you in the next ten minutes.
+
+00:03:50.500 --> 00:04:02.000
+<v Care Taker>Great, do that. And while we're waiting on Security to respond — can you test the Draft API in staging end to end and document what the response payload looks like? I want to see an actual example draft response before we decide how to parse it in the frontend.
+
+00:04:02.500 --> 00:04:18.000
+<v Caretaker User>Yeah I can do that. I'll run through the full flow — auth, createDraft, then pull it back with getDraft — and I'll capture the response. I'll have a documented example ready by tomorrow morning, including what the message body field looks like and whether the isDraft flag is set correctly.
+
+00:04:18.500 --> 00:04:28.000
+<v Care Taker>Perfect. That'll be useful for the frontend team too. Make sure it's clear enough that they can read it without having to ask you follow-up questions.
+
+00:04:28.500 --> 00:04:42.000
+<v Caretaker User>Will do. Actually — one thing I want to flag before I forget. The Teams channel message API is separate from the mail Draft API. We've been talking about them almost interchangeably but they're quite different underneath. The channel message endpoint uses a different permission scope and the payload structure is different.
+
+00:04:42.500 --> 00:04:55.000
+<v Care Taker>Right, good point. We need both, right? We want to be able to draft emails and also post to Teams channels. So we need to make sure both flows are covered.
+
+00:04:55.500 --> 00:05:10.000
+<v Caretaker User>Correct. For Teams channel messages it's the ChannelMessage.Send application permission. That one I believe is already consented in the production app registration, but I should verify. Let me add that to my list — I'll confirm the permission status for ChannelMessage.Send in the prod app registration before Wednesday.
+
+00:05:10.500 --> 00:05:22.000
+<v Care Taker>Good. Add it to the list. Okay, back to secrets for a second — you mentioned we're using Key Vault for the client secret. What about the webhook signing secret for the Teams notification subscription? Is that in Key Vault too?
+
+00:05:22.500 --> 00:05:40.000
+<v Caretaker User>That's a good question and honestly I'm not a hundred percent sure. I think it might be stored as a Kubernetes secret directly rather than going through Key Vault. I'd need to check the deployment manifests. If it's not in Key Vault that's a gap — everything should be going through Key Vault or at minimum through the Vault agent for secrets management.
+
+00:05:40.500 --> 00:05:52.000
+<v Care Taker>Yeah, we can't have secrets scattered across different stores. Please check that today and if the webhook signing secret is not in Key Vault, get it moved over. That's the policy.
+
+00:05:52.500 --> 00:06:05.000
+<v Caretaker User>Understood. I'll check the Kubernetes manifests for the notification subscription service and if the signing secret is hardcoded or in a plain Kubernetes secret I'll migrate it to Key Vault and update the manifests. I can have that done today.
+
+00:06:05.500 --> 00:06:18.000
+<v Care Taker>Good. And please also verify the webhook signature validation logic itself — make sure we're actually validating incoming notifications against that signing secret and not just accepting everything. I saw a PR a few weeks ago where the validation was commented out.
+
+00:06:18.500 --> 00:06:32.000
+<v Caretaker User>Yeah... that was a temporary thing during development. That should have been re-enabled before we merged it to main. Let me check the current state of the notification handler. If validation is still disabled that's a security issue and I'll re-enable it immediately.
+
+00:06:32.500 --> 00:06:42.000
+<v Care Taker>Please do. That one is not optional — we cannot accept unvalidated webhook payloads in production. Check it today and let me know either way.
+
+00:06:42.500 --> 00:06:55.000
+<v Caretaker User>I will. I'll check it as soon as we're off this call. If it's still disabled I'll fix it and push the patch today. I'll message you once it's confirmed enabled and tested.
+
+00:06:55.500 --> 00:07:10.000
+<v Care Taker>Good. One more thing on the auth side — JWT. We're issuing our own JWTs for internal service-to-service calls alongside the Graph tokens, right? What's the signing key situation there?
+
+00:07:10.500 --> 00:07:30.000
+<v Caretaker User>Yes. The JWT signing key is referenced from Key Vault — secret name is internal-jwt-signing-key-prod. I rotated it last month as part of the quarterly rotation schedule. The services that consume it fetch it at startup via the Key Vault SDK, so a rotation doesn't require a redeploy. But there's one service — the notification dispatcher — that I think is caching the key in memory and not refreshing it. If we rotate mid-deployment that service would start failing signature verification.
+
+00:07:30.500 --> 00:07:45.000
+<v Care Taker>That sounds like a bug. Can you look at the notification dispatcher and figure out whether it's refreshing the signing key on a schedule or just loading it once at startup?
+
+00:07:45.500 --> 00:08:00.000
+<v Caretaker User>I'll look at it. If it's a one-time load I'll add a refresh interval — probably pulling from Key Vault every hour or so. That's a pretty low-effort fix. I can have a patch ready by Wednesday.
+
+00:08:00.500 --> 00:08:12.000
+<v Care Taker>Wednesday is fine. Don't rush and break something else. Just make sure it's tested properly before you deploy it.
+
+00:08:12.500 --> 00:08:25.000
+<v Caretaker User>Yeah, I'll test it in staging first — make sure rotation doesn't cause a blip for the dispatcher. One thing I'm not sure about is whether we should also rotate the JWT signing key now, ahead of the fix, or wait until the fix is in place first.
+
+00:08:25.500 --> 00:08:38.000
+<v Care Taker>Wait until the fix is in. Don't rotate a key while a service is known to not handle rotation correctly. That's just asking for a production incident. Fix the dispatcher first, validate it, then we can rotate on schedule.
+
+00:08:38.500 --> 00:08:48.000
+<v Caretaker User>Makes sense. I'll hold off on the JWT key rotation until the dispatcher patch is in and confirmed stable. Probably early next week then.
+
+00:08:48.500 --> 00:09:00.000
+<v Care Taker>Sounds right. Okay, let's talk about monitoring. We've got Prometheus scraping the Graph API call latency, right? How's that looking?
+
+00:09:00.500 --> 00:09:22.000
+<v Caretaker User>It's set up but the dashboard needs work. Right now we have request count and latency histograms, but we're missing error rate breakdowns by status code. I'd really like to see 401s and 403s called out separately — those are usually auth failures and they get lost in the general error rate right now. I'll update the Grafana dashboard to add those panels. I can do that before Friday.
+
+00:09:22.500 --> 00:09:35.000
+<v Care Taker>Please do. I want to be able to tell at a glance whether we're getting auth errors without having to dig through logs. Also — do we have alerting set up for repeated 401s? That would be a strong signal that a token is expired.
+
+00:09:35.500 --> 00:09:52.000
+<v Caretaker User>Not yet. I'll add a Prometheus alert rule — something like if the 401 error rate exceeds a threshold over a five-minute window, fire an alert. I'll make it route to the engineering Slack channel. That'll give us early warning if a secret expires in production without anyone noticing.
+
+00:09:52.500 --> 00:10:05.000
+<v Care Taker>Good idea. Hook it into Slack and also make sure it shows up in the on-call rotation. I don't want a secret expiry to be a silent failure. Can you have the alert set up before Friday as well?
+
+00:10:05.500 --> 00:10:15.000
+<v Caretaker User>Yeah I'll do the dashboard and alert together. Both before Friday.
+
+00:10:15.500 --> 00:10:30.000
+<v Care Taker>Good. Okay — is there anything that's actually blocking you right now today? Things you can't make progress on without something from someone else?
+
+00:10:30.500 --> 00:10:52.000
+<v Caretaker User>The main blocker is the Mail.ReadWrite admin consent. Until that's approved by Security I can't do end-to-end testing of the Draft API in production — only in staging. Everything else I can move forward on independently. The JWT dispatcher fix, the Grafana updates, the Key Vault secret check — those are all things I can do today and tomorrow without waiting on anyone.
+
+00:10:52.500 --> 00:11:05.000
+<v Care Taker>Okay, I'll message Security right after this call. I'll send them the app registration details you're about to forward me and request expedited review. Hopefully we get a response today or tomorrow.
+
+00:11:05.500 --> 00:11:18.000
+<v Caretaker User>That would be great. Once consent is granted I can do the production end-to-end test the same day. I'd rather not wait until next week on that.
+
+00:11:18.500 --> 00:11:32.000
+<v Care Taker>Agreed. I'll push for a response by tomorrow. If they come back with questions let me know and I'll handle the back and forth with them — I don't want it to become a time sink for you.
+
+00:11:32.500 --> 00:11:44.000
+<v Caretaker User>Appreciated. Oh — one thing I almost forgot. The feature flag for the Draft API feature is currently off in production. We have it behind a flag in our Redis-backed feature flag system. Once the admin consent is in place and we've done the production validation, we'll need to flip that flag on. Someone needs to own that step.
+
+00:11:44.500 --> 00:11:58.000
+<v Care Taker>That should be you — once you've done the production validation and everything checks out, go ahead and enable the feature flag. But don't touch it until production is validated end to end. That's the dependency — production validation first, then flag enable.
+
+00:11:58.500 --> 00:12:10.000
+<v Caretaker User>Understood. I'll own the flag flip, but only after full production validation is done. I'll document the validation steps and check each one off before enabling it.
+
+00:12:10.500 --> 00:12:25.000
+<v Care Taker>Good. And once the flag is on and the feature is live, can you post an update in the engineering Teams channel? I want the broader team to know it's available.
+
+00:12:25.500 --> 00:12:38.000
+<v Caretaker User>Yes, I'll post to the engineering channel once the feature is live. I'll include what's available, any known limitations, and who to contact with issues.
+
+00:12:38.500 --> 00:12:52.000
+<v Care Taker>Perfect. And one more thing — can you put together a brief Teams summary of everything we just talked about? Action items, owners, what's blocked, what the dependencies are. Post it to our project channel so we both have a record of it.
+
+00:12:52.500 --> 00:13:08.000
+<v Caretaker User>Sure. I'll write up a summary — action items with owners and deadlines, the blocker around admin consent, the dependency chain for the feature flag, and next steps. I'll post it to the project channel this afternoon.
+
+00:13:08.500 --> 00:13:22.000
+<v Care Taker>Good. Also — can you draft the email to the stakeholders about the Draft API feature going live? I'll need to send them a heads-up once we're confirmed live. Just a short one — what the feature does, when it went live, who to contact. You can send me the draft and I'll review and send it.
+
+00:13:22.500 --> 00:13:38.000
+<v Caretaker User>I'll put together an email draft. Short, factual — feature description, go-live date, contact info. I'll have the draft ready by tomorrow morning so you can review it before we actually flip the flag.
+
+00:13:38.500 --> 00:13:50.000
+<v Care Taker>That works. Alright, I think that's everything on my list. Anything else from your side before we wrap up?
+
+00:13:50.500 --> 00:14:05.000
+<v Caretaker User>Just one open question — and I genuinely don't have an answer for this yet. The feature flag is per-tenant in our system. Do we want to roll this out to all tenants at once when we enable it, or do we want to start with a subset? I don't know if there's a product decision on that yet.
+
+00:14:05.500 --> 00:14:18.000
+<v Care Taker>Good question. I don't know either off the top of my head. I'll check with Product and get back to you. Don't flip the flag until we've got an answer on that — it might affect how you enable it.
+
+00:14:18.500 --> 00:14:32.000
+<v Caretaker User>Got it. I'll wait to hear from you on the rollout scope before touching the flag. Everything else I can move forward on.
+
+00:14:32.500 --> 00:14:48.000
+<v Care Taker>Sounds good. Alright, let's wrap up. Talk later today once you've checked the webhook validation and the Key Vault secret. Message me directly if anything looks wrong.
+
+00:14:48.500 --> 00:14:56.000
+<v Caretaker User>Will do. I'll be in touch this afternoon.
+
+""",
+}
+
+ALL_FIXTURES = [STANDUP, INCIDENT_POSTMORTEM, SPRINT_PLANNING, CLIENT_ESCALATION, CLIENT_DELAY, API_INTEGRATION, PROD_READINESS, DATABASE_MIGRATION, GRAPH_API_OAUTH,GRAPH_API_OAUTH]

@@ -321,7 +321,7 @@ def list_audit_for_action(db: Session, action_id: int, limit: int = 200) -> list
         .filter(
             or_(
                 and_(AuditEvent.resource_type == "AgentAction", AuditEvent.resource_id == action_id),
-                AuditEvent.event_data["action_id"].astext == str(action_id),
+                AuditEvent.event_data["action_id"].as_integer() == action_id,
             )
         )
         .order_by(AuditEvent.id.asc())

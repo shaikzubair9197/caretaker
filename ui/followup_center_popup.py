@@ -25,6 +25,7 @@ Usage:
 
 import argparse
 import atexit
+import json
 import os
 import sys
 import tempfile
@@ -50,7 +51,13 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ui.theme import build_stylesheet, current_theme
+try:
+    from ui.theme import build_stylesheet, current_theme
+except ModuleNotFoundError:
+    # Allow running the script directly (not as a package) by adding project root to sys.path
+    import os, sys
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+    from ui.theme import build_stylesheet, current_theme
 
 load_dotenv()
 
@@ -178,6 +185,7 @@ class FollowupCenterDialog(QDialog):
         self._meeting_id = meeting_id
         self._selected: set[int] = set()
         self._workers: list[_HttpWorker] = []
+        self._inflight_requests = 0
         self._data: dict = {}
         self._pill: "_CompactBar | None" = None
         self._maximized = False
@@ -265,15 +273,21 @@ class FollowupCenterDialog(QDialog):
 
         bulk = QWidget()
         bulk.setStyleSheet(f"background:{C_BG}; border-bottom:1px solid {C_BORDER};")
+        self._bulk = bulk
         bl = QHBoxLayout(bulk)
         bl.setContentsMargins(14, 8, 10, 8)
         self._sel_lbl = QLabel("0 selected")
         self._sel_lbl.setStyleSheet(f"color:{C_MUTED}; font-size:11px;")
         bl.addWidget(self._sel_lbl)
         bl.addStretch(1)
-        bl.addWidget(_btn("Approve Selected", C_SUCCESS, self._approve_selected))
-        bl.addWidget(_btn("Reject Selected", C_DANGER, self._reject_selected))
-        bl.addWidget(_btn("Approve All", C_ACCENT, self._approve_all))
+        approve_selected_btn = _btn("Approve Selected", C_SUCCESS, self._approve_selected)
+        reject_selected_btn = _btn("Reject Selected", C_DANGER, self._reject_selected)
+        approve_all_btn = _btn("Approve All", C_ACCENT, self._approve_all)
+        for btn in (approve_selected_btn, reject_selected_btn, approve_all_btn):
+            btn.setProperty("request_sensitive", True)
+        bl.addWidget(approve_selected_btn)
+        bl.addWidget(reject_selected_btn)
+        bl.addWidget(approve_all_btn)
         root.addWidget(bulk)
 
         self._stack = QStackedWidget()
@@ -309,22 +323,54 @@ class FollowupCenterDialog(QDialog):
         w = _HttpWorker(tag, method, path, body)
         w.done.connect(self._on_done)
         self._workers.append(w)
-        w.start()
+        self._begin_request()
+        try:
+            w.start()
+        except Exception:
+            self._end_request()
+            raise
+
+    def _begin_request(self) -> None:
+        self._inflight_requests += 1
+        if self._inflight_requests == 1:
+            self._set_request_controls_enabled(False)
+
+    def _end_request(self) -> None:
+        if self._inflight_requests <= 0:
+            self._inflight_requests = 0
+            self._set_request_controls_enabled(True)
+            return
+        self._inflight_requests -= 1
+        if self._inflight_requests == 0:
+            self._set_request_controls_enabled(True)
+
+    def _set_request_controls_enabled(self, enabled: bool) -> None:
+        for container in (getattr(self, "_bulk", None), getattr(self, "_body", None)):
+            if container is None:
+                continue
+            for widget in container.findChildren(QWidget):
+                if widget.property("request_sensitive"):
+                    widget.setEnabled(enabled)
 
     def _on_done(self, tag: str, payload: object) -> None:
-        if not isinstance(payload, dict):
-            payload = {}
-        if tag == "drafts":
-            if payload.get("_error"):
-                self._msg.setText(f"Could not load drafts:\n{payload['_error']}\n\nIs the API running?")
-                self._stack.setCurrentIndex(1)
-                return
-            self._render(payload)
-        elif tag == "versions":
-            self._show_version_history(payload)
-        elif tag == "action":
-            # any mutation → reload to reflect new state
-            self.refresh()
+        try:
+            if not isinstance(payload, dict):
+                payload = {}
+            if tag == "drafts":
+                if payload.get("_error"):
+                    self._msg.setText(f"Could not load drafts:\n{payload['_error']}\n\nIs the API running?")
+                    self._stack.setCurrentIndex(1)
+                    return
+                self._render(payload)
+            elif tag == "versions":
+                self._show_version_history(payload)
+            elif tag == "audit":
+                self._show_audit_timeline(payload)
+            elif tag == "action":
+                # any mutation → reload to reflect new state
+                self.refresh()
+        finally:
+            self._end_request()
 
     # ── render ─────────────────────────────────────────────────────────────────
     def _clear_body(self) -> None:
@@ -356,6 +402,7 @@ class FollowupCenterDialog(QDialog):
             }))
         self._body_layout.addStretch(1)
         self._stack.setCurrentIndex(0)
+        self._set_request_controls_enabled(self._inflight_requests == 0)
         self._update_sel()
 
     def _meeting_section(self, m: dict) -> QWidget:
@@ -608,6 +655,7 @@ class FollowupCenterDialog(QDialog):
         top.setSpacing(6)
         if is_pending and not is_clar:
             cb = QCheckBox()
+            cb.setProperty("request_sensitive", True)
             cb.setChecked(aid in self._selected)
             cb.stateChanged.connect(partial(self._toggle_sel, aid))
             top.addWidget(cb)
@@ -669,13 +717,26 @@ class FollowupCenterDialog(QDialog):
 
         row = QHBoxLayout()
         row.setSpacing(6)
-        row.addWidget(_btn("Version History", C_MUTED, partial(self._version_history, aid)))
+        version_btn = _btn("Version History", C_MUTED, partial(self._version_history, aid))
+        version_btn.setProperty("request_sensitive", True)
+        audit_btn = _btn("Audit Timeline", C_MUTED, partial(self._audit_timeline, aid))
+        audit_btn.setProperty("request_sensitive", True)
+        row.addWidget(version_btn)
+        row.addWidget(audit_btn)
         if is_pending:
             if not is_clar:
-                row.addWidget(_btn("Approve", C_SUCCESS, partial(self._approve, aid)))
-                row.addWidget(_btn("Edit", C_MUTED, partial(self._edit, d)))
-                row.addWidget(_btn("Regenerate", C_MUTED, partial(self._regenerate, aid)))
-            row.addWidget(_btn("Reject" if not is_clar else "Dismiss", C_DANGER, partial(self._reject, aid)))
+                approve_btn = _btn("Approve", C_SUCCESS, partial(self._approve, aid))
+                approve_btn.setProperty("request_sensitive", True)
+                edit_btn = _btn("Edit", C_MUTED, partial(self._edit, d))
+                edit_btn.setProperty("request_sensitive", True)
+                regen_btn = _btn("Regenerate", C_MUTED, partial(self._regenerate, aid))
+                regen_btn.setProperty("request_sensitive", True)
+                row.addWidget(approve_btn)
+                row.addWidget(edit_btn)
+                row.addWidget(regen_btn)
+            reject_btn = _btn("Reject" if not is_clar else "Dismiss", C_DANGER, partial(self._reject, aid))
+            reject_btn.setProperty("request_sensitive", True)
+            row.addWidget(reject_btn)
         row.addStretch(1)
         v.addLayout(row)
         return card
@@ -703,6 +764,9 @@ class FollowupCenterDialog(QDialog):
 
     def _version_history(self, aid: int) -> None:
         self._run("versions", "GET", f"/drafts/{aid}/version-history")
+
+    def _audit_timeline(self, aid: int) -> None:
+        self._run("audit", "GET", f"/drafts/{aid}/audit-trail")
 
     def _approve_selected(self) -> None:
         if self._selected:
@@ -736,6 +800,10 @@ class FollowupCenterDialog(QDialog):
 
     def _show_version_history(self, payload: dict) -> None:
         dlg = _VersionHistoryDialog(payload, self)
+        dlg.exec()
+
+    def _show_audit_timeline(self, payload: dict) -> None:
+        dlg = _AuditTimelineDialog(payload, self)
         dlg.exec()
 
 
@@ -897,6 +965,111 @@ class _VersionHistoryDialog(QDialog):
         meta.setStyleSheet(f"color:{C_MUTED}; font-size:10px; border:none;")
         meta.setWordWrap(True)
         lay.addWidget(meta)
+
+        return row
+
+
+class _AuditTimelineDialog(QDialog):
+    """Read-only modal dialog for a draft's audit timeline."""
+
+    def __init__(self, payload: dict, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Audit Timeline")
+        self.setModal(True)
+        self.setMinimumWidth(640)
+        self.setStyleSheet(parent.styleSheet() if parent else "")
+
+        events = payload.get("events") or []
+        action_id = payload.get("action_id")
+        error = payload.get("_error")
+
+        root = QVBoxLayout(self)
+        root.setContentsMargins(14, 14, 14, 14)
+        root.setSpacing(10)
+
+        title = QLabel("Audit Timeline")
+        title.setStyleSheet(f"color:{C_TEXT}; font-size:15px; font-weight:700; border:none;")
+        root.addWidget(title)
+
+        meta = QLabel(f"Action #{action_id}" if action_id is not None else "Draft")
+        meta.setStyleSheet(f"color:{C_MUTED}; font-size:10px; border:none;")
+        meta.setWordWrap(True)
+        root.addWidget(meta)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"QScrollArea {{ background:{C_BG}; border:none; }}")
+        content = QWidget()
+        content.setStyleSheet(f"background:{C_BG};")
+        content_lay = QVBoxLayout(content)
+        content_lay.setContentsMargins(0, 0, 0, 0)
+        content_lay.setSpacing(8)
+
+        if error:
+            err = QLabel(f"Could not load audit timeline:\n{error}")
+            err.setStyleSheet(f"color:{C_DANGER}; font-size:12px; border:none;")
+            err.setWordWrap(True)
+            content_lay.addWidget(err)
+        elif not events:
+            empty = QLabel("No audit events available.")
+            empty.setStyleSheet(f"color:{C_MUTED}; font-size:12px; border:none;")
+            empty.setWordWrap(True)
+            content_lay.addWidget(empty)
+        else:
+            for event in events:
+                content_lay.addWidget(self._event_row(event))
+
+        content_lay.addStretch(1)
+        scroll.setWidget(content)
+        root.addWidget(scroll, 1)
+
+        actions = QHBoxLayout()
+        actions.addStretch(1)
+        actions.addWidget(_btn("Close", C_ACCENT, self.accept))
+        root.addLayout(actions)
+
+    def _event_row(self, event: dict) -> QWidget:
+        row = QFrame()
+        row.setStyleSheet(f"QFrame {{ background:{C_CARD}; border:1px solid {C_BORDER}; border-radius:8px; }}")
+        lay = QVBoxLayout(row)
+        lay.setContentsMargins(10, 9, 10, 9)
+        lay.setSpacing(4)
+
+        top = QHBoxLayout()
+        top.setSpacing(8)
+
+        ev_type = QLabel(event.get("event_type") or "(unknown)")
+        ev_type.setStyleSheet(f"color:{C_ACCENT}; font-size:11px; font-weight:700; border:none;")
+        top.addWidget(ev_type)
+
+        top.addStretch(1)
+
+        outcome = QLabel(event.get("outcome") or "—")
+        outcome_color = C_SUCCESS if (event.get("outcome") or "").upper() == "SUCCESS" else C_DANGER if (event.get("outcome") or "").upper() == "ERROR" else C_MUTED
+        outcome.setStyleSheet(f"color:{outcome_color}; font-size:10px; border:none;")
+        top.addWidget(outcome)
+
+        lay.addLayout(top)
+
+        meta_bits = []
+        if event.get("created_at"):
+            meta_bits.append(f"at {event['created_at'][:16].replace('T', ' ')}")
+        if event.get("actor"):
+            meta_bits.append(f"actor {event['actor']}")
+        meta = QLabel("  ·  ".join(meta_bits) if meta_bits else " ")
+        meta.setStyleSheet(f"color:{C_MUTED}; font-size:10px; border:none;")
+        meta.setWordWrap(True)
+        lay.addWidget(meta)
+
+        data = QTextEdit()
+        data.setReadOnly(True)
+        data.setMinimumHeight(90)
+        data.setStyleSheet(
+            f"QTextEdit {{ background:{C_BG}; color:{C_TEXT}; border:1px solid {C_BORDER};"
+            f" border-radius:6px; font-family:monospace; font-size:10px; }}"
+        )
+        data.setPlainText(json.dumps(event.get("event_data") or {}, indent=2, sort_keys=True, ensure_ascii=False))
+        lay.addWidget(data)
 
         return row
 

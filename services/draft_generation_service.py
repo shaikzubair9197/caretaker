@@ -28,6 +28,7 @@ from database.models import (
 )
 from services.llm_service import LLMService
 from services import knowledge_retrieval_service
+from utils.config import settings
 from utils.time_utils import utcnow
 from utils.logger import get_logger
 
@@ -119,6 +120,11 @@ def _shape_payload(draft_type, action_type, item, data, results, confidence, con
         "knowledge_key": item.knowledge_key,
         "version": item.version,
         "draft_type": draft_type,
+        # Permanent sender identity (Pass 2 — Phase 1). Fixed system constant,
+        # never inferred. The execution layer re-validates against this before
+        # any send; the UI renders it as the draft's "From:" line. Recipients
+        # vary (recipient_token, masked); the sender never does.
+        "sender_identity": settings.SENDER_IDENTITY,
         "confidence": float(confidence) if confidence is not None else None,
         "conflict_flag": conflict_flag,
         "citations": data.get("citations") or [],
@@ -275,6 +281,7 @@ class DraftGenerationService:
             "knowledge_key": item.knowledge_key,
             "version": item.version,
             "draft_type": "clarification",
+            "sender_identity": settings.SENDER_IDENTITY,
             "display_title": item.title_masked,
             "reason": reason,
             "edit_history": [],

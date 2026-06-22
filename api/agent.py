@@ -16,6 +16,7 @@ from services.graph.senders.teams_sender import TeamsSender
 from services.graph.senders.email_sender import EmailSender
 from services.graph.senders.calendar_writer import CalendarWriter
 from services.graph.senders.errors import GraphSendError
+from utils.config import settings
 from utils.logger import get_logger
 
 logger = get_logger("api.agent")
@@ -346,6 +347,28 @@ def _audit_failed(action: AgentAction, db: Session, reason: str, message: str) -
     return {"success": False, "action_type": action.action_type, "reason": reason, "note": (message or "")[:200]}
 
 
+def _canonical_sender_or_fail(action: AgentAction, payload: dict, db: Session):
+    """
+    Pass 2 — Phase 1: Permanent Sender Identity guard.
+
+    Every outbound Graph action must originate from the one fixed system identity
+    `settings.SENDER_IDENTITY` (care.taker@amperatech.ai) — never an inferred one.
+    Returns (canonical_sender_upn, None) to proceed, or (None, failure_dict) when
+    the identity is missing or a draft was stamped with a different sender; the
+    failure path audits ACTION_FAILED reason="sender_identity_violation" and
+    performs no send. Recipients stay dynamic; only the sender is validated here.
+    """
+    canonical = (settings.SENDER_IDENTITY or "").strip()
+    if not canonical:
+        return None, _audit_failed(action, db, "sender_identity_violation",
+                                   "SENDER_IDENTITY is not configured")
+    stamped = payload.get("sender_identity")
+    if stamped is not None and stamped != canonical:
+        return None, _audit_failed(action, db, "sender_identity_violation",
+                                   f"draft sender_identity does not match the canonical system identity")
+    return canonical, None
+
+
 def _execute_teams_message_draft(action: AgentAction, payload: dict, db: Session) -> dict:
     stale = _stale_reason(payload, db)
     if stale:
@@ -353,10 +376,13 @@ def _execute_teams_message_draft(action: AgentAction, payload: dict, db: Session
     recipient_token = payload.get("recipient_token")
     if not recipient_token:
         return _audit_failed(action, db, "missing_recipient", "payload has no recipient_token")
+    sender_upn, fail = _canonical_sender_or_fail(action, payload, db)
+    if fail:
+        return fail
     try:
         recipient_id = VaultService.decrypt(recipient_token, "execute_teams_message_draft", "system", action.id, db)
         body_html = _rehydrate(payload.get("body", ""), db, action.id, "execute_teams_message_draft")
-        sender = TeamsSender()
+        sender = TeamsSender(upn=sender_upn)
         chat_id = sender.resolve_one_on_one_chat(recipient_id)
         result = sender.send_message(chat_id, body_html)
         return _audit_executed(action, db, {"graph_message_id": result.get("message_id")})
@@ -375,11 +401,14 @@ def _execute_email_draft(action: AgentAction, payload: dict, db: Session) -> dic
     recipient_token = payload.get("recipient_token")
     if not recipient_token:
         return _audit_failed(action, db, "missing_recipient", "payload has no recipient_token")
+    sender_upn, fail = _canonical_sender_or_fail(action, payload, db)
+    if fail:
+        return fail
     try:
         to_email = VaultService.decrypt(recipient_token, "execute_email_draft", "system", action.id, db)
         subject = _rehydrate(payload.get("subject", ""), db, action.id, "execute_email_draft")
         body_html = _rehydrate(payload.get("body", ""), db, action.id, "execute_email_draft")
-        EmailSender().send_mail(to_email, subject, body_html)
+        EmailSender(upn=sender_upn).send_mail(to_email, subject, body_html)
         return _audit_executed(action, db, {"sent": True})
     except GraphSendError as e:
         return _audit_failed(action, db, e.reason, str(e))
@@ -396,6 +425,9 @@ def _execute_calendar_reminder_draft(action: AgentAction, payload: dict, db: Ses
     start_iso = payload.get("start_hint")
     if not start_iso:
         return _audit_failed(action, db, "missing_start", "payload has no start_hint")
+    sender_upn, fail = _canonical_sender_or_fail(action, payload, db)
+    if fail:
+        return fail
     try:
         subject = _rehydrate(payload.get("title", ""), db, action.id, "execute_calendar_reminder_draft")
         duration = int(payload.get("duration_minutes") or 30)
@@ -405,7 +437,7 @@ def _execute_calendar_reminder_draft(action: AgentAction, payload: dict, db: Ses
                 attendee_emails.append(VaultService.decrypt(tok, "execute_calendar_reminder_draft", "system", action.id, db))
             except KeyError:
                 logger.warning(f"calendar draft: attendee token absent from vault for action {action.id} — skipped")
-        result = CalendarWriter().create_event(subject, start_iso, duration, attendee_emails)
+        result = CalendarWriter(upn=sender_upn).create_event(subject, start_iso, duration, attendee_emails)
         return _audit_executed(action, db, {"event_id": result.get("event_id")})
     except GraphSendError as e:
         return _audit_failed(action, db, e.reason, str(e))

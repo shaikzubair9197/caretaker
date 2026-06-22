@@ -85,6 +85,10 @@ def _preview(payload: dict) -> str:
 def _draft_dto(a: AgentAction) -> dict:
     p = a.payload or {}
     targets = _targets(p)
+    hist = p.get("edit_history") or []
+    last_modified = None
+    if hist and isinstance(hist[-1], dict):
+        last_modified = hist[-1].get("at")
     return {
         "action_id": a.id,
         "action_type": a.action_type,
@@ -100,7 +104,13 @@ def _draft_dto(a: AgentAction) -> dict:
         "knowledge_item_id": p.get("knowledge_item_id"),
         "knowledge_key": p.get("knowledge_key"),
         "reason": p.get("reason"),
+        # Pass 2 P1/P3: fixed system sender for the card "From:" line + reasoning
+        # projection (rationale arrives in P11/PH-9; rendered "if available").
+        "sender_identity": p.get("sender_identity"),
+        "rationale": p.get("rationale"),
         "created_at": a.created_at.isoformat() if a.created_at else None,
+        "last_modified": last_modified,
+        "edit_count": len(hist),
         "approved_at": a.approved_at.isoformat() if a.approved_at else None,
     }
 

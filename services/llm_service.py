@@ -1,7 +1,10 @@
 """
-LLM Service — switchable Ollama / Azure OpenAI backend, full observability.
+LLM Service — Azure OpenAI (active) / Ollama (RETIRED, dormant) backend, full observability.
 
-LLM_PROVIDER selects the backend ("ollama" default, or "azure_openai").
+LLM_PROVIDER selects the backend. Azure OpenAI is the active production backend;
+the Ollama path is RETIRED and kept only as a dormant local-dev fallback (used by
+the credential-free regression suite). A deprecation warning is logged whenever
+the Ollama backend is selected.
 _call_ollama() and _call_azure_openai() share the exact same LLMCallResult
 contract and status codes, so callers never need to know which backend
 served a given call.
@@ -48,8 +51,19 @@ OLLAMA_HOST    = os.getenv("OLLAMA_HOST",    "http://localhost:11434")
 OLLAMA_MODEL   = os.getenv("OLLAMA_MODEL",   "llama3.2")
 OLLAMA_TIMEOUT = float(os.getenv("OLLAMA_TIMEOUT", "30"))
 
-# Switchable backend — "ollama" (default, unchanged behavior) or "azure_openai".
+# Backend selection. Azure OpenAI is the active backend; the Ollama path is
+# RETIRED — kept in place (dormant) only as a local-dev fallback for environments
+# with no Azure deployment (notably the credential-free LLM regression suite).
+# The default is intentionally left "ollama" so that suite keeps running without
+# Azure credentials and without import-time validation failures; production and
+# this workspace select Azure via LLM_PROVIDER=azure_openai in the environment.
 LLM_PROVIDER         = os.getenv("LLM_PROVIDER", "ollama").strip().lower()
+if LLM_PROVIDER == "ollama":
+    logger.warning(
+        "LLM backend 'ollama' is RETIRED/deprecated and dormant — set "
+        "LLM_PROVIDER=azure_openai. The Ollama code path remains only for "
+        "local-dev and the credential-free regression suite."
+    )
 AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY", "")
 AZURE_DEPLOYMENT     = os.getenv("AZURE_DEPLOYMENT", "")      # deployment name = the "model" for Azure's API
 OPENAI_API_VERSION   = os.getenv("OPENAI_API_VERSION", "")

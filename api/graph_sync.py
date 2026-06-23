@@ -92,6 +92,31 @@ def _scope_tokens(token_map: dict, masked_text: str, source_id: int) -> tuple[di
     return new_map, new_masked
 
 
+def _is_duplicate(item: GraphSourceItem, db: Session) -> bool:
+    """
+    Fast duplicate guard for Graph items.
+
+    The prior implementation scanned every SourceItem metadata row for the source
+    on each item, which becomes very slow as the archive grows. We can use the
+    source-specific tables here because their external_id columns are unique and
+    indexed.
+    """
+    if item.source_type == "outlook_email":
+        return db.query(Email.id).filter(Email.external_id == item.external_id).first() is not None
+    if item.source_type in ("teams_chat", "teams_channel"):
+        return db.query(TeamsMessage.id).filter(TeamsMessage.external_id == item.external_id).first() is not None
+    if item.source_type == "calendar":
+        return db.query(CalendarEvent.id).filter(CalendarEvent.external_id == item.external_id).first() is not None
+
+    # Fallback for any future source types that still persist via SourceItem only.
+    for (md,) in db.query(SourceItem.metadata_).filter(
+        SourceItem.source_type == item.source_type
+    ).all():
+        if (md or {}).get("external_id") == item.external_id:
+            return True
+    return False
+
+
 # ── Stage 4–7 core ingest for a single item ───────────────────────────────────
 
 def _ingest_one(
@@ -104,13 +129,10 @@ def _ingest_one(
     Returns ("ingested"|"skipped_dup"|"quarantined"|"error", exc_or_None).
     """
     try:
-        # Stage 3 — dedup check (dialect-safe: generic JSON columns do not
-        # support the `.astext` accessor, so filter the external_id in Python).
-        for (md,) in db.query(SourceItem.metadata_).filter(
-            SourceItem.source_type == item.source_type
-        ).all():
-            if (md or {}).get("external_id") == item.external_id:
-                return "skipped_dup", None
+        # Stage 3 — dedup check. Use the indexed source-specific tables when
+        # available so duplicate syncs stay fast even on large archives.
+        if _is_duplicate(item, db):
+            return "skipped_dup", None
 
         # Stage 4 — threat scoring
         threat: ThreatScore = ThreatEngine.score(item.source_type, item.raw_payload)
@@ -352,6 +374,7 @@ def _run_source(source: str, upn: str, db: Session, dry_run: bool) -> SyncResult
     )
 
     try:
+        logger.info(f"_run_source: starting source={source} upn={upn} dry_run={dry_run}")
         state = _get_sync_state(db, source, upn)
         if not dry_run:
             db.commit()

@@ -9,6 +9,7 @@ Delta tokens stored in graph_sync_state (source_type='outlook_email').
 """
 
 import os
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from utils.config import settings
@@ -82,3 +83,54 @@ class EmailConnector:
             f"delta_token={'<new>' if new_delta_token else 'none'}"
         )
         return items, new_delta_token
+
+    def fetch_recent(
+        self,
+        days_back: int = 30,
+        max_items: int = 100,
+    ) -> list[dict]:
+        """
+        Fetch a bounded slice of recent inbox emails.
+
+        This is intentionally not delta-based: the meeting-prep checker only
+        needs enough recent context to surface related emails quickly, and a
+        full mailbox crawl can be slow on large inboxes.
+        """
+        if not self.upn:
+            raise RuntimeError("GRAPH_SERVICE_UPN not configured.")
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        path = f"users/{self.upn}/mailFolders/{_FOLDER}/messages"
+        params: dict = {
+            "$select": _SELECT,
+            "$orderby": "receivedDateTime desc",
+            "$filter": f"receivedDateTime ge {cutoff}",
+            "$top": min(max_items, 50),
+        }
+
+        logger.info(
+            f"EmailConnector: recent sync for {self.upn} "
+            f"days_back={days_back} max_items={max_items}"
+        )
+
+        items: list[dict] = []
+        while True:
+            data = graph_get(path, params)
+            page_items = [i for i in data.get("value", []) if not i.get("@removed")]
+            items.extend(page_items)
+
+            if len(items) >= max_items:
+                items = items[:max_items]
+                break
+
+            next_link = data.get("@odata.nextLink")
+            if not next_link:
+                break
+
+            path = next_link.replace("https://graph.microsoft.com/v1.0/", "")
+            params = {}
+
+        logger.info(
+            f"EmailConnector: fetched {len(items)} recent emails for {self.upn}"
+        )
+        return items

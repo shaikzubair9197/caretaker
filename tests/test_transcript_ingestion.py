@@ -1,13 +1,13 @@
 """
 Transcript ingestion pipeline tests (Plan 1).
 
-Uses an in-memory SQLite DB — no PostgreSQL/Graph required. The Ollama HTTP
-call is patched (same convention as tests/test_llm_service.py) so no real
-LLM is needed either. Audit writers that open their own independent DB
-session (LLMAuditService.log, vault_service._write_audit) are patched out,
-exactly like the existing LLM service tests — this test focuses on the
-transcript pipeline's own logic (masking, idempotency, quarantine, knowledge
-persistence), not on the already-covered audit-writer internals.
+Uses an in-memory SQLite DB — no PostgreSQL/Graph required. The Azure OpenAI
+HTTP call is patched so no real LLM is needed either. Audit writers that open
+their own independent DB session (LLMAuditService.log, vault_service._write_audit)
+are patched out, exactly like the existing LLM service tests — this test
+focuses on the transcript pipeline's own logic (masking, idempotency,
+quarantine, knowledge persistence), not on the already-covered audit-writer
+internals.
 
 Run with:
     cd caretaker
@@ -59,10 +59,10 @@ def db(monkeypatch):
         session.close()
 
 
-def _ollama_response(items: list[dict]) -> MagicMock:
+def _azure_response(items: list[dict]) -> MagicMock:
     mock = MagicMock()
     mock.status_code = 200
-    mock.json.return_value = {"message": {"content": json.dumps({"items": items})}}
+    mock.json.return_value = {"choices": [{"message": {"content": json.dumps({"items": items})}}]}
     mock.raise_for_status = MagicMock()
     return mock
 
@@ -112,7 +112,7 @@ def test_ingest_creates_transcript_segments_and_knowledge_items(db):
         },
     ]
 
-    with patch(_HTTPX_POST, return_value=_ollama_response(mock_items)) as mock_post, \
+    with patch(_HTTPX_POST, return_value=_azure_response(mock_items)) as mock_post, \
          patch(_AUDIT_PATH, return_value=99) as mock_log, \
          patch(_VAULT_AUDIT_PATH):
         result = transcript_ingestion_service.ingest(transcript, db)
@@ -170,7 +170,7 @@ def test_quarantine_skips_llm_call(db):
 def test_dedup_by_external_id_skips_reingestion(db):
     transcript = _standup_transcript()
 
-    with patch(_HTTPX_POST, return_value=_ollama_response([])), \
+    with patch(_HTTPX_POST, return_value=_azure_response([])), \
          patch(_AUDIT_PATH, return_value=1), \
          patch(_VAULT_AUDIT_PATH):
         first = transcript_ingestion_service.ingest(transcript, db)
@@ -187,7 +187,7 @@ def test_dedup_by_external_id_skips_reingestion(db):
 def test_idempotent_content_skips_reextraction_unless_forced(db):
     transcript = _standup_transcript()
 
-    with patch(_HTTPX_POST, return_value=_ollama_response([{
+    with patch(_HTTPX_POST, return_value=_azure_response([{
             "knowledge_type": "action_item", "title": "Follow up with infra",
             "confidence": 0.7, "extra_data": {},
         }])), \
@@ -223,7 +223,7 @@ def test_idempotent_content_skips_reextraction_unless_forced(db):
     transcript_forced = _standup_transcript()
     transcript_forced.metadata.external_id = "transcript-eng-standup-001-RETRY-2"
 
-    with patch(_HTTPX_POST, return_value=_ollama_response([])) as mock_post_forced, \
+    with patch(_HTTPX_POST, return_value=_azure_response([])) as mock_post_forced, \
          patch(_AUDIT_PATH, return_value=44), \
          patch(_VAULT_AUDIT_PATH):
         forced = transcript_ingestion_service.ingest(transcript_forced, db, force_reextract=True)

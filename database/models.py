@@ -128,6 +128,15 @@ class Commitment(Base):
 
     due_date = Column(DateTime, nullable=True)
 
+    # ── Reminder auto-scheduling (Phase 6) ────────────────────────────────────
+    # Self-contained reminder window snapshotted onto the Commitment at creation:
+    # remind_at = due_date - remind_offset_minutes. Once set, the reminder daemon
+    # works EXCLUSIVELY from these columns and never reads back the originating
+    # KnowledgeItem (the execution layer is independent of the extraction layer).
+    remind_at = Column(DateTime, nullable=True)
+    remind_offset_minutes = Column(Integer, nullable=True)
+    reminded_at = Column(DateTime, nullable=True)   # fire-once stamp; NULL = not yet fired
+
     source_id = Column(Integer, ForeignKey("source_items.id"), nullable=True)
 
     user_id = Column(Integer, default=1)
@@ -296,6 +305,10 @@ class MeetingTranscript(Base):
     meeting_start       = Column(DateTime, nullable=True)
     meeting_end         = Column(DateTime, nullable=True)
     organizer_token     = Column(String(64), nullable=True)
+    self_token          = Column(String(64), nullable=True)
+    # scoped speaker token of the caretaker user (participant whose email matches
+    # settings.SENDER_IDENTITY), or NULL if the user was not in the meeting. Used by
+    # the Follow-up Center to classify Action Items (assigned to self) vs Commitments.
     content_hash        = Column(String(64), nullable=True)
     # SHA-256 of the raw archived payload — used for idempotent re-ingestion checks
     user_id             = Column(Integer, default=1)
@@ -401,6 +414,76 @@ class VaultToken(Base):
     last_accessed_at = Column(DateTime, nullable=True)
     access_count     = Column(Integer, default=0)
     created_at       = Column(DateTime, default=utcnow)
+
+
+class SecureCredential(Base):
+    """A discovered confidential value of ANY credential type, versioned with
+    rotation history. The single source of truth that Teams/Email/manual sources
+    sync into; draft generation, reveal and send resolve only against this store
+    (Follow-up Center plan — Phase 1). The plaintext value never lives here — only
+    on CredentialVersion.ciphertext (AES-256-GCM)."""
+
+    __tablename__ = "secure_credentials"
+
+    id                = Column(Integer, primary_key=True)
+    credential_key    = Column(String(256), nullable=False, unique=True, index=True)
+    # deterministic identity grouping every version of "the same credential" —
+    # see secure_store_service.derive_credential_key.
+    credential_type   = Column(String(40), nullable=False)
+    # open taxonomy: api_key|password|certificate|ssh_key|jwt|oauth_token|
+    # client_secret|db_credential|connection_string|license_key|... (extensible)
+    system_name       = Column(String(128), nullable=True)
+    context           = Column(JSON, default=dict)
+    # flexible dimension map: environment/project/application/region/customer/...
+    owner_token       = Column(String(64), nullable=True)
+    active_version_id = Column(Integer, nullable=True)
+    # points at the current active CredentialVersion (app-maintained; no DB FK to
+    # avoid a circular constraint with credential_versions.credential_id).
+    created_at        = Column(DateTime, default=utcnow)
+    last_seen_at      = Column(DateTime, default=utcnow)
+
+    __table_args__ = (
+        Index("ix_secure_credentials_type_system", "credential_type", "system_name"),
+    )
+
+
+class CredentialVersion(Base):
+    """One encrypted value for a SecureCredential. Exactly one row per credential
+    is active at a time; rotation deactivates the prior and inserts version+1
+    (mirrors knowledge_evolution_service supersession). Plaintext exists only in
+    memory during an audited decrypt — never anywhere but `ciphertext`."""
+
+    __tablename__ = "credential_versions"
+
+    id              = Column(Integer, primary_key=True)
+    credential_id   = Column(Integer, ForeignKey("secure_credentials.id", ondelete="CASCADE"), nullable=False, index=True)
+    ciphertext      = Column(LargeBinary, nullable=False)   # nonce(12)||ciphertext||tag(16)
+    key_version     = Column(Integer, nullable=False, default=1)
+    value_fingerprint = Column(String(64), nullable=True, index=True)
+    # keyed HMAC-SHA256 of the value (VaultService.fingerprint) — lets rotation
+    # detection compare "same value vs new value" WITHOUT decrypting. Non-reversible.
+    version         = Column(Integer, nullable=False, default=1)
+    is_active       = Column(Boolean, default=True, index=True)
+    valid_from      = Column(DateTime, nullable=True)
+    valid_to        = Column(DateTime, nullable=True)
+    source_type     = Column(String(50), nullable=True)
+    source_id       = Column(Integer, ForeignKey("source_items.id", ondelete="SET NULL"), nullable=True)
+    source_metadata = Column(JSON, default=dict)
+    # provenance: conversation_id/chat_id/team_id/channel_id/sender/source_url/message_id/...
+    created_at      = Column(DateTime, default=utcnow)
+    last_seen_at    = Column(DateTime, default=utcnow)
+
+    __table_args__ = (
+        # At most one active version per credential — DB-level backstop for the
+        # service's transactional rotation (mirrors ux_knowledge_items_active_key).
+        Index(
+            "ux_credential_versions_active",
+            "credential_id",
+            unique=True,
+            postgresql_where=text("is_active = true"),
+            sqlite_where=text("is_active = 1"),
+        ),
+    )
 
 
 class KnowledgeItem(Base):

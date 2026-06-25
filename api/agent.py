@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 from fastapi import APIRouter, Body, HTTPException
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ from services.brain_service import BrainService
 from services.intent_service import IntentService
 from services.action_service import ActionService
 from services.vault_service import VaultService
+from services import secure_store_service
 from services.commitment_service import CommitmentService
 from services.graph.senders.teams_sender import TeamsSender
 from services.graph.senders.email_sender import EmailSender
@@ -274,19 +276,32 @@ def _execute_action(action: AgentAction, db: Session) -> dict:
 # source-scoped indexed tokens produced by transcript_ingestion_service. The
 # vault stores them without the angle brackets.
 _BODY_TOKEN_RE = re.compile(r"<(S\d+_[A-Z0-9_]+)>")
+# Phase 4: inline credential placeholders, e.g. {{SECURE_REF:1}}. A draft may carry
+# several independent refs; each maps via payload.secure_refs to a credential_key.
+_SECURE_REF_RE = re.compile(r"\{\{SECURE_REF:(\d+)\}\}")
 
 
-def _rehydrate(text: str, db: Session, action_id: int, justification: str) -> str:
+def _rehydrate(text: str, db: Session, action_id: int, justification: str,
+               secure_refs: Optional[dict] = None) -> str:
     """
-    Substitute inline <Sn_TOKEN> placeholders with decrypted plaintext, IN
-    MEMORY ONLY, for the duration of the send — never persisted, never logged.
+    Substitute inline placeholders with decrypted plaintext, IN MEMORY ONLY, for
+    the duration of the send — never persisted, never logged.
 
-    A token with no vault entry is left masked (logged) rather than aborting the
-    whole send; a genuine gate failure (PermissionError) propagates to the
-    caller's try/except and becomes ACTION_FAILED.
+      • <Sn_TOKEN>        → vault PII/routing value (VaultService.decrypt).
+      • {{SECURE_REF:n}}  → the credential's LATEST ACTIVE value, resolved per
+                            reference via secure_store_service.decrypt_credential
+                            (rotation-safe: a post-draft rotation is used here with
+                            no regeneration). Each ref resolves INDEPENDENTLY.
+
+    A token with no vault entry / a ref with no resolved credential is left masked
+    (logged) rather than aborting the whole send; a genuine gate failure
+    (PermissionError) propagates to the caller's try/except and becomes ACTION_FAILED.
+    At send time the action is already 'approved', so the decrypt gate is satisfied.
     """
     if not text:
         return text
+
+    # Pass 1 — vault routing tokens (unchanged behaviour).
     resolved: dict[str, str] = {}
 
     def _sub(match):
@@ -299,7 +314,31 @@ def _rehydrate(text: str, db: Session, action_id: int, justification: str) -> st
                 return match.group(0)
         return resolved[name]
 
-    return _BODY_TOKEN_RE.sub(_sub, text)
+    text = _BODY_TOKEN_RE.sub(_sub, text)
+
+    # Pass 2 — secure credential references (Phase 4), each resolved independently.
+    if secure_refs:
+        resolved_refs: dict[str, str] = {}
+
+        def _sub_ref(match):
+            n = match.group(1)
+            if n not in resolved_refs:
+                credential_key = (secure_refs.get(n) or {}).get("credential_key")
+                if not credential_key:
+                    logger.warning(f"_rehydrate: secure ref {n} unresolved for action {action_id} — left masked")
+                    return match.group(0)
+                try:
+                    resolved_refs[n] = secure_store_service.decrypt_credential(
+                        credential_key, justification, "system", action_id, db
+                    )
+                except KeyError:
+                    logger.warning(f"_rehydrate: credential for secure ref {n} not found for action {action_id} — left masked")
+                    return match.group(0)
+            return resolved_refs[n]
+
+        text = _SECURE_REF_RE.sub(_sub_ref, text)
+
+    return text
 
 
 def _stale_reason(payload: dict, db: Session):
@@ -369,6 +408,15 @@ def _canonical_sender_or_fail(action: AgentAction, payload: dict, db: Session):
     return canonical, None
 
 
+def _is_service_account(address: Optional[str]) -> bool:
+    """True when a resolved recipient address is the Caretaker service account
+    (settings.SENDER_IDENTITY). Send-time backstop for the routing invariant: the
+    assistant/organizer is never a recipient. Compares against the CONFIGURED
+    identity, not a hardcoded literal."""
+    canonical = (settings.SENDER_IDENTITY or "").strip().lower()
+    return bool(canonical) and (address or "").strip().lower() == canonical
+
+
 def _execute_teams_message_draft(action: AgentAction, payload: dict, db: Session) -> dict:
     stale = _stale_reason(payload, db)
     if stale:
@@ -381,7 +429,7 @@ def _execute_teams_message_draft(action: AgentAction, payload: dict, db: Session
         return fail
     try:
         recipient_id = VaultService.decrypt(recipient_token, "execute_teams_message_draft", "system", action.id, db)
-        body_html = _rehydrate(payload.get("body", ""), db, action.id, "execute_teams_message_draft")
+        body_html = _rehydrate(payload.get("body", ""), db, action.id, "execute_teams_message_draft", payload.get("secure_refs"))
         sender = TeamsSender(upn=sender_upn)
         chat_id = sender.resolve_one_on_one_chat(recipient_id)
         result = sender.send_message(chat_id, body_html)
@@ -406,8 +454,14 @@ def _execute_email_draft(action: AgentAction, payload: dict, db: Session) -> dic
         return fail
     try:
         to_email = VaultService.decrypt(recipient_token, "execute_email_draft", "system", action.id, db)
-        subject = _rehydrate(payload.get("subject", ""), db, action.id, "execute_email_draft")
-        body_html = _rehydrate(payload.get("body", ""), db, action.id, "execute_email_draft")
+        # Hard invariant backstop: never deliver to the Caretaker service account,
+        # even if upstream routing somehow resolved to it (e.g. unresolved self_token).
+        if _is_service_account(to_email):
+            return _audit_failed(action, db, "recipient_is_service_account",
+                                 "refusing to send: recipient resolves to the Caretaker service account")
+        secure_refs = payload.get("secure_refs")
+        subject = _rehydrate(payload.get("subject", ""), db, action.id, "execute_email_draft", secure_refs)
+        body_html = _rehydrate(payload.get("body", ""), db, action.id, "execute_email_draft", secure_refs)
         EmailSender(upn=sender_upn).send_mail(to_email, subject, body_html)
         return _audit_executed(action, db, {"sent": True})
     except GraphSendError as e:
@@ -461,11 +515,23 @@ def _execute_reminder_draft(action: AgentAction, payload: dict, db: Session) -> 
                 person = VaultService.decrypt(person_token, "execute_reminder_draft", "system", action.id, db)
             except KeyError:
                 person = None
+        # Snapshot the deadline onto the Commitment ONCE, here at the extraction→
+        # execution boundary (Phase 6). The reminder daemon thereafter works only
+        # from the commitment's own columns and never reads this KnowledgeItem again.
+        due_date = None
+        ki_id = payload.get("knowledge_item_id")
+        if ki_id:
+            ki = db.query(KnowledgeItem).filter(KnowledgeItem.id == ki_id).first()
+            due_date = ki.due_at if ki else None
         commitment = CommitmentService.create(
             db, raw_text=title, action=title, person=person, commitment_type="reminder",
+            due_date=due_date,
         )
         db.flush()
-        return _audit_executed(action, db, {"commitment_id": commitment.id})
+        return _audit_executed(
+            action, db,
+            {"commitment_id": commitment.id, "remind_at": commitment.remind_at.isoformat() if commitment.remind_at else None},
+        )
     except (PermissionError, KeyError) as e:
         return _audit_failed(action, db, "vault_error", str(e))
     except Exception as e:

@@ -247,12 +247,10 @@ CLIENT_ESCALATION = {
 """,
 }
 
-# Demo scenario for the Follow-up Center: the AI must draft a follow-up TO
-# caretaker.user@amperatech.ai (a commitment to email the client about a delay →
-# email_draft, and an action to Teams-message the client tech lead → teams draft).
-# No raw secret is pasted (the API key is "stored in the vault, reference by
-# name") so the transcript is not quarantined and drafts are produced; the
-# encrypt→decrypt demo runs on the vaulted recipient identity at send time.
+# Demo scenario for the Follow-up Center: keep this one deliberately simple so
+# the extractor produces exactly three clean draftable commitments and nothing
+# secret-related. The goal is to exercise email/task/Teams draft generation with
+# obvious, non-ambiguous wording.
 CLIENT_DELAY = {
     "transcript_metadata": {
         "id": "transcript-client-delay-005",
@@ -1098,6 +1096,44 @@ GRAPH_API_OAUTH = {
 
 """,
 }
+API_KEY_REQUEST = {
+    "transcript_metadata": {
+        "id": "MSoxNzA5ODEwMDAwMDAwKjE5OmFiMTIzY2Q0NTY3ZWZnODkwaGlqMTIza2xtQGFtcGVyYXRlY2guYWk=",
+        "meetingId": "MSoxNzA5ODEwMDAwMDAwKjE5OmFiMTIzY2Q0NTY3ZWZnODkwaGlqMTIza2xtQGFtcGVyYXRlY2guYWk=",
+        "createdDateTime": "2025-02-05T15:04:22.109Z",
+        "transcriptContentUrl": "https://graph.microsoft.com/v1.0/me/onlineMeetings/MSoxNzA5ODEwMDAwMDAwKjE5OmFiMTIzY2Q0NTY3ZWZnODkwaGlqMTIza2xtQGFtcGVyYXRlY2guYWk=/transcripts/MSoxNzA5ODEwMDAwMDAwKjE5OmFiMTIzY2Q0NTY3ZWZnODkwaGlqMTIza2xtQGFtcGVyYXRlY2guYWk=/content",
+    },
+    "meeting_metadata": {
+        "id": "MSoxNzA5ODEwMDAwMDAwKjE5OmFiMTIzY2Q0NTY3ZWZnODkwaGlqMTIza2xtQGFtcGVyYXRlY2guYWk=",
+        "subject": "Production OpenAI API Key Request",
+        "startDateTime": "2025-02-05T15:00:00.000Z",
+        "endDateTime": "2025-02-05T15:05:10.000Z",
+        "joinWebUrl": "https://teams.microsoft.com/l/meetup-join/19%3Aab123cd4567efg890hij123klm%40thread.tacv2/1738764000000?context=%7B%22Tid%22%3A%22f8a3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c%22%2C%22Oid%22%3A%22a1b2c3d4-e5f6-7890-abcd-ef1234567890%22%7D",
+        "participants": {
+            "organizer": {
+                "identity": {"user": {"id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "displayName": "Care Taker"}},
+                "upn": "care.taker@amperatech.ai",
+            },
+            "attendees": [
+                {
+                    "identity": {"user": {"id": "b2c3d4e5-f6a7-8901-bcde-f12345678901", "displayName": "Caretaker User"}},
+                    "upn": "caretaker.user@amperatech.ai",
+                    "role": "attendee",
+                },
+            ],
+        },
+    },
+    "vtt_content": """WEBVTT
+00:00:01.000 --> 00:00:09.000
+<v Caretaker User>I'm blocked on the chatbot deployment and I need the production OpenAI API key via outlook. Can you send it to me?
+
+00:00:09.500 --> 00:00:17.000
+<v Care Taker>Sure, I'll email you the production OpenAI API key today.
+
+00:00:17.500 --> 00:00:23.000
+<v Caretaker User>Perfect, thank you.
+""",
+}
 
 ALL_FIXTURES = [
     STANDUP,
@@ -1109,4 +1145,5 @@ ALL_FIXTURES = [
     PROD_READINESS,
     DATABASE_MIGRATION,
     GRAPH_API_OAUTH,
+    API_KEY_REQUEST,
 ]

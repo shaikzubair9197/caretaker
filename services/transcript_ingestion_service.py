@@ -25,6 +25,7 @@ from services.meeting_intelligence_model import MeetingIntelligence
 from services.preprocessing_service import PreprocessingService
 from services.threat_engine import ThreatEngine
 from services.vault_service import VaultService
+from utils.config import settings
 from utils.logger import get_logger
 
 logger = get_logger("services.transcript_ingestion")
@@ -101,6 +102,22 @@ def _assign_speaker_tokens(transcript: Transcript) -> dict[str, str]:
             seen.add(utterance.speaker.identity_key())
 
     return {p.identity_key(): f"SPEAKER_{i + 1}" for i, p in enumerate(ordered) if p.identity_key()}
+
+
+def _resolve_self_token(transcript: Transcript, scoped_speaker_tokens: dict[str, str]) -> Optional[str]:
+    """The scoped speaker token of the caretaker user — the participant (or speaker)
+    whose email matches settings.SENDER_IDENTITY. None if the user was not present.
+    Lets the Follow-up Center classify work assigned to 'self' as an Action Item."""
+    self_upn = (settings.SENDER_IDENTITY or "").strip().lower()
+    if not self_upn:
+        return None
+    people = list(transcript.participants) + [u.speaker for u in transcript.utterances if u.speaker]
+    for participant in people:
+        if participant and (getattr(participant, "email", None) or "").strip().lower() == self_upn:
+            token = scoped_speaker_tokens.get(participant.identity_key())
+            if token:
+                return token
+    return None
 
 
 def _identity_token_map(transcript: Transcript, speaker_tokens: dict[str, str]) -> dict[str, str]:
@@ -229,6 +246,7 @@ def ingest(transcript: Transcript, db: Session, force_reextract: bool = False) -
             if metadata.organizer and metadata.organizer.identity_key()
             else None
         )
+        self_token = _resolve_self_token(transcript, scoped_speaker_tokens)
         meeting_transcript = MeetingTranscript(
             source_id=source_id,
             external_id=metadata.external_id,
@@ -244,6 +262,7 @@ def ingest(transcript: Transcript, db: Session, force_reextract: bool = False) -
             meeting_start=metadata.start_time,
             meeting_end=metadata.end_time,
             organizer_token=organizer_token,
+            self_token=self_token,
             content_hash=content_hash,
         )
         db.add(meeting_transcript)

@@ -7,12 +7,45 @@ knowledge_persistence_service, which is the sole place that produces
 KnowledgeItem rows.
 """
 
+import re
 from dataclasses import dataclass, field
 from typing import Optional
 
 from utils.logger import get_logger
 
 logger = get_logger("services.meeting_intelligence_model")
+
+_COUNTERPARTY_KINDS = {"person", "team", "department", "vendor", "customer", "group"}
+_TOKEN_LIKE = re.compile(r"^<?[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*_\d+>?$")
+
+
+def _normalize_counterparty(raw) -> Optional[dict]:
+    """
+    Coerce the LLM's `counterparty` into the canonical shape, or None.
+
+    Accepts a dict {token?, name?, kind?} or a bare string. A token-looking string
+    (e.g. "<S5_PERSON_3>" or "PERSON_3") becomes a person token (brackets stripped);
+    any other string becomes a named entity. Empty/blank → None.
+    """
+    if not raw:
+        return None
+    if isinstance(raw, str):
+        val = raw.strip()
+        if not val:
+            return None
+        if _TOKEN_LIKE.match(val):
+            return {"token": val.strip("<>"), "name": None, "kind": "person"}
+        return {"token": None, "name": val, "kind": "group"}
+    if isinstance(raw, dict):
+        token = (raw.get("token") or "").strip().strip("<>") or None
+        name = (raw.get("name") or "").strip() or None
+        kind = (raw.get("kind") or "").strip().lower()
+        if kind not in _COUNTERPARTY_KINDS:
+            kind = "person" if token else "group"
+        if not token and not name:
+            return None
+        return {"token": token, "name": name, "kind": kind}
+    return None
 
 VALID_KNOWLEDGE_TYPES = {
     "action_item", "commitment", "deadline", "decision", "risk", "blocker",
@@ -36,6 +69,12 @@ class MeetingIntelligenceItem:
     due_hint:       Optional[str] = None
     confidence:     float = 0.0
     extra_data:     dict = field(default_factory=dict)
+    counterparty:   Optional[dict] = None
+    # the OTHER party a task is directed at (recipient/addressee), when distinct
+    # from the owner — a person token or a named entity. Shape:
+    # {"token": <token|None>, "name": <str|None>,
+    #  "kind": person|team|department|vendor|customer|group}. Drives the
+    # Action Item vs Commitment split (Follow-up Center — Phase 3).
 
 
 @dataclass
@@ -74,6 +113,7 @@ class MeetingIntelligence:
                     due_hint=raw_item.get("due_hint"),
                     confidence=max(0.0, min(1.0, confidence)),
                     extra_data=raw_item.get("extra_data") or {},
+                    counterparty=_normalize_counterparty(raw_item.get("counterparty")),
                 )
             )
         return cls(items=items)

@@ -42,6 +42,10 @@ _VTT_TIME_RE = re.compile(
 _VOICE_TAG_RE = re.compile(r"^<v\s+([^>]+)>(.*)$", re.DOTALL)
 
 
+def _strip_nul(value: Optional[str]) -> Optional[str]:
+    return value.replace("\x00", "") if value else value
+
+
 def _parse_dt(value: Optional[str]) -> Optional[datetime]:
     """Parse a Graph ISO 8601 timestamp (always UTC, may carry a trailing Z) to naive UTC."""
     if not value:
@@ -87,6 +91,7 @@ def _parse_participants(meeting_metadata: dict) -> tuple[list[Participant], Opti
 
 def _parse_vtt(vtt_content: str, participants_by_name: dict[str, Participant]) -> list[Utterance]:
     """Parse WebVTT cue blocks (with <v Speaker> voice tags) into ordered Utterances."""
+    vtt_content = _strip_nul(vtt_content) or ""
     utterances: list[Utterance] = []
     blocks = re.split(r"\r?\n\r?\n+", vtt_content.strip())
     sequence_index = 0
@@ -163,14 +168,14 @@ def parse_transcript_payload(
         duration_seconds = int((end_time - start_time).total_seconds())
 
     metadata = MeetingMetadata(
-        meeting_id=transcript_metadata.get("meetingId") or meeting_metadata.get("id", ""),
-        subject=meeting_metadata.get("subject"),
+        meeting_id=_strip_nul(transcript_metadata.get("meetingId")) or _strip_nul(meeting_metadata.get("id")) or "",
+        subject=_strip_nul(meeting_metadata.get("subject")),
         organizer=organizer,
         start_time=start_time,
         end_time=end_time,
         duration_seconds=duration_seconds,
-        join_url=meeting_metadata.get("joinWebUrl"),
-        external_id=transcript_metadata.get("id"),
+        join_url=_strip_nul(meeting_metadata.get("joinWebUrl")),
+        external_id=_strip_nul(transcript_metadata.get("id")),
         raw_source={
             "transcript_metadata": transcript_metadata,
             "vtt_content": vtt_content,

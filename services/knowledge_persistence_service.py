@@ -32,9 +32,38 @@ _EXTRA_DATA_SCHEMA: dict[str, set] = {
     # vault). system_name + credential_kind form the knowledge_key and the
     # (metadata-only) embedding template — see knowledge_evolution_service.
     "credential_reference": {"vault_token", "system_name", "credential_kind"},
+    # Follow-up Center — Phase 3: the external/other party a task is directed at,
+    # used to classify Action Items (self) vs Commitments (external recipient/entity).
+    "action_item":         {"counterparty"},
+    "commitment":          {"counterparty"},
+    "follow_up":            {"counterparty"},
+    "question":             {"counterparty"},
+    "deadline":            {"counterparty"},
+    "risk":                {"counterparty"},
+    "blocker":             {"counterparty"},
 }
 
 _WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+
+def _strip_nul(text: Optional[str]) -> Optional[str]:
+    return text.replace("\x00", "") if text else text
+
+
+def _clean_scalar(value):
+    if isinstance(value, str):
+        return value.replace("\x00", "")
+    return value
+
+
+def _clean_extra_data(extra_data: dict) -> dict:
+    cleaned = {}
+    for k, v in (extra_data or {}).items():
+        if isinstance(v, str):
+            cleaned[k] = v.replace("\x00", "")
+        else:
+            cleaned[k] = v
+    return cleaned
 
 
 def _shape_extra_data(knowledge_type: str, extra_data: dict) -> dict:
@@ -42,7 +71,7 @@ def _shape_extra_data(knowledge_type: str, extra_data: dict) -> dict:
     allowed = _EXTRA_DATA_SCHEMA.get(knowledge_type)
     if not allowed:
         return {}
-    return {k: v for k, v in (extra_data or {}).items() if k in allowed}
+    return {k: _clean_scalar(v) for k, v in (extra_data or {}).items() if k in allowed}
 
 
 def _resolve_due_hint(due_hint: Optional[str], reference_dt: Optional[datetime]) -> Optional[datetime]:
@@ -83,17 +112,23 @@ def persist(
     created: list[KnowledgeItem] = []
 
     for item in intelligence.items:
+        # Merge the (separate) counterparty field into extra_data so the per-type
+        # schema can carry it through to classification (Follow-up Center — Phase 3).
+        merged_extra = dict(item.extra_data or {})
+        if getattr(item, "counterparty", None):
+            merged_extra["counterparty"] = item.counterparty
+
         row = KnowledgeItem(
             source_id=source_id,
             knowledge_type=item.knowledge_type,
-            title_masked=item.title,
-            detail_masked=item.detail,
-            owner_token=item.owner_token,
+            title_masked=_strip_nul(item.title),
+            detail_masked=_strip_nul(item.detail),
+            owner_token=_strip_nul(item.owner_token),
             due_at=_resolve_due_hint(item.due_hint, meeting_start),
             confidence=round(item.confidence, 3),
             status="open",
             source_type="transcript",
-            extra_data=_shape_extra_data(item.knowledge_type, item.extra_data),
+            extra_data=_shape_extra_data(item.knowledge_type, _clean_extra_data(merged_extra)),
             llm_call_log_id=llm_call_log_id,
         )
         db.add(row)

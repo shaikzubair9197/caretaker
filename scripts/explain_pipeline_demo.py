@@ -117,11 +117,8 @@ def _spoken_lines(vtt: str) -> list[tuple[str, str]]:
 
 
 def _ai_backend() -> tuple[str, str]:
-    provider = getattr(llm_service, "LLM_PROVIDER", "ollama")
-    model = (
-        getattr(llm_service, "AZURE_DEPLOYMENT", "") if provider == "azure_openai"
-        else getattr(llm_service, "OLLAMA_MODEL", "")
-    )
+    provider = getattr(llm_service, "LLM_PROVIDER", "azure_openai")
+    model = getattr(llm_service, "AZURE_DEPLOYMENT", "")
     return provider, model
 
 

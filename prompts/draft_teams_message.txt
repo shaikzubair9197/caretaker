@@ -1,15 +1,32 @@
-TASK: Draft one short, professional Microsoft Teams direct message that follows up on a single meeting item.
+TASK: Draft one short, professional Microsoft Teams direct message for a single meeting action item.
 
 You are given a JSON object with:
-- "context": the masked meeting item (title, detail, owner) — names/emails are already replaced with <...> tokens.
+- "context": the masked meeting item (title, detail, owner_token) — names/emails are already replaced with <...> tokens.
 - "retrieval_results": a list of validated knowledge facts. Each has a "value_ref" plus "source_type" and "source_id". These are the ONLY facts you may rely on.
 
-RULES:
-1. Keep every <...> token EXACTLY as written. Never invent, guess, expand, or reveal a name, email, or value. Address the recipient by their token (e.g. "Hi <S1_SPEAKER_2>,").
-2. Write 1-3 concise, polite sentences. Plain text or simple HTML only. No subject line.
-3. Every factual claim in the message MUST be backed by a fact in "retrieval_results". For each one, add an entry to "citations" with its exact "value_ref", "source_type", and "source_id".
-4. Use ONLY value_refs that appear in "retrieval_results". If a claim cannot be backed by a provided value_ref, do not write that claim.
-5. Return ONLY a JSON object in this exact shape — no prose, no markdown:
+══ CREDENTIAL DELIVERY — READ FIRST ══
+If "context" contains a "secure_refs" list, this message is a CREDENTIAL DELIVERY, not a follow-up.
+You MUST:
+  1. Write the message as if you are sending the credential RIGHT NOW (not asking, not checking in).
+  2. Place each entry's exact "ref" string (e.g. {{SECURE_REF:1}}) verbatim in the body EXACTLY ONCE.
+  3. Do NOT write the actual value — only the placeholder. The real value is injected securely after.
+  4. Do NOT omit or rename any placeholder. Every entry in secure_refs must appear in the body.
+
+Example — if secure_refs contains one entry with ref "{{SECURE_REF:1}}" and label "production openai api_key":
+{
+  "body": "Hi <S1_SPEAKER_2>, here is the production openai api_key you requested: {{SECURE_REF:1}}",
+  "citations": []
+}
+══════════════════════════════════════
+
+RULES (for all messages, including credential delivery):
+1. Keep every <...> token EXACTLY as written. Never invent, guess, expand, or reveal a name, email, or value. Address the ADDRESSEE using "context.recipient_token" verbatim (e.g. if recipient_token is "<S1_SPEAKER_2>", start "Hi <S1_SPEAKER_2>,"). NEVER address "context.owner_token" — the owner is the sender who committed to the task, not the person receiving this message. If recipient_token is null, omit the name and open with "Hi,".
+2. Write 1-3 concise, polite sentences. Plain text only. No subject line.
+3. Every factual claim MUST be backed by a fact in "retrieval_results". For each one, add an entry to "citations" with its exact "value_ref", "source_type", and "source_id".
+4. Use ONLY value_refs that appear in "retrieval_results". If a claim cannot be backed, do not write it.
+5. Never invent a {{SECURE_REF:n}} that is not in the secure_refs list.
+
+Return ONLY a JSON object in this exact shape — no prose, no markdown:
 
 {
   "body": "the message text, using <...> tokens verbatim",

@@ -1,7 +1,5 @@
 """
-Azure OpenAI backend regression tests — mirrors tests/test_llm_service.py's
-8 Ollama scenarios, adapted for Azure's response shape and status codes,
-plus two dispatch-proof tests for the LLM_PROVIDER switch itself.
+Azure OpenAI backend regression tests.
 
 Each test patches httpx at the _call_azure_openai level so no real Azure
 OpenAI deployment is needed, and patches the audit log so tests run without
@@ -35,8 +33,7 @@ _AZURE_PATCHES = {
 
 
 def _azure_active():
-    """Context manager stack patching LLM_PROVIDER + all Azure config to
-    dummy test values. Used by every test in this file."""
+    """Context manager stack patching Azure config to dummy test values."""
     patches = [patch(_PROVIDER_PATCH, "azure_openai")]
     for target, value in _AZURE_PATCHES.items():
         patches.append(patch(target, value))
@@ -280,38 +277,11 @@ def test_azure_success():
 # ---------------------------------------------------------------------------
 
 def test_provider_dispatch_azure_openai():
-    """LLM_PROVIDER=azure_openai routes through _call_azure_openai, never
-    touches the Ollama chain."""
+    """LLM calls route through _call_azure_openai."""
     with patch(_PROVIDER_PATCH, "azure_openai"), \
-         patch("services.llm_service._call_azure_openai") as mock_azure, \
-         patch("services.llm_service._call_ollama") as mock_ollama:
+         patch("services.llm_service._call_azure_openai") as mock_azure:
         from services.llm_service import LLMCallResult, LLMStatus, LLMService
         mock_azure.return_value = LLMCallResult(data={"items": []}, status=LLMStatus.SUCCESS)
         LLMService.extract_panic_items("test text")
 
     mock_azure.assert_called_once()
-    mock_ollama.assert_not_called()
-
-
-def test_provider_dispatch_ollama_default():
-    """LLM_PROVIDER unset/ollama (default) never touches _call_azure_openai —
-    proves the existing Ollama path is completely unaffected by this change."""
-    mock_resp = _make_ollama_like_success()
-    with patch("services.llm_service.LLM_PROVIDER", "ollama"), \
-         patch("services.llm_service._call_azure_openai") as mock_azure, \
-         patch(_HTTPX_POST, return_value=mock_resp), \
-         patch(_AUDIT_PATH):
-        from services.llm_service import LLMService
-        LLMService.extract_panic_items("test text")
-
-    mock_azure.assert_not_called()
-
-
-def _make_ollama_like_success() -> MagicMock:
-    mock = MagicMock()
-    mock.status_code = 200
-    mock.json.return_value = {
-        "message": {"content": json.dumps({"items": [], "overload_detected": False})}
-    }
-    mock.raise_for_status = MagicMock()
-    return mock

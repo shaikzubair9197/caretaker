@@ -45,6 +45,19 @@ class Settings:
     VAULT_MASTER_KEY         = os.getenv("VAULT_MASTER_KEY", "")
     VAULT_KEY_VERSION        = int(os.getenv("VAULT_KEY_VERSION", "1"))
 
+    # ── Secure credential resolution (Follow-up Center plan — Phase 4) ────────
+    # Confidence at/above which resolve_secure_reference() auto-resolves a
+    # credential request to a single latest-active version with no clarification.
+    # Below this (or a near-tie / zero matches) the draft becomes a clarification
+    # card instead. The LLM never sees the value either way.
+    SECURE_RESOLUTION_THRESHOLD = float(os.getenv("SECURE_RESOLUTION_THRESHOLD", "0.8"))
+
+    # ── Reminder auto-scheduling (Follow-up Center plan — Phase 6) ────────────
+    # Default lead time (minutes before a deadline) used to derive a reminder's
+    # remind_at from its due_date when a deadline-bearing reminder commitment is
+    # created. Snapshotted onto the Commitment; the daemon never recomputes it.
+    REMINDER_DEFAULT_OFFSET_MINUTES = int(os.getenv("REMINDER_DEFAULT_OFFSET_MINUTES", "60"))
+
     # ── Retention (days) ─────────────────────────────────────────────────────
     RETENTION_RAW_DAYS         = int(os.getenv("RETENTION_RAW_DAYS", "90"))
     RETENTION_TRANSCRIPT_DAYS  = int(os.getenv("RETENTION_TRANSCRIPT_DAYS", "30"))

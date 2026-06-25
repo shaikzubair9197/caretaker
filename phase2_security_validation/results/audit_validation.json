@@ -1,6 +1,6 @@
 {
   "test": "TEST 7 \u2014 Audit Completeness",
-  "generated_at": "2026-06-19T13:29:33.962371",
+  "generated_at": "2026-06-25T14:14:40.924048",
   "passed": true,
   "matrix": {
     "INGEST": {

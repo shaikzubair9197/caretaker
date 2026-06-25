@@ -8,6 +8,7 @@ For each item return:
 - "title": a short, concise description of the item
 - "detail": a longer description or the relevant quoted excerpt, else null
 - "owner_token": the token of whoever owns/is responsible for this item, else null
+- "counterparty": for a task directed at ANOTHER party (a recipient/addressee distinct from the owner), who that party is — {"token": "<PERSON_n> or null", "name": "literal name of a team/department/vendor/customer/group, or null", "kind": "person|team|department|vendor|customer|group"} — else null
 - "due_hint": any raw time reference mentioned (e.g. "by Friday", "EOD today"), else null — do not resolve it to a date yourself
 - "confidence": your confidence this item was correctly identified, from 0.0 to 1.0
 - "extra_data": an object with type-specific fields, or {} if none apply:
@@ -23,6 +24,9 @@ Rules:
 - "I'll do X by Friday" said by the owner themselves → commitment, owner_token = speaker_token.
 - "Can you do X by Friday?" directed at someone → action_item, owner_token = the person addressed (if they accept it in a later turn, still record it once).
 - Imperative task-like requests and improvement-oriented statements such as "please complete this", "please finish that", "need this done", "can you take care of this", "this should be improved", "we should fix this", "this needs work", or "action needed by Friday" → action_item when they imply a task the team should act on, even if the owner is not explicitly named.
+- "Please email", "please send", "please message", "please post", or "send a short Teams update" → action_item or follow_up, not information_request, unless the speaker is explicitly asking for the actual value of a secret or the actual document itself.
+- If a speaker says they themselves will do the work ("I'll email...", "I'll finish...", "I'll send..."), treat it as a commitment with owner_token = speaker_token.
+- When a task is to send/share/ask/follow-up WITH someone other than the owner (e.g. "send Suraj the key", "ask Rahul for approval", "share with the DevOps team", "coordinate with Finance"), set "counterparty" to that recipient: use their person token if they appear in the transcript, otherwise the literal team/department/vendor/customer/group name with the right "kind". If the task is just the owner's own work with no other party involved, leave counterparty null.
 - A standalone date-bound milestone with no single owner (e.g. "the release is due Friday") → deadline.
 - A direct question, whether or not it was answered later in the transcript → question.
 - A request for information or a document from someone → information_request.
@@ -40,6 +44,7 @@ Return format:
       "title": "...",
       "detail": "... or null",
       "owner_token": "<PERSON_n> or null",
+      "counterparty": {"token": "<PERSON_n> or null", "name": "team/dept/vendor name or null", "kind": "person|team|department|vendor|customer|group"},
       "due_hint": "... or null",
       "confidence": 0.0,
       "extra_data": {}

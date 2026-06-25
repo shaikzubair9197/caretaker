@@ -331,6 +331,30 @@ def test_intent_heuristic_flags_secret_when_llm_unavailable(db):
     assert intent.query_type == "secret"
 
 
+def test_intent_draft_style_query_stays_non_secret(db):
+    from services import knowledge_intent_service
+
+    classified = LLMCallResult(
+        data={
+            "query_type": "secret",
+            "is_secret_request": True,
+            "knowledge_types": ["credential_reference"],
+            "search_terms": [],
+            "as_of_hint": None,
+        },
+        status=LLMStatus.SUCCESS,
+    )
+    with patch("services.knowledge_intent_service.LLMService.classify_knowledge_query",
+               return_value=classified), \
+         patch("services.knowledge_intent_service.PreprocessingService.mask_pii",
+               return_value=("please email sarah manager the open api package by friday", [])):
+        intent = knowledge_intent_service.classify("please email sarah manager the open api package by friday")
+
+    assert intent.classifier_status == "SUCCESS"
+    assert intent.is_secret_request is False
+    assert intent.query_type == "semantic"
+
+
 # ── Confidence floor returns insufficient-confidence rather than a guess ──────
 
 def test_low_confidence_only_returns_insufficient(db):

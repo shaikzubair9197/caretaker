@@ -35,12 +35,18 @@ def results():
         "threat":      rsv.test_6_threat(),
         "audit":       rsv.test_7_audit(),
         "boundary":    rsv.test_8_boundary_proof(),
+        "no_plaintext": rsv.test_9_credential_no_plaintext(),
     }
 
 
 def test_no_secret_reaches_llm(results):
     r = results["leak"]
     assert r["passed"], f"Secrets/identities leaked to LLM: {r['leaks']}"
+
+
+def test_no_credential_plaintext_anywhere(results):
+    r = results["no_plaintext"]
+    assert r["passed"], f"Secure-credential plaintext leaked: {r['violations']}"
 
 
 def test_vault_full_recovery(results):

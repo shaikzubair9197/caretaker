@@ -30,6 +30,22 @@ _SECRET_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Follow-up/draft-style phrasing that should stay non-secret unless the query
+# explicitly asks for the value of a credential.
+_DRAFT_INTENT_RE = re.compile(
+    r"\b(email|send|draft|follow[\s-]?up|remind|update|acknowledge|complete|finish|review)\b",
+    re.IGNORECASE,
+)
+
+# Stronger pattern for a direct request for the actual value of a secret.
+_EXPLICIT_SECRET_REQUEST_RE = re.compile(
+    r"\b(what(?:'s| is)|give me|send me|share|show me|tell me|need|provide|pull up|"
+    r"look up|retrieve|find|locate|email me|message me)\b.{0,60}\b("
+    r"password|passwd|api[\s_-]?key|secret|token|credential|connection[\s_-]?string|"
+    r"access[\s_-]?key|private[\s_-]?key|bearer)\b",
+    re.IGNORECASE,
+)
+
 
 @dataclass
 class KnowledgeIntent:
@@ -87,6 +103,13 @@ def classify(query: str) -> KnowledgeIntent:
     # Belt-and-suspenders: a keyword secret request always wins, even if the LLM
     # missed it — we must never treat a secret query as a normal one.
     is_secret = bool(data.get("is_secret_request")) or bool(_SECRET_RE.search(raw_query))
+    if not _EXPLICIT_SECRET_REQUEST_RE.search(raw_query) and _DRAFT_INTENT_RE.search(raw_query):
+        # Draft-generation queries often mention "send", "email", or "follow up"
+        # while looking up a normal work item. Don't let that wording route us to
+        # secret-only retrieval unless the user explicitly asked for the value.
+        is_secret = False
+        if query_type == "secret":
+            query_type = "semantic"
     if is_secret and query_type not in {"secret", "mixed"}:
         query_type = "secret"
 

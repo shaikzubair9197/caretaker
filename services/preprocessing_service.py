@@ -15,6 +15,11 @@ _analyzer = None
 _anonymizer = None
 
 
+def _strip_nul(text: str) -> str:
+    """Remove embedded NUL bytes before regex/LLM/DB processing."""
+    return text.replace("\x00", "") if text else text
+
+
 def _get_presidio():
     global _analyzer, _anonymizer
     if _analyzer is not None:
@@ -37,6 +42,16 @@ def _get_presidio():
         api_key_recognizer = PatternRecognizer(
             supported_entity="API_KEY",
             patterns=[
+                # Vendor-prefixed secret tokens (OpenAI sk-, Azure az-, GitHub ghp_,
+                # Slack xox*, GitLab glpat, Google AIza/ya29, AWS temp ASIA, …). Scored
+                # ABOVE the spaCy NER PERSON/ORGANIZATION confidence (0.85) so a key
+                # whose value embeds a brand word ("az-openai-stg-…") is kept as an
+                # API_KEY by the overlap resolver instead of being mis-tagged ORGANIZATION.
+                Pattern(
+                    "VENDOR_KEY",
+                    r"\b(sk|az|ghp|gho|ghu|ghs|ghr|xox[baprs]|glpat|AIza|ya29|ASIA)[-_][A-Za-z0-9_\-]{6,}\b",
+                    0.9,
+                ),
                 Pattern("API_KEY_LONG", r"\b[A-Za-z0-9_\-]{16,}\b", 0.5),
                 Pattern(
                     "BEARER_HEADER",
@@ -79,6 +94,9 @@ def _get_presidio():
 _FALLBACK_PATTERNS = [
     (re.compile(r"\bAKIA[0-9A-Z]{16}\b"), "AWS_KEY"),
     (re.compile(r"(postgres|mysql|mongodb|redis|mssql)://[^\s\"']+", re.IGNORECASE), "CONNECTION_STRING"),
+    # Vendor-prefixed secret tokens (sk-/az-/ghp_/xox*/glpat/AIza/ya29/ASIA …). Mirrors
+    # the Presidio VENDOR_KEY recognizer so bare keys are still caught without Presidio.
+    (re.compile(r"\b(sk|az|ghp|gho|ghu|ghs|ghr|xox[baprs]|glpat|AIza|ya29|ASIA)[-_][A-Za-z0-9_\-]{6,}\b"), "API_KEY"),
     (re.compile(r"\b(bearer|token|apikey|api_key|secret|password|passwd|pwd)\s*[=:]\s*\S+", re.IGNORECASE), "API_KEY"),
     (re.compile(r"\b(?:\d[ -]?){13,16}\b"), "CREDIT_CARD"),
     (re.compile(r"\b(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)\d+\.\d+\b"), "PRIVATE_IP"),
@@ -88,7 +106,7 @@ _FALLBACK_PATTERNS = [
 
 
 def _mask_with_regex(text: str) -> tuple[str, list]:
-    result = text
+    result = _strip_nul(text)
     redactions = []
     for pattern, label in _FALLBACK_PATTERNS:
         def replacer(m, lbl=label):
@@ -211,6 +229,7 @@ class PreprocessingService:
         """
         if not text:
             return text
+        text = _strip_nul(text)
         t = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", text, flags=re.I | re.S)
         t = re.sub(r"<br\s*/?>", "\n", t, flags=re.I)
         t = re.sub(r"</(p|div|li|tr|h[1-6]|ul|ol|blockquote)>", "\n", t, flags=re.I)
@@ -223,7 +242,7 @@ class PreprocessingService:
 
     @staticmethod
     def strip_noise(text: str) -> str:
-        result = text
+        result = _strip_nul(text)
         for pattern in _SIGNATURE_PATTERNS:
             result = pattern.sub("", result)
         result = re.sub(r"\n{3,}", "\n\n", result)
@@ -236,6 +255,7 @@ class PreprocessingService:
         Falls back to regex patterns if Presidio is unavailable.
         Placeholders use <ENTITY_TYPE> format for semantic LLM reasoning.
         """
+        text = _strip_nul(text)
         analyzer, anonymizer = _get_presidio()
 
         if analyzer is None or anonymizer is None:
@@ -299,14 +319,28 @@ class PreprocessingService:
                Same (type, value) reuses the same token (stable within doc).
             5. Replace span in text right-to-left so earlier offsets stay valid.
         """
+        text = _strip_nul(text)
         analyzer, _ = _get_presidio()
 
         if analyzer is None:
-            return PreprocessingService._mask_indexed_regex(text)
+            logger.info(
+                "[CREDTRACE] Mask -> Presidio unavailable, using regex fallback (text_len=%s)",
+                len(text or ""),
+            )
+            masked, token_map, redactions = PreprocessingService._mask_indexed_regex(text)
+            logger.info(
+                "[CREDTRACE] Mask (regex) -> entities=%s redactions=%s",
+                len(redactions), redactions,
+            )
+            return masked, token_map, redactions
 
         try:
             results = analyzer.analyze(text=text, language="en")
             if not results:
+                logger.info(
+                    "[CREDTRACE] Mask -> Presidio detected 0 entities (text_len=%s) — "
+                    "nothing to redact", len(text or ""),
+                )
                 return text, {}, []
 
             # ── Step 2: resolve overlaps (highest score, then longest span wins) ──
@@ -345,11 +379,25 @@ class PreprocessingService:
                     "token": token_name,
                 })
 
+            # redactions carry type/score/token only — never the secret value.
+            logger.info(
+                "[CREDTRACE] Mask -> Presidio detected %s entities; redactions=%s; "
+                "entity_types=%s",
+                len(redactions), redactions, sorted({r["type"] for r in redactions}),
+            )
             return masked, token_map, redactions
 
         except Exception as e:
-            logger.error(f"mask_pii_indexed Presidio failed: {e} — using regex fallback")
-            return PreprocessingService._mask_indexed_regex(text)
+            logger.exception(
+                "[CREDTRACE] Mask -> Presidio analysis FAILED — full traceback above; "
+                "using regex fallback"
+            )
+            masked, token_map, redactions = PreprocessingService._mask_indexed_regex(text)
+            logger.info(
+                "[CREDTRACE] Mask (regex fallback) -> entities=%s redactions=%s",
+                len(redactions), redactions,
+            )
+            return masked, token_map, redactions
 
     @staticmethod
     def _mask_indexed_regex(text: str) -> tuple[str, dict[str, str], list[dict]]:

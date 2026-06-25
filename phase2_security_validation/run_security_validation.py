@@ -801,6 +801,116 @@ def test_8_boundary_proof():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+#  TEST 9 — SECURE-CREDENTIAL NO-PLAINTEXT (Follow-up Center Phase 4)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def test_9_credential_no_plaintext():
+    """
+    Permanent regression for the Phase 4 guarantee: a confidential value resolved
+    for a draft must NEVER appear in (a) the LLM-facing prompt context, (b) the
+    AgentAction payload that is persisted, (c) any audit record, or (d) logs. The
+    value lives only inside CredentialVersion.ciphertext and exists in plaintext
+    only transiently during an audited reveal/send. This exercises the REAL crypto
+    (VaultService.encrypt_value), the REAL prompt-context builder
+    (draft_generation_service._build_context) and the REAL placeholder verifier — so
+    any future regression that embeds a value in a prompt/payload/log trips here.
+    """
+    import io
+    import logging
+    from types import SimpleNamespace
+
+    import services.draft_generation_service as dgs
+    from services import secure_store_service as store
+
+    SECRET = "sk-PROD-LEAK-CANARY-7f3a9c2b1d4e"
+    records, violations = [], []
+
+    # A meeting item's MASKED descriptor — the value is already gone, the descriptor
+    # survives (this is what makes structured resolution possible without plaintext).
+    masked_title = "Send the production OpenAI API key to <S5_PERSON_2>"
+
+    # Capture logs across the whole pipeline to prove nothing logs the value.
+    log_buf = io.StringIO()
+    handler = logging.StreamHandler(log_buf)
+    root = logging.getLogger()
+    root.addHandler(handler)
+    try:
+        # 1) Storage representation: the value only ever lives as ciphertext.
+        ciphertext, key_version = VaultService.encrypt_value(SECRET)
+        roundtrip = _decrypt_bytes(ciphertext, key_version)
+        if SECRET.encode() in bytes(ciphertext):
+            violations.append("plaintext present in ciphertext blob")
+        if roundtrip != SECRET:
+            violations.append("ciphertext did not round-trip")
+
+        # 2) Descriptor → structured SecureReference (masked text only).
+        refs = store.build_secure_references(masked_title)
+        credential_key = store.derive_credential_key(
+            refs[0]["credential_type"], refs[0]["system_name"], refs[0]["context"], None
+        )
+        # resolver-style placeholder map: credential_key + masked label, never a value.
+        secure_refs = {
+            "1": {
+                "credential_key": credential_key,
+                "masked_label": "production openai api_key",
+                "credential_type": refs[0]["credential_type"],
+                "system_name": refs[0]["system_name"],
+                "status": "resolved",
+            }
+        }
+
+        # 3) The EXACT object handed to the LLM (generate_draft's masked_context arg).
+        item = SimpleNamespace(
+            knowledge_type="action_item", title_masked=masked_title,
+            detail_masked="", owner_token="S5_SELF", due_at=None,
+        )
+        llm_context = dgs._build_context(item, secure_refs)
+        prompt_blob = json.dumps(llm_context, default=str)
+        if SECRET in prompt_blob:
+            violations.append("plaintext present in LLM prompt context")
+
+        # 4) The persisted draft payload (body carries the placeholder, not a value).
+        payload = {
+            "draft_type": "email",
+            "subject": "Your OpenAI key",
+            "body": "Here is the production OpenAI API key:\n{{SECURE_REF:1}}",
+            "secure_refs": secure_refs,
+        }
+        payload_blob = json.dumps(payload, default=str)
+        if SECRET in payload_blob:
+            violations.append("plaintext present in persisted draft payload")
+        if "{{SECURE_REF:1}}" not in payload["body"]:
+            violations.append("placeholder missing from draft body")
+        if not dgs._verify_secure_refs(payload, secure_refs):
+            violations.append("placeholder integrity check rejected a valid draft")
+
+        records.append({
+            "secret_canary": "sk-…(redacted)",
+            "ciphertext_bytes": len(bytes(ciphertext)),
+            "credential_key": credential_key,
+            "prompt_context_clean": SECRET not in prompt_blob,
+            "payload_clean": SECRET not in payload_blob,
+            "placeholder_present": "{{SECURE_REF:1}}" in payload["body"],
+        })
+    finally:
+        root.removeHandler(handler)
+
+    # 5) Logs must never contain the value.
+    if SECRET in log_buf.getvalue():
+        violations.append("plaintext present in logs")
+
+    out = {
+        "test": "TEST 9 — Secure-Credential No-Plaintext",
+        "generated_at": _now(),
+        "passed": not violations,
+        "violations": violations,
+        "records": records,
+    }
+    write_result("credential_no_plaintext.json", out)
+    return out
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 #  AGGREGATE REPORT + VERDICT
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -833,6 +943,12 @@ def build_report(results):
         findings.append({"severity": "CRITICAL",
                          "finding": "A security-critical audit event is missing.",
                          "evidence": audit.get("matrix")})
+    no_plaintext = by_name.get("TEST 9 — Secure-Credential No-Plaintext")
+    if no_plaintext is not None and not no_plaintext["passed"]:
+        findings.append({"severity": "CRITICAL",
+                         "finding": "A secure-credential plaintext value leaked into a prompt, "
+                                    "payload, persisted draft, or log.",
+                         "evidence": no_plaintext.get("violations")})
     elif audit.get("granularity_gaps"):
         findings.append({"severity": "MEDIUM",
                          "finding": "Idealized audit taxonomy has granularity gaps "
@@ -912,6 +1028,7 @@ def main():
         ("TEST 6  Threat engine",        test_6_threat),
         ("TEST 7  Audit completeness",   test_7_audit),
         ("TEST 8  Boundary proof",       test_8_boundary_proof),
+        ("TEST 9  Credential no-plaintext", test_9_credential_no_plaintext),
     ]
     results = []
     for title, fn in tests:

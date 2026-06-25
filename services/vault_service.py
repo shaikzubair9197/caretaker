@@ -65,6 +65,21 @@ def _encrypt(plaintext: str, version: int) -> bytes:
     return nonce + ct_and_tag
 
 
+def _normalize_session_context(session_context: Optional[str], source_id: int) -> str:
+    """
+    Keep vault_tokens.session_context within the 64-char DB limit.
+
+    Graph meeting IDs can be much longer than 64 chars, so we hash any long
+    context instead of trying to store the raw value.
+    """
+    if session_context:
+        ctx = str(session_context).strip()
+        if len(ctx) <= 64:
+            return ctx
+        return hashlib.sha256(ctx.encode("utf-8")).hexdigest()
+    return hashlib.sha256(str(source_id).encode()).hexdigest()[:8]
+
+
 def _decrypt_bytes(ciphertext_blob: bytes, version: int) -> str:
     """AES-256-GCM decrypt. Expects nonce(12)||ciphertext||tag format."""
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -170,7 +185,7 @@ class VaultService:
             return
 
         version = settings.VAULT_KEY_VERSION
-        ctx = session_context or hashlib.sha256(str(source_id).encode()).hexdigest()[:8]
+        ctx = _normalize_session_context(session_context, source_id)
 
         for token_name, original_value in token_map.items():
             entity_type = token_name.rsplit("_", 1)[0]   # "PERSON_1" → "PERSON"
@@ -261,6 +276,83 @@ class VaultService:
             },
         )
 
+        return plaintext
+
+    @staticmethod
+    def fingerprint(plaintext: str) -> str:
+        """Keyed, non-reversible fingerprint (HMAC-SHA256 with the master key) of a
+        value. Lets the secure store detect whether a re-discovered credential is
+        unchanged vs. rotated WITHOUT decrypting anything. Requires the master key
+        to compute, so a DB-only attacker cannot precompute it; never reversible to
+        plaintext."""
+        import hmac
+        key = _load_master_key(settings.VAULT_KEY_VERSION)
+        return hmac.new(key, plaintext.encode("utf-8"), hashlib.sha256).hexdigest()
+
+    @staticmethod
+    def encrypt_value(plaintext: str) -> tuple:
+        """Encrypt a value with the current master-key version for storage in the
+        secure credential store (Follow-up Center plan — Phase 1). Returns
+        (ciphertext_blob, key_version). Thin public wrapper over _encrypt — it does
+        NOT write audit; the caller's upsert_credential emits CREDENTIAL_STORED /
+        CREDENTIAL_ROTATED so storage and rotation are audited at the right layer."""
+        version = settings.VAULT_KEY_VERSION
+        return _encrypt(plaintext, version), version
+
+    @staticmethod
+    def decrypt_ciphertext(
+        ciphertext: bytes,
+        key_version: int,
+        justification: str,
+        actor: str,
+        agent_action_id: int,
+        db,
+        *,
+        audit_event: str = "CREDENTIAL_REVEAL",
+        source_id: Optional[int] = None,
+        label: Optional[str] = None,
+    ) -> str:
+        """
+        Authorized unmask of a raw secure-credential ciphertext (a CredentialVersion
+        row, not a VaultToken). Same gate as decrypt(): requires an approved
+        AgentAction and a non-empty justification. Returns plaintext for in-memory
+        use ONLY — never stored, never logged, never placed in the audit record.
+        `label` is a non-secret identifier (e.g. a credential_key) recorded in the
+        audit trail.
+        """
+        from database.models import AgentAction
+
+        if not justification or not justification.strip():
+            raise ValueError("justification is required for credential decryption.")
+
+        action = db.query(AgentAction).filter(AgentAction.id == agent_action_id).first()
+        if action is None:
+            _write_audit("ACCESS_DENIED", actor, source_id, label, "DENIED",
+                         justification, {"reason": "agent_action_not_found"})
+            raise PermissionError(f"AgentAction #{agent_action_id} not found.")
+        if action.status != "approved":
+            _write_audit("ACCESS_DENIED", actor, source_id, label, "DENIED",
+                         justification, {"reason": f"action_status={action.status}"})
+            raise PermissionError(
+                f"AgentAction #{agent_action_id} is '{action.status}', not 'approved'."
+            )
+
+        try:
+            plaintext = _decrypt_bytes(ciphertext, key_version)
+        except Exception as e:
+            _write_audit(audit_event, actor, source_id, label, "ERROR",
+                         justification, {"error": str(e)[:200]})
+            raise
+
+        _write_audit(
+            event_type    = audit_event,
+            actor         = actor,
+            source_id     = source_id,
+            vault_token   = label,
+            outcome       = "SUCCESS",
+            justification = justification,
+            event_data    = {"agent_action_id": agent_action_id, "key_version": key_version},
+        )
         return plaintext
 
     @staticmethod

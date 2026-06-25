@@ -24,6 +24,7 @@ from api.health import router as health_router
 from api.graph_sync import router as graph_sync_router
 from api.meeting_prep import router as meeting_prep_router
 from api.drafts import router as drafts_router
+from api.reminders import router as reminders_router
 from utils.logger import get_logger
 
 logger = get_logger("app")
@@ -93,6 +94,7 @@ app.include_router(health_router, dependencies=_auth)
 app.include_router(graph_sync_router, dependencies=_auth)
 app.include_router(meeting_prep_router, dependencies=_auth)
 app.include_router(drafts_router, dependencies=_auth)
+app.include_router(reminders_router, dependencies=_auth)
 
 # ── Dashboard static files — served at /dashboard/ ───────────────────────────
 _dashboard_dir = Path(__file__).parent / "dashboard"

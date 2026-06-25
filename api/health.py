@@ -79,35 +79,24 @@ def health_detailed():
             db_ok = False
             counts["error"] = str(e)
 
-        # ── Ollama pre-flight ─────────────────────────────────────────────
-        # Uses the same preflight_check() used by the LLM service so the
-        # health endpoint and the runtime diagnostics are consistent. Only
-        # meaningful when the Ollama backend is actually active — Azure
-        # OpenAI has no local process to probe, so skip the network call
-        # and report "n/a" rather than a misleading "unavailable".
-        if LLM_PROVIDER == "ollama":
-            pf = preflight_check()
-            ollama_status = "ok" if pf["model_available"] else (
-                "reachable_model_missing" if pf["ollama_reachable"] else "unavailable"
-            )
-            ollama_diagnostics = {
-                "reachable":        pf["ollama_reachable"],
-                "model_available":  pf["model_available"],
-                "configured_model": pf["configured_model"],
-                "installed_models": pf["installed_models"],
-                "preflight_ms":     pf["duration_ms"],
-                "error":            pf.get("error"),
-            }
-        else:
-            ollama_status = "n/a"
-            ollama_diagnostics = {"error": f"not applicable — LLM_PROVIDER={LLM_PROVIDER}"}
+        # ── LLM pre-flight ───────────────────────────────────────────────
+        pf = preflight_check()
+        llm_status = "ok" if pf["azure_configured"] and pf["endpoint_configured"] and pf["api_version_configured"] else "config_missing"
+        llm_diagnostics = {
+            "azure_configured":         pf["azure_configured"],
+            "configured_model":         pf["configured_model"],
+            "endpoint_configured":      pf["endpoint_configured"],
+            "api_version_configured":    pf["api_version_configured"],
+            "preflight_ms":             pf["duration_ms"],
+            "error":                    pf.get("error"),
+        }
 
         return {
             "api": "ok",
             "database": "ok" if db_ok else "error",
             "llm_provider": LLM_PROVIDER,
-            "ollama": ollama_status,
-            "ollama_diagnostics": ollama_diagnostics,
+            "llm_status": llm_status,
+            "llm_diagnostics": llm_diagnostics,
             "counts": counts,
             "last_panic_dump":           last_panic,
             "last_telemetry":            last_telemetry,

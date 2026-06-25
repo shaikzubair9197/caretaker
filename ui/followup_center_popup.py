@@ -37,11 +37,13 @@ from PySide6.QtGui import QGuiApplication, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QComboBox,
     QDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QListView,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -86,10 +88,6 @@ TYPE_LABEL = {
 # Sendable draft types shown under "Generated Drafts" (clarifications get their own section).
 _SEND_TYPES = ("email_draft", "teams_message_draft", "calendar_reminder_draft",
                "reminder_draft", "followup_suggestion_draft")
-# Execution Queue ordering (status → label). "approved" is the transient state P1 made durable.
-EXEC_STATUS_ORDER = [("pending", "Pending"), ("approved", "Approved"),
-                     ("executed", "Executed"), ("failed", "Failed"), ("dismissed", "Dismissed")]
-
 # Palette (matches the dark theme used inline across meeting_prep_popup.py)
 C_BG = "#0d1117"
 C_CARD = "#161b22"
@@ -100,6 +98,21 @@ C_ACCENT = "#6d5efc"
 C_DANGER = "#f85149"
 C_SUCCESS = "#3fb950"
 C_WARN = "#d29922"
+
+# Typography (Phase 5 readability pass) — larger, higher-contrast sizing so the
+# Center reads as a modern productivity surface, not a debug list. Centralized
+# here and used across the workspace + cards.
+FS_HEADER = 16     # workspace / focus context header
+FS_COL    = 14     # column header buttons
+FS_TITLE  = 14     # card title
+FS_BODY   = 13     # card body / preview
+FS_LABEL  = 12     # type label, status badge
+FS_META   = 11     # metadata, timestamps, secondary lines
+
+# The three fixed workspace columns (Phase 5). Drafts holds every sendable draft +
+# credential clarification (approve/reveal/send live here); Commitments and Action
+# Items are server-classified lenses on the same follow-up set (followup_category).
+WORKSPACE_COLUMNS = (("drafts", "Drafts"), ("commitments", "Commitments"), ("action_items", "Action Items"))
 
 
 # ── HTTP worker (same QThread+Signal pattern as meeting_prep's _FetchWorker) ──
@@ -126,6 +139,18 @@ class _HttpWorker(QThread):
             self.done.emit(self._tag, data if isinstance(data, dict) else {"_list": data})
         except Exception as exc:  # noqa: BLE001
             self.done.emit(self._tag, {"_error": str(exc)})
+
+
+class _StableScrollArea(QScrollArea):
+    """QScrollArea that never auto-scrolls to a focused child.
+
+    Qt's QScrollArea calls ensureWidgetVisible() whenever a child receives focus
+    (e.g. clicking a checkbox/button inside a card), which yanks the whole list
+    up or down. Overriding it to a no-op keeps the scroll position stable on click;
+    we still scroll explicitly via the scrollbar when switching tabs."""
+
+    def ensureWidgetVisible(self, childWidget, xmargin=50, ymargin=50):  # noqa: N803
+        return
 
 
 def _btn(text: str, color: str, on_click) -> QPushButton:
@@ -184,6 +209,9 @@ class FollowupCenterDialog(QDialog):
         super().__init__(parent)
         self._meeting_id = meeting_id
         self._selected: set[int] = set()
+        # aid → its checkbox widgets (a draft can appear in several tabs at once;
+        # all its checkboxes must reflect the same selection state).
+        self._checkboxes: dict[int, list] = {}
         self._workers: list[_HttpWorker] = []
         self._inflight_requests = 0
         self._data: dict = {}
@@ -201,7 +229,9 @@ class FollowupCenterDialog(QDialog):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setStyleSheet(build_stylesheet(current_theme()))
         QShortcut(QKeySequence("Escape"), self).activated.connect(self.close)
-        self._apply_workspace_geometry(WORKSPACE_RATIO)
+        # Open full-screen by default (R4 workspace); the ▢ control toggles down to
+        # the smaller centered workspace and back.
+        self._apply_workspace_geometry(0.98)
 
     def _apply_workspace_geometry(self, ratio: float) -> None:
         """Centered desktop workspace at `ratio` of the available screen (R4)."""
@@ -279,6 +309,12 @@ class FollowupCenterDialog(QDialog):
         self._sel_lbl = QLabel("0 selected")
         self._sel_lbl.setStyleSheet(f"color:{C_MUTED}; font-size:11px;")
         bl.addWidget(self._sel_lbl)
+        # Transient result line for bulk/per-card actions (success / skip / error),
+        # so the buttons visibly report what happened instead of silently refreshing.
+        self._action_status = QLabel("")
+        self._action_status.setStyleSheet(f"color:{C_MUTED}; font-size:11px;")
+        bl.addSpacing(12)
+        bl.addWidget(self._action_status)
         bl.addStretch(1)
         approve_selected_btn = _btn("Approve Selected", C_SUCCESS, self._approve_selected)
         reject_selected_btn = _btn("Reject Selected", C_DANGER, self._reject_selected)
@@ -293,7 +329,7 @@ class FollowupCenterDialog(QDialog):
         self._stack = QStackedWidget()
         root.addWidget(self._stack, 1)
 
-        self._scroll = QScrollArea()
+        self._scroll = _StableScrollArea()
         self._scroll.setWidgetResizable(True)
         self._scroll.setStyleSheet(f"QScrollArea {{ background:{C_BG}; border:none; }}")
         self._body = QWidget()
@@ -366,8 +402,15 @@ class FollowupCenterDialog(QDialog):
                 self._show_version_history(payload)
             elif tag == "audit":
                 self._show_audit_timeline(payload)
+            elif tag == "reveal":
+                self._show_reveal(payload)
             elif tag == "action":
-                # any mutation → reload to reflect new state
+                # Surface the outcome (the buttons used to refresh silently, which
+                # looked like nothing happened), then reload to reflect new state.
+                if payload.get("_error"):
+                    self._flash(f"Action failed: {payload['_error']}", error=True)
+                else:
+                    self._flash(self._summarize_action(payload))
                 self.refresh()
         finally:
             self._end_request()
@@ -383,84 +426,264 @@ class FollowupCenterDialog(QDialog):
     def _render(self, data: dict) -> None:
         self._data = data
         self._clear_body()
+        self._checkboxes = {}   # rebuilt below; old widget refs are now stale
         meetings = data.get("meetings", []) or []
         ungrouped = data.get("ungrouped", []) or []
-        total = sum(m.get("counts", {}).get("total", 0) for m in meetings) + len(ungrouped)
-        self._count.setText(f"{total} draft(s)")
 
-        if not meetings and not ungrouped:
+        # Flatten every draft across all groups + meetings into one list, then split
+        # into the three fixed workspace columns (current-transcript-scoped when the
+        # Center was launched with --meeting). No extra fetches — masked-only.
+        all_d: list = []
+        for m in meetings:
+            groups = m.get("groups", {}) or {}
+            for g in GROUP_ORDER:
+                all_d += groups.get(g) or []
+        all_d += ungrouped
+
+        self._count.setText(f"{len(all_d)} draft(s)")
+        if not all_d:
             self._msg.setText("No follow-up drafts yet.\nGenerate from a meeting to populate the center.")
             self._stack.setCurrentIndex(1)
             return
 
+        # Meeting (transcript) filter options: "All meetings" + one entry per
+        # meeting (+ unlinked), each carrying that meeting's own draft list. The tabs
+        # below render whichever option is selected — masked-only, no extra fetches.
+        self._meeting_options: list[tuple[str, list]] = [("All meetings", all_d)]
         for m in meetings:
-            self._body_layout.addWidget(self._meeting_section(m))
+            md: list = []
+            groups = m.get("groups", {}) or {}
+            for g in GROUP_ORDER:
+                md += groups.get(g) or []
+            subject = m.get("subject_human") or m.get("subject") or "Meeting"
+            when = str(m.get("meeting_start") or "")[:16].replace("T", " ")
+            self._meeting_options.append((f"{subject}  ·  {when}" if when else subject, md))
         if ungrouped:
-            self._body_layout.addWidget(self._meeting_section({
-                "subject": "Unlinked drafts", "meeting_start": None, "participant_tokens": [],
-                "counts": {}, "groups": {"pending_approval": ungrouped},
-            }))
-        self._body_layout.addStretch(1)
+            self._meeting_options.append(("Unlinked follow-ups", ungrouped))
+
+        # Preserve the chosen meeting across refreshes; clamp if the set changed.
+        if getattr(self, "_active_meeting", 0) >= len(self._meeting_options):
+            self._active_meeting = 0
+        sel = getattr(self, "_active_meeting", 0)
+        self._col_drafts = self._split_cols(self._meeting_options[sel][1])
+
+        self._body_layout.addWidget(self._build_workspace(meetings), 1)
         self._stack.setCurrentIndex(0)
+        self._scroll.verticalScrollBar().setValue(0)   # never land mid-list after a render
         self._set_request_controls_enabled(self._inflight_requests == 0)
         self._update_sel()
 
-    def _meeting_section(self, m: dict) -> QWidget:
-        """A full meeting block: Meeting Information + 7 collapsible workspace
-        sections (R5), all re-grouped client-side from the existing GET /drafts
-        payload — no extra fetches, masked-only."""
-        groups = m.get("groups", {}) or {}
-        all_d: list = []
-        for g in ("pending_approval", "clarification_needed", "executed", "dismissed", "failed"):
-            all_d += groups.get(g) or []
-
-        sec = QFrame()
-        sec.setStyleSheet(f"QFrame {{ background:{C_CARD}; border:1px solid {C_BORDER}; border-radius:10px; }}")
-        v = QVBoxLayout(sec)
-        v.setContentsMargins(14, 14, 14, 14)
-        v.setSpacing(8)
-
-        # ═══ Meeting Information ═══ (always visible)
-        v.addWidget(self._meeting_info(m))
-
-        # ═══ Generated Drafts ═══ (Email / Teams / Calendar / Reminder / Suggestion) — full cards
-        sends = [d for d in all_d if d.get("action_type") in _SEND_TYPES]
-        v.addWidget(self._collapsible("Generated Drafts", len(sends), self._generated_drafts(sends), open=True))
-
-        # ═══ Action Items ═══
-        ai = [d for d in all_d if d.get("action_type") == "teams_message_draft"]
-        v.addWidget(self._collapsible("Action Items", len(ai), self._compact_list(ai), open=False))
-
-        # ═══ Commitments ═══
-        co = [d for d in all_d if d.get("action_type") in ("email_draft", "reminder_draft")]
-        v.addWidget(self._collapsible("Commitments", len(co), self._compact_list(co), open=False))
-
-        # ═══ Knowledge Updates ═══
-        ku = [d for d in all_d if d.get("knowledge_key")]
-        v.addWidget(self._collapsible("Knowledge Updates", len(ku), self._knowledge_list(ku), open=False))
-
-        # ═══ Clarifications Required ═══ — full cards (open if any)
-        cl = [d for d in all_d if d.get("action_type") == "clarification_needed"]
-        v.addWidget(self._collapsible("Clarifications Required", len(cl), self._cards_list(cl), open=bool(cl)))
-
-        # ═══ Execution Queue ═══ (by status)
-        v.addWidget(self._collapsible("Execution Queue", len(all_d), self._exec_queue(all_d), open=False))
-
-        # ═══ Audit / Timeline ═══
-        v.addWidget(self._collapsible("Audit / Timeline", len(all_d), self._audit_list(all_d), open=False))
-
-        return sec
-
-    # ── section builders (read-only projections of the same draft list) ───────
+    # ── tabbed workspace (Phase 5) ────────────────────────────────────────────
     @staticmethod
-    def _vbox() -> tuple:
-        w = QWidget()
-        w.setStyleSheet("background:transparent;")
-        lay = QVBoxLayout(w)
-        lay.setContentsMargins(2, 4, 2, 2)
-        lay.setSpacing(6)
-        return w, lay
+    def _split_cols(drafts: list) -> dict:
+        """Split a flat draft list into the three workspace columns. Drafts holds
+        sendable artifacts + credential clarification cards; Commitments / Action
+        Items are the server-classified lenses (Phase 3 followup_category)."""
+        return {
+            "drafts": [d for d in drafts
+                       if d.get("action_type") in _SEND_TYPES or d.get("action_type") == "clarification_needed"],
+            "commitments": [d for d in drafts if d.get("followup_category") == "commitment"],
+            "action_items": [d for d in drafts if d.get("followup_category") == "action_item"],
+        }
 
+    def _build_workspace(self, meetings: list) -> QWidget:
+        """Tabbed workspace: a meeting (transcript) dropdown on top, then a tab bar
+        (Drafts | Commitments | Action Items) over one full-width content area.
+        Picking a meeting refilters the tabs; clicking a tab swaps the pre-built
+        QStackedWidget page instantly — masked-only, no re-fetch, no scroll jump."""
+        wrap = QWidget()
+        wrap.setStyleSheet(f"background:{C_BG};")
+        outer = QVBoxLayout(wrap)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(10)
+
+        # meeting (transcript) filter — drives which transcript the tabs show
+        mrow = QWidget()
+        mrow.setStyleSheet(f"background:{C_BG};")
+        mrl = QHBoxLayout(mrow)
+        mrl.setContentsMargins(4, 2, 4, 2)
+        mrl.setSpacing(8)
+        mlbl = QLabel("Meeting:")
+        mlbl.setStyleSheet(f"color:{C_MUTED}; font-size:{FS_META}px; font-weight:700; border:none;")
+        mrl.addWidget(mlbl)
+        self._meeting_select = QComboBox()
+        self._meeting_select.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._meeting_select.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # Force a QListView popup so the stylesheet's ::item / :hover / :selected
+        # rules actually apply (the native combo popup ignores them → a black list).
+        self._meeting_select.setView(QListView())
+        self._meeting_select.setStyleSheet(self._combo_style())
+        for label, _ in getattr(self, "_meeting_options", []):
+            self._meeting_select.addItem(label)
+        msel = getattr(self, "_active_meeting", 0)
+        if msel >= self._meeting_select.count():
+            msel = 0
+        self._meeting_select.setCurrentIndex(msel)
+        self._meeting_select.currentIndexChanged.connect(self._select_meeting)
+        mrl.addWidget(self._meeting_select, 1)
+        outer.addWidget(mrow)
+
+        # tab bar — text tabs with an accent underline on the active one
+        tabbar = QWidget()
+        tabbar.setStyleSheet(f"background:{C_BG}; border-bottom:1px solid {C_BORDER};")
+        tl = QHBoxLayout(tabbar)
+        tl.setContentsMargins(4, 0, 4, 0)
+        tl.setSpacing(2)
+
+        self._tab_btns: dict[int, QPushButton] = {}
+        self._ws_pages = QStackedWidget()
+        for idx, (key, title) in enumerate(WORKSPACE_COLUMNS):
+            btn = QPushButton(title)            # text (with count) set by _rebuild_tab_pages
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            btn.clicked.connect(partial(self._select_tab, idx))
+            tl.addWidget(btn)
+            self._tab_btns[idx] = btn
+        tl.addStretch(1)
+
+        outer.addWidget(tabbar)
+        outer.addWidget(self._ws_pages, 1)
+
+        # Fill page content + tab counts for the current meeting, select active tab.
+        self._rebuild_tab_pages()
+        return wrap
+
+    def _combo_style(self) -> str:
+        return (
+            # closed control
+            f"QComboBox {{ background:{C_CARD}; color:{C_TEXT}; border:1px solid {C_BORDER};"
+            f" border-radius:8px; padding:8px 14px; min-width:260px;"
+            f" font-size:{FS_COL}px; font-weight:700; }}"
+            f"QComboBox:hover {{ border-color:{C_ACCENT}; }}"
+            f"QComboBox::drop-down {{ subcontrol-origin:padding; subcontrol-position:center right;"
+            f" border:none; width:26px; }}"
+            # open popup list (QListView)
+            f"QComboBox QAbstractItemView {{ background:{C_CARD}; color:{C_TEXT};"
+            f" border:1px solid {C_BORDER}; border-radius:8px; padding:4px; outline:none; }}"
+            f"QComboBox QAbstractItemView::item {{ background:transparent; color:{C_TEXT};"
+            f" padding:8px 12px; min-height:22px; border-radius:6px; }}"
+            # hover = subtle accent tint; selected/current = solid accent
+            f"QComboBox QAbstractItemView::item:hover {{ background:{C_ACCENT}33; color:{C_TEXT}; }}"
+            f"QComboBox QAbstractItemView::item:selected {{ background:{C_ACCENT}; color:#ffffff; }}"
+        )
+
+    def _select_meeting(self, idx: int) -> None:
+        """Refilter the tabs to the chosen transcript (or 'All meetings') and rebuild
+        the tab pages — masked-only, reuses the already-fetched payload."""
+        opts = getattr(self, "_meeting_options", None)
+        if not opts or idx < 0 or idx >= len(opts):
+            return
+        self._active_meeting = idx
+        self._col_drafts = self._split_cols(opts[idx][1])
+        self._rebuild_tab_pages()
+
+    def _rebuild_tab_pages(self) -> None:
+        """(Re)build the three tab pages + their counts from the current
+        _col_drafts, preserving the active tab. Used on first build and whenever the
+        meeting filter changes."""
+        pages = getattr(self, "_ws_pages", None)
+        if pages is None:
+            return
+        while pages.count():
+            w = pages.widget(0)
+            pages.removeWidget(w)
+            w.deleteLater()
+        for idx, (key, title) in enumerate(WORKSPACE_COLUMNS):
+            count = len(self._col_drafts.get(key, []))
+            if idx in self._tab_btns:
+                self._tab_btns[idx].setText(f"{title}  ({count})")
+            pages.addWidget(self._build_tab_page(key))
+        active = getattr(self, "_active_tab", 0)
+        if active >= pages.count():
+            active = 0
+        self._select_tab(active)
+
+    def _tab_style(self, active: bool) -> str:
+        if active:
+            return (
+                f"QPushButton {{ background:transparent; color:{C_ACCENT}; border:none;"
+                f" border-bottom:2px solid {C_ACCENT}; padding:10px 20px;"
+                f" font-size:{FS_COL}px; font-weight:700; }}"
+            )
+        return (
+            f"QPushButton {{ background:transparent; color:{C_MUTED}; border:none;"
+            f" border-bottom:2px solid transparent; padding:10px 20px;"
+            f" font-size:{FS_COL}px; font-weight:600; }}"
+            f"QPushButton:hover {{ color:{C_TEXT}; }}"
+        )
+
+    def _select_tab(self, idx: int) -> None:
+        """Switch the active tab: swap the stacked page, restyle the tab buttons,
+        and reset that page's scroll to the top so it never lands mid-list."""
+        pages = getattr(self, "_ws_pages", None)
+        if pages is None or idx >= pages.count():
+            return
+        self._active_tab = idx
+        pages.setCurrentIndex(idx)
+        for i, btn in self._tab_btns.items():
+            btn.setStyleSheet(self._tab_style(i == idx))
+        page = pages.widget(idx)
+        if isinstance(page, QScrollArea):
+            page.verticalScrollBar().setValue(0)
+
+    def _context_header(self, meetings: list) -> QWidget:
+        """Slim meeting-context strip above the columns."""
+        if len(meetings) == 1:
+            m = meetings[0]
+            subject = m.get("subject") or "Meeting"
+            bits = []
+            if m.get("meeting_start"):
+                bits.append(str(m["meeting_start"])[:16].replace("T", " "))
+            parts = m.get("participant_tokens") or []
+            bits.append(f"{len(parts)} participants")
+            if parts:
+                bits.append("  ".join(str(p) for p in parts[:6]))
+            meta = "  ·  ".join(bits)
+        elif meetings:
+            subject, meta = f"All follow-ups · {len(meetings)} meetings", ""
+        else:
+            subject, meta = "Unlinked follow-ups", ""
+
+        w = QFrame()
+        w.setStyleSheet(f"QFrame {{ background:{C_CARD}; border:1px solid {C_BORDER}; border-radius:10px; }}")
+        v = QVBoxLayout(w)
+        v.setContentsMargins(14, 10, 14, 10)
+        v.setSpacing(3)
+        t = QLabel("▦  " + subject)
+        t.setStyleSheet(f"color:{C_TEXT}; font-size:{FS_HEADER}px; font-weight:700; border:none;")
+        t.setWordWrap(True)
+        v.addWidget(t)
+        if meta:
+            ml = QLabel(meta)
+            ml.setStyleSheet(f"color:{C_MUTED}; font-size:{FS_META}px; border:none;")
+            ml.setWordWrap(True)
+            v.addWidget(ml)
+        return w
+
+    def _build_tab_page(self, key: str) -> QWidget:
+        """One tab's content: a single full-width, stable-scrolling list of cards."""
+        drafts = self._col_drafts.get(key, [])
+        scroll = _StableScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { background:transparent; border:none; }")
+        inner = QWidget()
+        inner.setStyleSheet("background:transparent;")
+        il = QVBoxLayout(inner)
+        il.setContentsMargins(2, 2, 2, 2)
+        il.setSpacing(8)
+        self._render_cards_into(il, drafts)
+        il.addStretch(1)
+        scroll.setWidget(inner)
+        return scroll
+
+    def _render_cards_into(self, layout: QVBoxLayout, drafts: list) -> None:
+        if not drafts:
+            self._none(layout, None)
+            return
+        for d in drafts:
+            layout.addWidget(self._card(d))
+
+    # ── card helpers ──────────────────────────────────────────────────────────
     @staticmethod
     def _none(lay, w):
         lbl = QLabel("— none —")
@@ -468,175 +691,11 @@ class FollowupCenterDialog(QDialog):
         lay.addWidget(lbl)
         return w
 
-    def _meeting_info(self, m: dict) -> QWidget:
-        w, lay = self._vbox()
-        title = QLabel("▦  " + (m.get("subject") or "Meeting"))
-        title.setStyleSheet(f"color:{C_TEXT}; font-size:15px; font-weight:700; border:none;")
-        title.setWordWrap(True)
-        lay.addWidget(title)
-        bits = []
-        if m.get("meeting_start"):
-            bits.append(str(m["meeting_start"])[:16].replace("T", " "))
-        parts = m.get("participant_tokens") or []
-        bits.append(f"{len(parts)} participants")
-        if parts:
-            bits.append("  ".join(str(p) for p in parts[:6]))
-        meta = QLabel("  ·  ".join(bits))
-        meta.setStyleSheet(f"color:{C_MUTED}; font-size:10px; border:none;")
-        meta.setWordWrap(True)
-        lay.addWidget(meta)
-        c = m.get("counts", {}) or {}
-        status = QLabel(
-            f"Status:  {c.get('pending', 0)} pending · {c.get('clarification', 0)} clarify · "
-            f"{c.get('failed', 0)} failed · {c.get('executed', 0)} executed"
-        )
-        status.setStyleSheet(f"color:{C_MUTED}; font-size:10px; border:none;")
-        lay.addWidget(status)
-        return w
-
-    def _collapsible(self, title: str, n, content: QWidget, open: bool = True) -> QWidget:
-        wrap = QWidget()
-        wrap.setStyleSheet("background:transparent;")
-        wl = QVBoxLayout(wrap)
-        wl.setContentsMargins(0, 4, 0, 0)
-        wl.setSpacing(0)
-
-        def _label(o: bool) -> str:
-            return f"{'▾' if o else '▸'}  {title}" + (f"  ({n})" if n is not None else "")
-
-        hdr = QPushButton(_label(open))
-        hdr.setCursor(Qt.CursorShape.PointingHandCursor)
-        hdr.setStyleSheet(
-            f"QPushButton {{ text-align:left; background:{C_BG}; color:{C_TEXT}; border:1px solid {C_BORDER};"
-            f" border-radius:6px; padding:6px 10px; font-size:11px; font-weight:700; }}"
-            f"QPushButton:hover {{ border-color:{C_ACCENT}; }}"
-        )
-        content.setVisible(open)
-
-        def _toggle():
-            vis = not content.isVisible()
-            content.setVisible(vis)
-            hdr.setText(_label(vis))
-
-        hdr.clicked.connect(_toggle)
-        wl.addWidget(hdr)
-        wl.addWidget(content)
-        return wrap
-
-    def _generated_drafts(self, drafts: list) -> QWidget:
-        w, lay = self._vbox()
-        if not drafts:
-            return self._none(lay, w)
-        by_type: dict = {}
-        for d in drafts:
-            by_type.setdefault(d.get("action_type"), []).append(d)
-        for atype in _SEND_TYPES:
-            items = by_type.get(atype)
-            if not items:
-                continue
-            gl = QLabel(f"{TYPE_LABEL.get(atype, atype)}  ({len(items)})")
-            gl.setStyleSheet(f"color:{C_ACCENT}; font-size:10px; font-weight:700; border:none; margin-top:4px;")
-            lay.addWidget(gl)
-            for d in items:
-                lay.addWidget(self._card(d))
-        return w
-
-    def _cards_list(self, drafts: list) -> QWidget:
-        w, lay = self._vbox()
-        if not drafts:
-            return self._none(lay, w)
-        for d in drafts:
-            lay.addWidget(self._card(d))
-        return w
-
-    def _compact_list(self, drafts: list) -> QWidget:
-        w, lay = self._vbox()
-        if not drafts:
-            return self._none(lay, w)
-        for d in drafts:
-            lay.addWidget(self._compact_row(d))
-        return w
-
-    def _compact_row(self, d: dict) -> QWidget:
-        atype = d.get("action_type", "")
-        status = d.get("status", "")
-        st_color = {"executed": C_SUCCESS, "failed": C_DANGER, "dismissed": C_MUTED}.get(status, C_TEXT)
-        row = QFrame()
-        row.setStyleSheet(f"QFrame {{ background:{C_BG}; border:1px solid {C_BORDER}; border-radius:6px; }}")
-        h = QHBoxLayout(row)
-        h.setContentsMargins(8, 5, 8, 5)
-        h.setSpacing(8)
-        t = QLabel(TYPE_LABEL.get(atype, atype))
-        t.setStyleSheet(f"color:{C_ACCENT}; font-size:10px; font-weight:700; border:none;")
-        h.addWidget(t)
-        title = QLabel(d.get("display_title") or "(untitled)")
-        title.setStyleSheet(f"color:{C_TEXT}; font-size:11px; border:none;")
-        title.setWordWrap(True)
-        h.addWidget(title, 1)
-        st = QLabel(status)
-        st.setStyleSheet(f"color:{st_color}; font-size:10px; border:none;")
-        h.addWidget(st)
-        return row
-
-    def _knowledge_list(self, drafts: list) -> QWidget:
-        w, lay = self._vbox()
-        if not drafts:
-            return self._none(lay, w)
-        for d in drafts:
-            conf = d.get("confidence")
-            bits = [f"v{d.get('version', '—')}"]
-            if conf is not None:
-                bits.append(f"{round(conf * 100)}% confidence")
-            if d.get("conflict_flag"):
-                bits.append("⚠ conflict")
-            row = QFrame()
-            row.setStyleSheet(f"QFrame {{ background:{C_BG}; border:1px solid {C_BORDER}; border-radius:6px; }}")
-            h = QHBoxLayout(row)
-            h.setContentsMargins(8, 5, 8, 5)
-            h.setSpacing(8)
-            ttl = QLabel(d.get("display_title") or "(untitled)")
-            ttl.setStyleSheet(f"color:{C_TEXT}; font-size:11px; border:none;")
-            ttl.setWordWrap(True)
-            meta = QLabel("  ·  ".join(bits))
-            meta.setStyleSheet(f"color:{C_MUTED}; font-size:10px; border:none;")
-            h.addWidget(ttl, 1)
-            h.addWidget(meta)
-            lay.addWidget(row)
-        return w
-
-    def _exec_queue(self, drafts: list) -> QWidget:
-        w, lay = self._vbox()
-        if not drafts:
-            return self._none(lay, w)
-        by_status: dict = {}
-        for d in drafts:
-            by_status.setdefault(d.get("status"), []).append(d)
-        for st, label in EXEC_STATUS_ORDER:
-            items = by_status.get(st)
-            if not items:
-                continue
-            gl = QLabel(f"{label}  ({len(items)})")
-            gl.setStyleSheet(f"color:{C_MUTED}; font-size:10px; font-weight:700; border:none; margin-top:2px;")
-            lay.addWidget(gl)
-            for d in items:
-                lay.addWidget(self._compact_row(d))
-        return w
-
-    def _audit_list(self, drafts: list) -> QWidget:
-        w, lay = self._vbox()
-        if not drafts:
-            return self._none(lay, w)
-        note = QLabel("Lifecycle overview — full per-draft audit timeline arrives in a later phase.")
-        note.setStyleSheet(f"color:{C_MUTED}; font-size:9px; border:none;")
-        note.setWordWrap(True)
-        lay.addWidget(note)
-        for d in sorted(drafts, key=lambda x: x.get("created_at") or ""):
-            created = (d.get("created_at") or "")[:16].replace("T", " ")
-            line = f"{created}  ·  {TYPE_LABEL.get(d.get('action_type'), d.get('action_type'))}  ·  {d.get('status')}"
-            r = QLabel(line)
-            r.setStyleSheet(f"color:{C_TEXT}; font-size:10px; border:none;")
-            lay.addWidget(r)
-        return w
+    # The per-section accordion builders (Generated Drafts / compact lists /
+    # Knowledge Updates / Execution Queue / Audit list) were removed in Phase 5 when
+    # the accordion was replaced by the 3-pane workspace. Per-card Version/Audit
+    # buttons and status badges live on _card; lifecycle detail is reachable via the
+    # card's Version History / Audit Timeline dialogs.
 
     def _card(self, d: dict) -> QWidget:
         aid = d.get("action_id")
@@ -658,13 +717,14 @@ class FollowupCenterDialog(QDialog):
             cb.setProperty("request_sensitive", True)
             cb.setChecked(aid in self._selected)
             cb.stateChanged.connect(partial(self._toggle_sel, aid))
+            self._checkboxes.setdefault(aid, []).append(cb)
             top.addWidget(cb)
         type_lbl = QLabel(TYPE_LABEL.get(atype, atype))
-        type_lbl.setStyleSheet(f"color:{C_ACCENT}; font-size:10px; font-weight:700; border:none;")
+        type_lbl.setStyleSheet(f"color:{C_ACCENT}; font-size:{FS_LABEL}px; font-weight:700; border:none;")
         top.addWidget(type_lbl)
         st = QLabel(status)
         st_color = {"executed": C_SUCCESS, "failed": C_DANGER, "dismissed": C_MUTED}.get(status, C_TEXT)
-        st.setStyleSheet(f"color:{st_color}; font-size:10px; border:none;")
+        st.setStyleSheet(f"color:{st_color}; font-size:{FS_LABEL}px; border:none;")
         top.addWidget(st)
         if d.get("conflict_flag"):
             cf = QLabel("⚠ conflict")
@@ -677,8 +737,10 @@ class FollowupCenterDialog(QDialog):
         top.addWidget(info)
         v.addLayout(top)
 
-        title = QLabel(d.get("display_title") or "(untitled)")
-        title.setStyleSheet(f"color:{C_TEXT}; font-size:12px; font-weight:600; border:none;")
+        # Render the human-readable (non-secret) text; the masked field is kept for
+        # editing. Falls back to the masked value if the server didn't humanize it.
+        title = QLabel(d.get("display_title_human") or d.get("display_title") or "(untitled)")
+        title.setStyleSheet(f"color:{C_TEXT}; font-size:{FS_TITLE}px; font-weight:700; border:none;")
         title.setWordWrap(True)
         v.addWidget(title)
 
@@ -695,12 +757,38 @@ class FollowupCenterDialog(QDialog):
             why.setWordWrap(True)
             v.addWidget(why)
 
-        preview_text = d.get("preview") or (("Clarification: " + d["reason"]) if d.get("reason") else "")
+        preview_text = (d.get("preview_human") or d.get("preview")
+                        or (("Clarification: " + d["reason"]) if d.get("reason") else ""))
         if preview_text:
             pv = QLabel(preview_text)
-            pv.setStyleSheet(f"color:{C_TEXT}; font-size:11px; border:none;")
+            pv.setStyleSheet(f"color:{C_TEXT}; font-size:{FS_BODY}px; border:none;")
             pv.setWordWrap(True)
             v.addWidget(pv)
+
+        # Credential delivery (Phase 4): the body carries {{SECURE_REF:n}} inline; show
+        # which credential(s) it resolves to — masked label only, never the value.
+        secure_refs = d.get("secure_refs") or {}
+        if secure_refs:
+            labels = ", ".join(sorted({(r.get("masked_label") or "credential") for r in secure_refs.values()}))
+            sl = QLabel(f"🔒 Delivers: {labels}")
+            sl.setStyleSheet(f"color:{C_WARN}; font-size:{FS_META}px; border:none;")
+            sl.setWordWrap(True)
+            v.addWidget(sl)
+
+        # Credential clarification (Phase 4): surface the "which credential?" ask
+        # right inside the Drafts column — candidate labels / unmatched descriptors.
+        candidates = d.get("candidates") or []
+        if candidates:
+            cand = QLabel("Which one?  " + "   •  ".join(c.get("label") or c.get("credential_key") or "?" for c in candidates))
+            cand.setStyleSheet(f"color:{C_TEXT}; font-size:{FS_META}px; border:none;")
+            cand.setWordWrap(True)
+            v.addWidget(cand)
+        unmatched = d.get("unmatched") or []
+        if unmatched:
+            um = QLabel("No matching credential for: " + ", ".join(str(u) for u in unmatched) + " — sync or add one.")
+            um.setStyleSheet(f"color:{C_MUTED}; font-size:{FS_META}px; border:none;")
+            um.setWordWrap(True)
+            v.addWidget(um)
 
         meta_bits = []
         if d.get("execution_target"):
@@ -723,6 +811,12 @@ class FollowupCenterDialog(QDialog):
         audit_btn.setProperty("request_sensitive", True)
         row.addWidget(version_btn)
         row.addWidget(audit_btn)
+        # Click-to-reveal (Phase 4): server-side, audited unmask of the latest active
+        # value(s) for this draft. Available while pending or approved.
+        if secure_refs and not is_clar and status in ("pending", "approved"):
+            reveal_btn = _btn(f"Reveal ({len(secure_refs)})", C_WARN, partial(self._reveal, aid))
+            reveal_btn.setProperty("request_sensitive", True)
+            row.addWidget(reveal_btn)
         if is_pending:
             if not is_clar:
                 approve_btn = _btn("Approve", C_SUCCESS, partial(self._approve, aid))
@@ -743,14 +837,45 @@ class FollowupCenterDialog(QDialog):
 
     # ── selection ───────────────────────────────────────────────────────────────
     def _toggle_sel(self, aid: int, state: int) -> None:
-        if state == Qt.CheckState.Checked.value:
+        checked = state == Qt.CheckState.Checked.value
+        if checked:
             self._selected.add(aid)
         else:
             self._selected.discard(aid)
+        # A draft can be shown in several tabs at once — keep every copy of its
+        # checkbox in sync so the selection is consistent wherever it appears.
+        for cb in self._checkboxes.get(aid, []):
+            try:
+                if cb.isChecked() != checked:
+                    cb.blockSignals(True)
+                    cb.setChecked(checked)
+                    cb.blockSignals(False)
+            except RuntimeError:
+                continue   # a stale (deleted) checkbox from a prior render
         self._update_sel()
 
     def _update_sel(self) -> None:
         self._sel_lbl.setText(f"{len(self._selected)} selected")
+
+    def _flash(self, text: str, error: bool = False) -> None:
+        """Show a short result/status line in the bulk bar (green ok / red error)."""
+        if getattr(self, "_action_status", None) is None:
+            return
+        self._action_status.setText(text)
+        self._action_status.setStyleSheet(
+            f"color:{C_DANGER if error else C_SUCCESS}; font-size:11px;"
+        )
+
+    @staticmethod
+    def _summarize_action(payload: dict) -> str:
+        """One-line summary of an approve/dismiss result (batch or single)."""
+        if "approved" in payload:
+            return f"Approved {payload['approved']} of {payload.get('submitted', 0)}."
+        if "dismissed" in payload:
+            return f"Rejected {payload['dismissed']} of {payload.get('submitted', 0)}."
+        if payload.get("status"):
+            return f"Action {payload.get('action_id', '')} → {payload['status']}."
+        return "Done."
 
     # ── actions ──────────────────────────────────────────────────────────────────
     def _approve(self, aid: int) -> None:
@@ -768,18 +893,29 @@ class FollowupCenterDialog(QDialog):
     def _audit_timeline(self, aid: int) -> None:
         self._run("audit", "GET", f"/drafts/{aid}/audit-trail")
 
+    def _reveal(self, aid: int) -> None:
+        # Server resolves every {{SECURE_REF:n}} in this draft to its latest active
+        # value, audited as CREDENTIAL_REVEAL. The value is shown ephemerally below.
+        self._run("reveal", "POST", f"/drafts/{aid}/reveal-credentials")
+
     def _approve_selected(self) -> None:
-        if self._selected:
-            self._run("action", "POST", "/agent/actions/approve-batch", body={"action_ids": list(self._selected)})
+        if not self._selected:
+            self._flash("Select at least one draft (tick its checkbox) first.", error=True)
+            return
+        self._run("action", "POST", "/agent/actions/approve-batch", body={"action_ids": list(self._selected)})
 
     def _reject_selected(self) -> None:
-        if self._selected:
-            self._run("action", "POST", "/agent/actions/dismiss-batch", body={"action_ids": list(self._selected)})
+        if not self._selected:
+            self._flash("Select at least one draft (tick its checkbox) first.", error=True)
+            return
+        self._run("action", "POST", "/agent/actions/dismiss-batch", body={"action_ids": list(self._selected)})
 
     def _approve_all(self) -> None:
         ids = self._all_pending()
-        if ids:
-            self._run("action", "POST", "/agent/actions/approve-batch", body={"action_ids": ids})
+        if not ids:
+            self._flash("No pending drafts to approve.", error=True)
+            return
+        self._run("action", "POST", "/agent/actions/approve-batch", body={"action_ids": ids})
 
     def _all_pending(self) -> list:
         """Every pending, non-clarification draft id currently loaded (Approve All)."""
@@ -804,6 +940,10 @@ class FollowupCenterDialog(QDialog):
 
     def _show_audit_timeline(self, payload: dict) -> None:
         dlg = _AuditTimelineDialog(payload, self)
+        dlg.exec()
+
+    def _show_reveal(self, payload: dict) -> None:
+        dlg = _RevealDialog(payload if isinstance(payload, dict) else {}, self)
         dlg.exec()
 
 
@@ -1071,6 +1211,98 @@ class _AuditTimelineDialog(QDialog):
         data.setPlainText(json.dumps(event.get("event_data") or {}, indent=2, sort_keys=True, ensure_ascii=False))
         lay.addWidget(data)
 
+        return row
+
+
+class _RevealDialog(QDialog):
+    """Ephemeral display of revealed credential value(s) (Phase 4 click-to-reveal).
+
+    Values are shown for THIS dialog only and are never persisted by the UI. Each
+    reveal was already resolved server-side to the LATEST ACTIVE version and audited
+    as CREDENTIAL_REVEAL. Closing the dialog discards the values from view."""
+
+    def __init__(self, payload: dict, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Revealed credentials")
+        self.setModal(True)
+        self.setMinimumWidth(560)
+        self.setStyleSheet(parent.styleSheet() if parent else "")
+
+        revealed = payload.get("revealed") or {}
+        errors = payload.get("errors") or {}
+        api_error = payload.get("_error")
+
+        root = QVBoxLayout(self)
+        root.setContentsMargins(14, 14, 14, 14)
+        root.setSpacing(10)
+
+        title = QLabel("Revealed credentials")
+        title.setStyleSheet(f"color:{C_TEXT}; font-size:{FS_HEADER}px; font-weight:700; border:none;")
+        root.addWidget(title)
+
+        warn = QLabel("Shown once for this view only — not stored by the app. Treat as sensitive.")
+        warn.setStyleSheet(f"color:{C_WARN}; font-size:{FS_META}px; border:none;")
+        warn.setWordWrap(True)
+        root.addWidget(warn)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet(f"QScrollArea {{ background:{C_BG}; border:none; }}")
+        content = QWidget()
+        content.setStyleSheet(f"background:{C_BG};")
+        content_lay = QVBoxLayout(content)
+        content_lay.setContentsMargins(0, 0, 0, 0)
+        content_lay.setSpacing(8)
+
+        if api_error:
+            err = QLabel(f"Could not reveal credentials:\n{api_error}")
+            err.setStyleSheet(f"color:{C_DANGER}; font-size:{FS_BODY}px; border:none;")
+            err.setWordWrap(True)
+            content_lay.addWidget(err)
+        elif not revealed and not errors:
+            empty = QLabel("No credentials to reveal for this draft.")
+            empty.setStyleSheet(f"color:{C_MUTED}; font-size:{FS_BODY}px; border:none;")
+            empty.setWordWrap(True)
+            content_lay.addWidget(empty)
+        else:
+            for n in sorted(revealed.keys(), key=lambda k: int(k) if str(k).isdigit() else 0):
+                content_lay.addWidget(self._value_row(n, revealed[n]))
+            for n, reason in errors.items():
+                er = QLabel(f"Reference {n}: could not resolve ({reason})")
+                er.setStyleSheet(f"color:{C_DANGER}; font-size:{FS_META}px; border:none;")
+                er.setWordWrap(True)
+                content_lay.addWidget(er)
+
+        content_lay.addStretch(1)
+        scroll.setWidget(content)
+        root.addWidget(scroll, 1)
+
+        actions = QHBoxLayout()
+        actions.addStretch(1)
+        actions.addWidget(_btn("Close", C_ACCENT, self.accept))
+        root.addLayout(actions)
+
+    def _value_row(self, n, info: dict) -> QWidget:
+        row = QFrame()
+        row.setStyleSheet(f"QFrame {{ background:{C_CARD}; border:1px solid {C_BORDER}; border-radius:8px; }}")
+        lay = QVBoxLayout(row)
+        lay.setContentsMargins(10, 9, 10, 9)
+        lay.setSpacing(4)
+
+        label = QLabel(f"{{{{SECURE_REF:{n}}}}}  ·  {info.get('masked_label') or 'credential'}")
+        label.setStyleSheet(f"color:{C_ACCENT}; font-size:{FS_LABEL}px; font-weight:700; border:none;")
+        label.setWordWrap(True)
+        lay.addWidget(label)
+
+        # Read-only field so the value can be copied but not edited; selectable text.
+        value = QLineEdit(info.get("value") or "")
+        value.setReadOnly(True)
+        value.setCursorPosition(0)
+        value.setStyleSheet(
+            f"QLineEdit {{ background:{C_BG}; color:{C_TEXT}; border:1px solid {C_BORDER};"
+            f" border-radius:6px; padding:6px 8px; font-family:monospace; font-size:{FS_BODY}px; }}"
+        )
+        lay.addWidget(value)
         return row
 
 

@@ -666,6 +666,287 @@ class _DocumentsPanel(QWidget):
                 self._model.set_thumbnail(row, pixmap)
 
 
+# ── Related content (Content Retrieval layer — Phase 3) ─────────────────────────
+
+# Friendly labels for the structured reason_type values returned by
+# services/content_retrieval.py. Match signals carry a useful value (keywords,
+# entities, filename, folder); context signals (semantic/recency/source) display
+# the label alone.
+_REASON_LABELS = {
+    "semantic": "similar content",
+    "keyword": "keywords",
+    "entity": "shared entity",
+    "filename": "filename match",
+    "recency": "recently modified",
+    "source": "source",
+    "folder": "related folder",
+}
+_REASON_WITH_VALUE = {"keyword", "entity", "filename", "folder"}
+
+
+def _stars(score) -> str:
+    """Render a 1–5 star rating from a 0..1 relevance score (results are already
+    rank-ordered; the stars give an at-a-glance strength cue)."""
+    try:
+        s = float(score)
+    except (TypeError, ValueError):
+        s = 0.0
+    filled = max(1, min(5, int(round(s * 5))))
+    return "★" * filled + "☆" * (5 - filled)
+
+
+def _human_size(n) -> str:
+    if not n:
+        return ""
+    size = float(n)
+    for unit in ("B", "KB", "MB", "GB"):
+        if size < 1024 or unit == "GB":
+            return f"{int(size)} {unit}" if unit == "B" else f"{size:.0f} {unit}"
+        size /= 1024
+    return ""
+
+
+def _short_date(iso) -> str:
+    if not iso:
+        return ""
+    try:
+        from datetime import datetime
+        return datetime.fromisoformat(str(iso)).strftime("%d %b %Y")
+    except Exception:
+        return str(iso)[:10]
+
+
+def _chip_text(reason: dict) -> str:
+    rtype = reason.get("reason_type", "")
+    label = _REASON_LABELS.get(rtype, rtype)
+    value = (reason.get("reason_value") or "").strip()
+    if rtype in _REASON_WITH_VALUE and value:
+        return f"{label}: {value}"
+    return label
+
+
+class _PreviewWorker(QThread):
+    """Fetches a content snippet from /content/{id}/preview off the UI thread."""
+    result = Signal(dict)
+
+    def __init__(self, content_id: int, query: str) -> None:
+        super().__init__()
+        self._content_id = content_id
+        self._query = query
+
+    def run(self) -> None:
+        try:
+            import requests
+            params = {"q": self._query} if self._query else {}
+            resp = requests.get(
+                f"{API_BASE}/content/{self._content_id}/preview",
+                params=params, headers=_HEADERS, timeout=15,
+            )
+            resp.raise_for_status()
+            self.result.emit(resp.json())
+        except Exception as exc:  # noqa: BLE001
+            self.result.emit({"_error": str(exc)})
+
+
+class _RevealWorker(QThread):
+    """POSTs /content/{id}/reveal so the server opens the containing folder."""
+    result = Signal(dict)
+
+    def __init__(self, content_id: int) -> None:
+        super().__init__()
+        self._content_id = content_id
+
+    def run(self) -> None:
+        try:
+            import requests
+            resp = requests.post(
+                f"{API_BASE}/content/{self._content_id}/reveal",
+                headers=_HEADERS, timeout=15,
+            )
+            resp.raise_for_status()
+            self.result.emit(resp.json())
+        except Exception as exc:  # noqa: BLE001
+            self.result.emit({"_error": str(exc)})
+
+
+class _RelatedContentPreviewDialog(QDialog):
+    def __init__(self, filename: str, snippet: str, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(f"Preview — {filename}")
+        self.resize(680, 460)
+        from ui.theme import build_stylesheet, current_theme
+        self.setStyleSheet(build_stylesheet(current_theme()))
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(8)
+
+        title = QLabel(filename)
+        title.setWordWrap(True)
+        title.setStyleSheet("QLabel { font-size: 18px; font-weight: 700; color: #e6edf3; }")
+        layout.addWidget(title)
+
+        body = QTextEdit()
+        body.setReadOnly(True)
+        body.setPlainText(snippet or "No preview text available.")
+        body.setStyleSheet(
+            "QTextEdit { background-color: #161b22; color: #e6edf3;"
+            " border: none; padding: 12px; font-size: 12px; }"
+        )
+        layout.addWidget(body)
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.close)
+        layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        QShortcut(QKeySequence("Escape"), self).activated.connect(self.close)
+
+
+class _RelatedContentCard(QFrame):
+    view_requested = Signal(int, str)
+    preview_requested = Signal(int, str)
+    reveal_requested = Signal(int, str)
+
+    def __init__(self, item: dict, parent=None) -> None:
+        super().__init__(parent)
+        self._item = item
+        content_id = int(item.get("content_id"))
+        filename = item.get("filename") or "(document)"
+        self.setProperty("class", "card")
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(4)
+
+        top = QHBoxLayout()
+        name = QLabel(filename)
+        name.setWordWrap(True)
+        name.setStyleSheet("QLabel { font-size: 13px; font-weight: 600; color: #e6edf3; }")
+        top.addWidget(name, stretch=1)
+        stars = QLabel(_stars(item.get("score", 0.0)))
+        stars.setStyleSheet("QLabel { font-size: 12px; color: #d29922; }")
+        stars.setToolTip(f"relevance score {float(item.get('score', 0.0)):.2f}")
+        top.addWidget(stars, alignment=Qt.AlignmentFlag.AlignRight)
+        layout.addLayout(top)
+
+        meta_parts = [
+            p for p in (
+                item.get("folder"),
+                (item.get("extension") or "").lstrip("."),
+                _human_size(item.get("size_bytes")),
+                _short_date(item.get("modified_at")),
+            ) if p
+        ]
+        if meta_parts:
+            meta = QLabel("  ·  ".join(meta_parts))
+            meta.setStyleSheet("QLabel { font-size: 11px; color: #8b949e; }")
+            layout.addWidget(meta)
+
+        reasons = item.get("reasons") or []
+        if reasons:
+            chip_row = QHBoxLayout()
+            chip_row.setSpacing(6)
+            for reason in reasons[:2]:
+                chip = QLabel(_chip_text(reason))
+                chip.setStyleSheet(
+                    "QLabel { font-size: 11px; color: #58a6ff; border: 1px solid #30363d;"
+                    " border-radius: 4px; padding: 1px 6px; }"
+                )
+                chip_row.addWidget(chip)
+            chip_row.addStretch()
+            layout.addLayout(chip_row)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        view_btn = QPushButton("View")
+        view_btn.setProperty("class", "ghost")
+        view_btn.clicked.connect(lambda: self.view_requested.emit(content_id, filename))
+        btn_row.addWidget(view_btn)
+        preview_btn = QPushButton("Preview")
+        preview_btn.setProperty("class", "ghost")
+        preview_btn.clicked.connect(lambda: self.preview_requested.emit(content_id, filename))
+        btn_row.addWidget(preview_btn)
+        folder_btn = QPushButton("Open Folder")
+        folder_btn.setProperty("class", "ghost")
+        folder_btn.clicked.connect(lambda: self.reveal_requested.emit(content_id, filename))
+        btn_row.addWidget(folder_btn)
+        layout.addLayout(btn_row)
+
+
+class _RelatedContentPanel(QWidget):
+    """Ranked, explainable documents from the Content Retrieval layer
+    (snapshot["related_content"]). View opens the full-screen DocumentViewerPopup
+    (always visible, reuses the existing viewers via /content/{id}/raw); Preview
+    shows a quick text snippet; Open Folder reveals the file server-side.
+    """
+
+    def __init__(self, related: list[dict], query_hint: str = "", parent=None) -> None:
+        super().__init__(parent)
+        self._items = related or []
+        self._query_hint = query_hint
+        self._workers: list[QThread] = []
+        self._open_viewers: list[QDialog] = []   # keep modeless viewers alive
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 8, 0, 0)
+        layout.setSpacing(8)
+
+        heading = QLabel("RELEVANT DOCUMENTS")
+        heading.setProperty("class", "section-header")
+        layout.addWidget(heading)
+
+        if not self._items:
+            empty = QLabel("No related documents found in your library.")
+            empty.setProperty("class", "meta")
+            empty.setWordWrap(True)
+            layout.addWidget(empty)
+        else:
+            for item in self._items:
+                card = _RelatedContentCard(item)
+                card.view_requested.connect(self._on_view)
+                card.preview_requested.connect(self._on_preview)
+                card.reveal_requested.connect(self._on_reveal)
+                layout.addWidget(card)
+
+        layout.addStretch()
+
+    # ── View — full-screen document viewer (always visible) ───────────────────
+    def _on_view(self, content_id: int, filename: str) -> None:
+        from ui.document_viewer_popup import DocumentViewerPopup
+        url = f"{API_BASE}/content/{content_id}/raw"
+        dlg = DocumentViewerPopup(self, url, _HEADERS, filename)
+        dlg.show()
+        dlg.raise_()
+        dlg.activateWindow()
+        self._open_viewers.append(dlg)
+
+    # ── Snippet preview ───────────────────────────────────────────────────────
+    def _on_preview(self, content_id: int, filename: str) -> None:
+        worker = _PreviewWorker(content_id, self._query_hint)
+        worker.result.connect(lambda data, fn=filename: self._show_preview(data, fn))
+        worker.finished.connect(lambda w=worker: self._retire_worker(w))
+        self._workers.append(worker)
+        worker.start()
+
+    def _show_preview(self, data: dict, filename: str) -> None:
+        if data.get("_error"):
+            text = f"Preview unavailable: {data['_error']}"
+        else:
+            text = data.get("snippet") or "No preview text available."
+        _RelatedContentPreviewDialog(filename, text, self).exec()
+
+    # ── Open Folder (server-side reveal) ──────────────────────────────────────
+    def _on_reveal(self, content_id: int, _filename: str) -> None:
+        worker = _RevealWorker(content_id)
+        worker.finished.connect(lambda w=worker: self._retire_worker(w))
+        self._workers.append(worker)
+        worker.start()
+
+    def _retire_worker(self, worker: QThread) -> None:
+        if worker in self._workers:
+            self._workers.remove(worker)
+
+
 # ── Main dialog ────────────────────────────────────────────────────────────────
 
 class MeetingPrepDialog(QDialog):
@@ -857,7 +1138,8 @@ class MeetingPrepDialog(QDialog):
 
         splitter.addWidget(left)
 
-        # RIGHT pane: documents + inline viewer
+        # RIGHT pane: ranked related content (Content Retrieval layer) above the
+        # deterministic documents panel, sharing one scroll area.
         docs = s.get("documents") or {}
         right_scroll = QScrollArea()
         right_scroll.setWidgetResizable(True)
@@ -866,10 +1148,23 @@ class MeetingPrepDialog(QDialog):
         )
         right_scroll.setMinimumWidth(420)
 
+        right_container = QWidget()
+        right_layout = QVBoxLayout(right_container)
+        right_layout.setContentsMargins(8, 8, 8, 8)
+        right_layout.setSpacing(8)
+
+        self._related_panel = _RelatedContentPanel(
+            s.get("related_content") or [], query_hint=s.get("title") or ""
+        )
+        right_layout.addWidget(self._related_panel)
+
         self._docs_panel = _DocumentsPanel(
             docs, self._doc_controller, self._doc_cache  # noqa: SIM117
         )
-        right_scroll.setWidget(self._docs_panel)
+        right_layout.addWidget(self._docs_panel)
+        right_layout.addStretch()
+
+        right_scroll.setWidget(right_container)
         splitter.addWidget(right_scroll)
 
         splitter.setSizes([480, 560])

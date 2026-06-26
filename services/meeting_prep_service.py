@@ -336,7 +336,40 @@ class MeetingPrepService:
             "attendees": attendees,
             "related_emails": MeetingPrepService.related_emails(db, attendee_addresses),
             "documents": MeetingPrepService.documents(db, raw, attendee_addresses, agenda, event_id=event.external_id),
+            "related_content": MeetingPrepService._related_content(
+                db, raw.get("subject") or "", agenda, attendee_addresses, event.start_at
+            ),
         }
+
+    @staticmethod
+    def _related_content(
+        db: Session,
+        subject: str,
+        agenda: str,
+        attendee_addresses: list[str],
+        start_at: Optional[datetime],
+    ) -> list[dict]:
+        """Ranked, explainable documents from the Content Retrieval layer (Phase 2).
+
+        Fail-closed and fully isolated from the deterministic `documents()` path:
+        any failure (retrieval unavailable, empty catalog, embedder down) returns
+        [] so meeting prep never breaks. Imported lazily so meeting prep has no
+        hard import-time dependency on the content layer. Only `type=="document"`
+        results are surfaced (the API is generically typed — rule #8)."""
+        try:
+            from services.content_retrieval import build_meeting_query, retrieve
+
+            query = build_meeting_query(
+                title=subject,
+                agenda=agenda or "",
+                attendees=attendee_addresses,
+                date=start_at,
+            )
+            results = retrieve(db, query)
+            return [r for r in results if r.get("type") == "document"]
+        except Exception as e:  # noqa: BLE001 - retrieval must never break meeting prep
+            logger.warning(f"related_content retrieval failed (non-fatal): {e}")
+            return []
 
     @staticmethod
     def related_emails(

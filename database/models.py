@@ -616,3 +616,106 @@ class AuditEvent(Base):
     outcome       = Column(String(20), default="SUCCESS")
     event_data    = Column(JSON, nullable=True)
     created_at    = Column(DateTime, default=utcnow)
+
+
+# ── Content Retrieval layer (Document Retrieval plan — Phase 1) ───────────────
+
+class IndexedContent(Base):
+    """Catalog entry for one piece of content from any source (LOCAL folder first,
+    cloud later). The extracted plain text is NEVER stored here — only on the
+    on-disk cache (text_cache_path); the DB carries metadata, keywords, entities,
+    embedding and content hashes (Document Retrieval plan, design rule #1).
+
+    Two orthogonal lifecycles share this row (design rule #3):
+      • work state  — index_status PENDING|INDEXING|INDEXED|ERROR (+ needs_reindex)
+      • serve state — is_active AND index_status='INDEXED'
+    A served (is_active, INDEXED) row may still carry needs_reindex=True; the
+    worker writes version+1 and only supersedes the old row once the new one is
+    INDEXED, so retrieval always has a row to serve (versioning mirrors
+    KnowledgeItem supersession)."""
+
+    __tablename__ = "indexed_content"
+
+    id                = Column(Integer, primary_key=True)
+
+    # ── Source identity (provider-agnostic) ──────────────────────────────────
+    source_type       = Column(String(50), nullable=False, default="LOCAL")
+    # LOCAL | SHAREPOINT | TEAMS | ... (open taxonomy; LOCAL is the only provider in Phase 1)
+    source_identifier = Column(String(1024), nullable=False)
+    # stable identity within a source — normalised absolute path (LOCAL) or item id (cloud)
+    source_metadata   = Column(JSON, default=dict)
+    # LOCAL {root, relative_path}; cloud {site_id, drive_id, item_id} (design rule #6)
+
+    # ── File / display metadata ───────────────────────────────────────────────
+    root_label        = Column(String(255), nullable=True)   # human label of the originating root
+    filename          = Column(String(512), nullable=False)
+    folder            = Column(String(512), nullable=True)   # immediate parent folder name (clustering signal)
+    folder_path       = Column(Text, nullable=True)          # relative folder path from root (server-side only)
+    extension         = Column(String(32), nullable=True)
+    size_bytes        = Column(BigInteger, nullable=True)
+    modified_at       = Column(DateTime, nullable=True)
+    content_hash      = Column(String(64), nullable=True)    # SHA-256 of the raw bytes
+
+    # ── Independent lifecycle versions (design rule #5) ───────────────────────
+    parser_version    = Column(String(20), nullable=True)    # re-extract trigger
+    pipeline_version  = Column(String(20), nullable=True)    # re-run keyword/entity/normalisation trigger
+    text_cache_path   = Column(Text, nullable=True)          # relative path under CONTENT_TEXT_CACHE_DIR (server-side)
+    keywords          = Column(JSON, default=list)
+    entities          = Column(JSON, default=list)
+    embedding         = Column(JSON, nullable=True)          # float list (e.g. 384-dim) — cosine in Python, no pgvector
+    embedding_model   = Column(String(100), nullable=True)   # re-embed trigger
+    embedding_dimension = Column(Integer, nullable=True)
+    text_extracted_at = Column(DateTime, nullable=True)
+    embedded_at       = Column(DateTime, nullable=True)
+    indexed_at        = Column(DateTime, nullable=True)
+
+    # ── Versioning / supersession (mirrors KnowledgeItem) ─────────────────────
+    version           = Column(Integer, default=1)
+    is_active         = Column(Boolean, default=True, index=True)
+    valid_from        = Column(DateTime, nullable=True)
+    valid_to          = Column(DateTime, nullable=True)
+    superseded_by_id  = Column(Integer, ForeignKey("indexed_content.id"), nullable=True)
+
+    # ── Work-queue state (orthogonal to serving — design rule #3) ─────────────
+    index_status      = Column(String(20), nullable=False, default="PENDING")
+    # PENDING | INDEXING | INDEXED | ERROR
+    needs_reindex     = Column(Boolean, default=False)
+    index_error       = Column(Text, nullable=True)
+    retry_count       = Column(Integer, default=0)
+    next_retry_at     = Column(DateTime, nullable=True)
+
+    user_id           = Column(Integer, default=1)
+    created_at        = Column(DateTime, default=utcnow)
+
+    __table_args__ = (
+        # Queue / serve hot paths. (is_active is indexed via Column(index=True).)
+        Index("ix_indexed_content_status", "index_status"),
+        Index("ix_indexed_content_needs_reindex", "needs_reindex"),
+        Index("ix_indexed_content_folder", "folder"),
+        Index("ix_indexed_content_parser_version", "parser_version"),
+        # At most one ACTIVE row per (source_type, source_identifier). The worker
+        # deactivates the prior version before activating version+1, so this is
+        # never violated (belt-and-suspenders for the supersession transaction).
+        # NULL is_active rows are excluded by the partial predicate.
+        Index(
+            "ux_indexed_content_active_source",
+            "source_type",
+            "source_identifier",
+            unique=True,
+            postgresql_where=text("is_active = true"),
+            sqlite_where=text("is_active = 1"),
+        ),
+    )
+
+
+class ContentIndexState(Base):
+    """Single-row catalog generation counter (design rule #14). The worker bumps
+    `generation` on ANY catalog mutation; each API process caches the value and
+    refreshes it every CONTENT_GENERATION_REFRESH_SECONDS so the retrieval cache
+    key (query_hash + generation) self-invalidates. There is no state.json."""
+
+    __tablename__ = "content_index_state"
+
+    id         = Column(Integer, primary_key=True)
+    generation = Column(BigInteger, nullable=False, default=0)
+    updated_at = Column(DateTime, default=utcnow)

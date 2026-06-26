@@ -1,0 +1,4 @@
+Project Apollo launch plan.
+
+Kubernetes deployment for the Apollo service is tracked in PROJ-123.
+Owner: platform team. Target: Q3. Risks: Postgres migration, Redis cache warmup.

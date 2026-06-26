@@ -748,8 +748,9 @@ class _PreviewWorker(QThread):
             self.result.emit({"_error": str(exc)})
 
 
-class _RevealWorker(QThread):
-    """POSTs /content/{id}/reveal so the server opens the containing folder."""
+class _SummaryWorker(QThread):
+    """Fetches a masked LLM summary from /content/{id}/summary off the UI thread.
+    The text is PII/credential-masked server-side before the LLM is called."""
     result = Signal(dict)
 
     def __init__(self, content_id: int) -> None:
@@ -759,9 +760,9 @@ class _RevealWorker(QThread):
     def run(self) -> None:
         try:
             import requests
-            resp = requests.post(
-                f"{API_BASE}/content/{self._content_id}/reveal",
-                headers=_HEADERS, timeout=15,
+            resp = requests.get(
+                f"{API_BASE}/content/{self._content_id}/summary",
+                headers=_HEADERS, timeout=120,   # an LLM call can take a while
             )
             resp.raise_for_status()
             self.result.emit(resp.json())
@@ -769,10 +770,13 @@ class _RevealWorker(QThread):
             self.result.emit({"_error": str(exc)})
 
 
-class _RelatedContentPreviewDialog(QDialog):
-    def __init__(self, filename: str, snippet: str, parent=None) -> None:
+class _RelatedContentTextDialog(QDialog):
+    """Reusable read-only text dialog (snippet preview or masked summary). The
+    body can be updated live via set_body() while an async fetch is in flight."""
+
+    def __init__(self, filename: str, body_text: str, parent=None, title: str = "Preview") -> None:
         super().__init__(parent)
-        self.setWindowTitle(f"Preview — {filename}")
+        self.setWindowTitle(f"{title} — {filename}")
         self.resize(680, 460)
         from ui.theme import build_stylesheet, current_theme
         self.setStyleSheet(build_stylesheet(current_theme()))
@@ -781,30 +785,33 @@ class _RelatedContentPreviewDialog(QDialog):
         layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(8)
 
-        title = QLabel(filename)
-        title.setWordWrap(True)
-        title.setStyleSheet("QLabel { font-size: 18px; font-weight: 700; color: #e6edf3; }")
-        layout.addWidget(title)
+        heading = QLabel(filename)
+        heading.setWordWrap(True)
+        heading.setStyleSheet("QLabel { font-size: 18px; font-weight: 700; color: #e6edf3; }")
+        layout.addWidget(heading)
 
-        body = QTextEdit()
-        body.setReadOnly(True)
-        body.setPlainText(snippet or "No preview text available.")
-        body.setStyleSheet(
+        self._body = QTextEdit()
+        self._body.setReadOnly(True)
+        self._body.setPlainText(body_text or "")
+        self._body.setStyleSheet(
             "QTextEdit { background-color: #161b22; color: #e6edf3;"
             " border: none; padding: 12px; font-size: 12px; }"
         )
-        layout.addWidget(body)
+        layout.addWidget(self._body)
 
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
         layout.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignRight)
         QShortcut(QKeySequence("Escape"), self).activated.connect(self.close)
 
+    def set_body(self, text: str) -> None:
+        self._body.setPlainText(text or "")
+
 
 class _RelatedContentCard(QFrame):
     view_requested = Signal(int, str)
     preview_requested = Signal(int, str)
-    reveal_requested = Signal(int, str)
+    summarize_requested = Signal(int, str)
 
     def __init__(self, item: dict, parent=None) -> None:
         super().__init__(parent)
@@ -866,10 +873,11 @@ class _RelatedContentCard(QFrame):
         preview_btn.setProperty("class", "ghost")
         preview_btn.clicked.connect(lambda: self.preview_requested.emit(content_id, filename))
         btn_row.addWidget(preview_btn)
-        folder_btn = QPushButton("Open Folder")
-        folder_btn.setProperty("class", "ghost")
-        folder_btn.clicked.connect(lambda: self.reveal_requested.emit(content_id, filename))
-        btn_row.addWidget(folder_btn)
+        summarize_btn = QPushButton("Summarize")
+        summarize_btn.setProperty("class", "ghost")
+        summarize_btn.setToolTip("Read a short, PII/credential-masked summary instead of the whole document")
+        summarize_btn.clicked.connect(lambda: self.summarize_requested.emit(content_id, filename))
+        btn_row.addWidget(summarize_btn)
         layout.addLayout(btn_row)
 
 
@@ -877,7 +885,8 @@ class _RelatedContentPanel(QWidget):
     """Ranked, explainable documents from the Content Retrieval layer
     (snapshot["related_content"]). View opens the full-screen DocumentViewerPopup
     (always visible, reuses the existing viewers via /content/{id}/raw); Preview
-    shows a quick text snippet; Open Folder reveals the file server-side.
+    shows a quick text snippet; Summarize shows a short, PII/credential-masked LLM
+    summary so the user need not read the whole document.
     """
 
     def __init__(self, related: list[dict], query_hint: str = "", parent=None) -> None:
@@ -905,7 +914,7 @@ class _RelatedContentPanel(QWidget):
                 card = _RelatedContentCard(item)
                 card.view_requested.connect(self._on_view)
                 card.preview_requested.connect(self._on_preview)
-                card.reveal_requested.connect(self._on_reveal)
+                card.summarize_requested.connect(self._on_summarize)
                 layout.addWidget(card)
 
         layout.addStretch()
@@ -933,14 +942,46 @@ class _RelatedContentPanel(QWidget):
             text = f"Preview unavailable: {data['_error']}"
         else:
             text = data.get("snippet") or "No preview text available."
-        _RelatedContentPreviewDialog(filename, text, self).exec()
+        _RelatedContentTextDialog(filename, text, self, title="Preview").exec()
 
-    # ── Open Folder (server-side reveal) ──────────────────────────────────────
-    def _on_reveal(self, content_id: int, _filename: str) -> None:
-        worker = _RevealWorker(content_id)
+    # ── Summarize — masked LLM summary (no need to read the whole doc) ─────────
+    def _on_summarize(self, content_id: int, filename: str) -> None:
+        # Show immediate feedback; the dialog is filled in when the LLM returns.
+        dlg = _RelatedContentTextDialog(
+            filename,
+            "Summarizing… (sensitive values are masked before the summary is generated)",
+            self, title="Summary",
+        )
+        dlg.show()
+        self._open_viewers.append(dlg)   # keep alive while modeless
+        worker = _SummaryWorker(content_id)
+        worker.result.connect(lambda data, d=dlg: d.set_body(self._summary_text(data)))
         worker.finished.connect(lambda w=worker: self._retire_worker(w))
         self._workers.append(worker)
         worker.start()
+
+    @staticmethod
+    def _summary_text(data: dict) -> str:
+        status = data.get("status")
+        if status == "ok":
+            text = data.get("summary") or "No summary was produced for this document."
+            notes = []
+            if data.get("redaction_count"):
+                notes.append(f"{data['redaction_count']} sensitive value(s) were hidden from the AI and restored here for you")
+            elif data.get("masked_from_llm"):
+                notes.append("sensitive values were hidden from the AI and restored for you")
+            if data.get("truncated"):
+                notes.append("based on the first part of a long document")
+            if notes:
+                text += "\n\n— " + "; ".join(notes) + "."
+            return text
+        if status == "empty":
+            return "This document has no extractable text to summarize."
+        if data.get("_error"):
+            return f"Summary unavailable: {data['_error']}"
+        if status == "llm_error":
+            return f"Summary unavailable: {data.get('reason') or data.get('llm_status') or 'the model could not respond.'}"
+        return "Summary unavailable."
 
     def _retire_worker(self, worker: QThread) -> None:
         if worker in self._workers:

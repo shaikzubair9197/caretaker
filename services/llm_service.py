@@ -87,6 +87,9 @@ _AZURE_MAX_COMPLETION_TOKENS_BUDGET: dict[str, int] = {
     # consumption is unpredictable — keep generous headroom. Tunable downward
     # once measured against real draft prompts in the target deployment.
     "generate_draft":                    8000,
+    # Structured multi-section document summary (overview/key points/insights/
+    # conclusion); generous headroom for gpt-5-nano's hidden-reasoning spend.
+    "document_summarize":                6000,
 }
 def _validate_llm_provider_config() -> None:
     """Fail fast on missing Azure config — never logs the actual secret/endpoint values."""
@@ -462,6 +465,22 @@ class LLMService:
                 f"reason={result.reason}"
             )
         return result
+
+    @staticmethod
+    def summarize_document(masked_text: str) -> LLMCallResult:
+        """
+        Summarize a document's MASKED text. The caller MUST mask PII/credentials
+        (PreprocessingService.mask_pii) BEFORE calling — the LLM only ever sees
+        [REDACTED:*] tokens, never real values. Always returns LLMCallResult —
+        check .succeeded and .data["summary"].
+        """
+        system_prompt = _load_prompt("document_summarize.txt")
+        return _call_with_fallback(
+            call_type="document_summarize",
+            system_prompt=system_prompt,
+            context_text=masked_text,
+            required_output_keys=["summary"],
+        )
 
     @staticmethod
     def reason_intent(context: dict) -> LLMCallResult:

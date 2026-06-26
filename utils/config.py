@@ -150,6 +150,9 @@ class Settings:
     CONTENT_CACHE_TTL_SECONDS         = int(os.getenv("CONTENT_CACHE_TTL_SECONDS", "300"))
     CONTENT_GENERATION_REFRESH_SECONDS = int(os.getenv("CONTENT_GENERATION_REFRESH_SECONDS", "5"))
     CONTENT_SNIPPET_CHARS             = int(os.getenv("CONTENT_SNIPPET_CHARS", "320"))
+    # Max characters of document text summarised: the head is masked (PII/creds
+    # redacted) then sent to the LLM, bounding prompt size for large documents.
+    CONTENT_SUMMARY_MAX_CHARS         = int(os.getenv("CONTENT_SUMMARY_MAX_CHARS", "12000"))
 
     # Known-entity vocabularies the deterministic extractors match against.
     CONTENT_KNOWN_PROJECTS      = _csv_list(os.getenv("CONTENT_KNOWN_PROJECTS", ""))

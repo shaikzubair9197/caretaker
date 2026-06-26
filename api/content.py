@@ -19,7 +19,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from database.connection import SessionLocal
-from services import content_catalog, content_preview
+from services import content_catalog, content_preview, content_summary
 from utils.logger import get_logger
 
 router = APIRouter(prefix="/content", tags=["content"])
@@ -52,6 +52,23 @@ def preview(
 ):
     result = content_preview.snippet(db, content_id, q)
     if result is None:
+        raise HTTPException(404, "Content not found or not indexed.")
+    return result
+
+
+@router.get("/{content_id}/summary")
+def summary(
+    content_id: int,
+    refresh: bool = Query(default=False, description="Force regeneration, ignoring the cached summary."),
+    db: Session = Depends(get_db),
+):
+    """Masked LLM summary of a document. The text is PII/credential-masked before
+    the LLM is called — real secrets never reach the model. The result is cached
+    by content hash (no re-call / token waste on repeat views); pass refresh=true
+    to regenerate. Returns 404 if the content isn't served; otherwise a structured
+    result (ok / empty / llm_error)."""
+    result = content_summary.summarize(db, content_id, refresh=refresh)
+    if result.get("status") == "not_found":
         raise HTTPException(404, "Content not found or not indexed.")
     return result
 

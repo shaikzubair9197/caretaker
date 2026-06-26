@@ -719,3 +719,25 @@ class ContentIndexState(Base):
     id         = Column(Integer, primary_key=True)
     generation = Column(BigInteger, nullable=False, default=0)
     updated_at = Column(DateTime, default=utcnow)
+
+
+class ContentSummary(Base):
+    """Permanent, content-addressed LLM summary of a document. Keyed by
+    content_hash so the SAME document content reuses the SAME summary across
+    meetings and across restarts — generated once, never re-billed. Regenerated
+    only when the document content changes (new hash) or the summary prompt
+    version changes. Stores the UNMASKED summary (same trust boundary as the
+    extracted-text cache); the LLM itself only ever saw masked text."""
+
+    __tablename__ = "content_summaries"
+
+    id              = Column(Integer, primary_key=True)
+    content_hash    = Column(String(64), nullable=False, unique=True, index=True)
+    summary         = Column(Text, nullable=False)
+    redaction_count = Column(Integer, default=0)
+    token_count     = Column(Integer, default=0)
+    truncated       = Column(Boolean, default=False)
+    summary_model   = Column(String(100), nullable=True)
+    prompt_version  = Column(String(20), nullable=True)
+    user_id         = Column(Integer, default=1)
+    created_at      = Column(DateTime, default=utcnow)

@@ -27,8 +27,11 @@ per call via an independent session (never content/paths/PII).
 
 from __future__ import annotations
 
+import difflib
 import hashlib
 import json
+import math
+import re
 import time
 from abc import ABC, abstractmethod
 from collections import Counter
@@ -103,6 +106,17 @@ class RetrievalQuery:
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
+# Common meeting/filler words that are noise for relevance — they rarely identify
+# the RIGHT document. Dropped from the query side only (document keywords are
+# untouched). Corpus-frequent terms are additionally handled by IDF at query time.
+_GENERIC_QUERY_TERMS = {
+    "using", "use", "used", "via", "etc", "todo", "misc", "draft", "copy",
+    "new", "old", "final", "note", "notes", "doc", "docs", "file", "files",
+    "test", "testing", "phase", "stuff", "thing", "things", "task", "tasks",
+    "agenda", "discussion", "demo", "intro", "overview", "general",
+}
+
+
 def build_meeting_query(
     title: str = "",
     agenda: str = "",
@@ -112,9 +126,10 @@ def build_meeting_query(
 ) -> RetrievalQuery:
     """Build a RetrievalQuery from meeting-prep fields. Keywords/entities are
     extracted with the SAME deterministic functions used at index time so query
-    and document signals are directly comparable."""
+    and document signals are directly comparable. Generic filler words are dropped
+    from the query so they cannot create spurious matches."""
     text = " ".join(t for t in (title, agenda) if t).strip()
-    keywords = _extract_keywords(text, "") if text else []
+    keywords = [k for k in (_extract_keywords(text, "") if text else []) if k not in _GENERIC_QUERY_TERMS]
     entities = [e.as_dict() for e in EntityRegistry.extract_all(text)] if text else []
     participants = [a.strip() for a in (attendees or []) if a and a.strip()]
     return RetrievalQuery(
@@ -136,6 +151,44 @@ class _Candidate:
     contributions: dict[str, float] = field(default_factory=dict)
     detail: dict[str, Any] = field(default_factory=dict)   # human reason values
     score: float = 0.0
+    has_match: bool = False   # True only on a real lexical or strong-semantic match
+
+
+# ── Fuzzy / distinctiveness helpers (typo-tolerant, generic-term aware) ───────
+def _fuzzy_hit(term: str, vocab: set[str]) -> bool:
+    """True if `term` matches any token in `vocab` exactly, or fuzzily for
+    reasonably-long tokens (catches typos like appolo↔apollo)."""
+    if term in vocab:
+        return True
+    if len(term) < 5:
+        return False  # too short to fuzzy-match safely
+    ratio = settings.CONTENT_FUZZY_RATIO
+    for token in vocab:
+        if len(token) >= 5 and difflib.SequenceMatcher(None, term, token).ratio() >= ratio:
+            return True
+    return False
+
+
+# Below this pool size there are too few documents to judge a term's
+# corpus-frequency, so every term is treated as distinctive (weight 1.0).
+_MIN_DOCS_FOR_IDF = 6
+
+
+def _compute_idf(q_keywords: set[str], doc_kw_sets: list[set[str]], n: int) -> dict[str, float]:
+    """Per-query-term distinctiveness in 0..1. With a large-enough corpus, terms
+    appearing (fuzzily) in more than GENERIC_DF_RATIO of documents are generic →
+    weight 0; rare terms → ~1. With a tiny corpus, every term stays distinctive."""
+    if n < _MIN_DOCS_FOR_IDF:
+        return {term: 1.0 for term in q_keywords}
+    idf: dict[str, float] = {}
+    denom = math.log(n + 1) or 1.0
+    for term in q_keywords:
+        df = sum(1 for dkw in doc_kw_sets if _fuzzy_hit(term, dkw))
+        if df / n > settings.CONTENT_GENERIC_DF_RATIO:
+            idf[term] = 0.0
+        else:
+            idf[term] = math.log((n + 1) / (df + 1)) / denom
+    return idf
 
 
 # ── Diversification (abstraction — rule #12) ──────────────────────────────────
@@ -257,14 +310,28 @@ def _run_pipeline(db: Session, query: RetrievalQuery) -> list[dict]:
     # 2) Feature extraction.
     q_keywords = {k.casefold() for k in query.keywords}
     q_entities = {(e.get("type", ""), str(e.get("value", "")).casefold()) for e in query.entities}
-    q_terms = q_keywords | {t for _, t in q_entities}
     q_embedding = encode(query.text) if query.text.strip() else None
     semantic_active = q_embedding is not None and any(c.row.embedding for c in candidates)
 
-    for c in candidates:
-        _extract_features(c, query, q_keywords, q_entities, q_terms, q_embedding, semantic_active)
+    # Distinctiveness of each query keyword (down-weight generic terms like "using").
+    doc_kw_sets = [{str(k).casefold() for k in (c.row.keywords or [])} for c in candidates]
+    idf = _compute_idf(q_keywords, doc_kw_sets, len(candidates))
+    # Distinctive terms drive lexical matching: non-generic keywords + every entity value.
+    distinctive = {t for t in q_keywords if idf.get(t, 0.0) > 0.0} | {v for _, v in q_entities}
 
-    # 3) Normalise each signal across the pool.
+    for c, dkw in zip(candidates, doc_kw_sets):
+        _extract_features(c, query, q_keywords, q_entities, distinctive, idf, dkw,
+                          q_embedding, semantic_active)
+
+    # 2b) STRICT GATE: keep only documents with a real match (lexical, or strong
+    #     semantic). Folder/recency/source are tie-breakers — never a reason to
+    #     surface a document. No genuine match → return nothing (no filler).
+    matched = [c for c in candidates if c.has_match]
+    if not matched:
+        return []
+    candidates = matched
+
+    # 3) Normalise each signal across the matched set.
     active_signals = [s for s in _CORE_SIGNALS if s != "semantic" or semantic_active]
     for signal in active_signals:
         norm = _normalize(
@@ -303,48 +370,80 @@ def _extract_features(
     query: RetrievalQuery,
     q_keywords: set,
     q_entities: set,
-    q_terms: set,
+    distinctive: set,
+    idf: dict[str, float],
+    doc_keywords: set,
     q_embedding: Optional[list],
     semantic_active: bool,
 ) -> None:
     row = c.row
+    has_lexical = False
 
-    # semantic — cosine of query vs doc embedding.
+    # semantic — cosine, with an ABSOLUTE floor (below it gives no credit at all,
+    # so weak "everything is vaguely similar" matches contribute nothing).
+    cosine = 0.0
     if semantic_active and q_embedding is not None and row.embedding:
         try:
-            c.raw["semantic"] = max(0.0, _cosine_similarity(q_embedding, row.embedding))
+            cosine = max(0.0, _cosine_similarity(q_embedding, row.embedding))
         except Exception:  # noqa: BLE001
-            c.raw["semantic"] = 0.0
-    else:
-        c.raw["semantic"] = 0.0
+            cosine = 0.0
+    floor = settings.CONTENT_SEMANTIC_FLOOR
+    c.raw["semantic"] = (cosine - floor) / (1.0 - floor) if cosine >= floor and floor < 1.0 else 0.0
+    # Semantic alone justifies showing a doc only when it is STRONG.
+    has_strong_semantic = cosine >= settings.CONTENT_SEMANTIC_MATCH_FLOOR
 
-    # keyword overlap.
-    doc_keywords = {str(k).casefold() for k in (row.keywords or [])}
-    kw_overlap = q_keywords & doc_keywords
-    c.raw["keyword"] = float(len(kw_overlap))
-    c.detail["keyword"] = sorted(kw_overlap)
+    # keyword — fuzzy, IDF-weighted (generic terms contribute ~0 and don't qualify).
+    kw_matched: list[str] = []
+    kw_score = 0.0
+    for term in q_keywords:
+        weight = idf.get(term, 0.0)
+        if weight <= 0.0:
+            continue
+        if _fuzzy_hit(term, doc_keywords):
+            kw_score += weight
+            kw_matched.append(_closest(term, doc_keywords))
+    c.raw["keyword"] = kw_score
+    c.detail["keyword"] = sorted(set(kw_matched))
+    has_lexical = has_lexical or kw_score > 0.0
 
-    # entity overlap.
+    # entity overlap (structured → exact; inherently distinctive).
     doc_entities = {(e.get("type", ""), str(e.get("value", "")).casefold()) for e in (row.entities or [])}
     ent_overlap = q_entities & doc_entities
     c.raw["entity"] = float(len(ent_overlap))
     c.detail["entity"] = sorted(v for _, v in ent_overlap)
+    has_lexical = has_lexical or bool(ent_overlap)
 
-    # filename — query terms appearing in the filename.
+    # filename — distinctive query terms appearing (exact or fuzzy) in the name.
     fname = (row.filename or "").casefold()
-    fname_hits = {t for t in q_terms if t and t in fname}
+    fname_tokens = set(re.findall(r"[a-z0-9]{3,}", fname))
+    fname_hits = {t for t in distinctive if t and (t in fname or _fuzzy_hit(t, fname_tokens))}
     c.raw["filename"] = float(len(fname_hits))
     c.detail["filename"] = sorted(fname_hits)
+    has_lexical = has_lexical or bool(fname_hits)
 
-    # recency — newer is higher (epoch seconds; normalised later).
+    # recency — newer is higher (epoch seconds; normalised later). Tie-breaker only.
     when = row.modified_at or row.created_at
     c.raw["recency"] = when.timestamp() if isinstance(when, datetime) else 0.0
 
-    # source priority + preferred-source bonus (rule #13).
+    # source priority + preferred-source bonus (rule #13). Tie-breaker only.
     priority = settings.CONTENT_SOURCE_PRIORITY.get((row.source_type or "").upper(), 0)
     if row.source_type and row.source_type.upper() in {s.upper() for s in query.preferred_sources}:
         priority += 1
     c.raw["source"] = float(priority)
+
+    c.has_match = has_lexical or has_strong_semantic
+
+
+def _closest(term: str, vocab: set[str]) -> str:
+    """The vocab token that best matches `term` (for display)."""
+    if term in vocab:
+        return term
+    best, best_ratio = term, 0.0
+    for token in vocab:
+        r = difflib.SequenceMatcher(None, term, token).ratio()
+        if r > best_ratio:
+            best, best_ratio = token, r
+    return best
 
 
 def _resolve_weights(semantic_active: bool) -> dict[str, float]:

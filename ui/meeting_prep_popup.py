@@ -822,16 +822,16 @@ class _RelatedContentCard(QFrame):
         self.setFrameShape(QFrame.Shape.StyledPanel)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 10, 12, 10)
-        layout.setSpacing(4)
+        layout.setContentsMargins(16, 14, 16, 14)
+        layout.setSpacing(7)
 
         top = QHBoxLayout()
         name = QLabel(filename)
         name.setWordWrap(True)
-        name.setStyleSheet("QLabel { font-size: 13px; font-weight: 600; color: #e6edf3; }")
+        name.setStyleSheet("QLabel { font-size: 13.5px; font-weight: 700; color: #f0f6fc; }")
         top.addWidget(name, stretch=1)
         stars = QLabel(_stars(item.get("score", 0.0)))
-        stars.setStyleSheet("QLabel { font-size: 12px; color: #d29922; }")
+        stars.setStyleSheet("QLabel { font-size: 13px; color: #d29922; letter-spacing: 1px; }")
         stars.setToolTip(f"relevance score {float(item.get('score', 0.0)):.2f}")
         top.addWidget(stars, alignment=Qt.AlignmentFlag.AlignRight)
         layout.addLayout(top)
@@ -846,7 +846,7 @@ class _RelatedContentCard(QFrame):
         ]
         if meta_parts:
             meta = QLabel("  ·  ".join(meta_parts))
-            meta.setStyleSheet("QLabel { font-size: 11px; color: #8b949e; }")
+            meta.setStyleSheet("QLabel { font-size: 11.5px; color: #8b949e; }")
             layout.addWidget(meta)
 
         reasons = item.get("reasons") or []
@@ -855,10 +855,7 @@ class _RelatedContentCard(QFrame):
             chip_row.setSpacing(6)
             for reason in reasons[:2]:
                 chip = QLabel(_chip_text(reason))
-                chip.setStyleSheet(
-                    "QLabel { font-size: 11px; color: #58a6ff; border: 1px solid #30363d;"
-                    " border-radius: 4px; padding: 1px 6px; }"
-                )
+                chip.setProperty("class", "chip")   # modern pill (themed)
                 chip_row.addWidget(chip)
             chip_row.addStretch()
             layout.addLayout(chip_row)
@@ -1271,6 +1268,14 @@ def main() -> None:
     parser.add_argument("--force", action="store_true", help="Soonest meeting, ignore window.")
     parser.add_argument("--event", default=None, help="Specific calendar event external_id.")
     args = parser.parse_args()
+
+    # Crisp scaling on fractional-DPI displays (smoother text/edges).
+    try:
+        QApplication.setHighDpiScaleFactorRoundingPolicy(
+            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+        )
+    except Exception:
+        pass
 
     app = QApplication.instance() or QApplication(sys.argv)
     theme = current_theme()

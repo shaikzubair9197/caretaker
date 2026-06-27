@@ -130,6 +130,18 @@ class Settings:
     # score, so a few strong matches are shown but the weak long tail is dropped.
     CONTENT_REL_SCORE_RATIO      = float(os.getenv("CONTENT_REL_SCORE_RATIO", "0.5"))
 
+    # ── Strict relevance (a document is shown only on a REAL match) ───────────
+    # Semantic cosine below this gives NO score credit (kills "everything is
+    # vaguely similar" filler). Semantic ALONE qualifies a doc for display only
+    # at/above the higher match floor — otherwise a lexical match (fuzzy keyword/
+    # filename or entity) is required. Fuzzy ratio catches typos (appolo→apollo).
+    # Generic query terms appearing in more than GENERIC_DF_RATIO of documents are
+    # treated as non-distinctive (zero weight), so words like "using" don't match.
+    CONTENT_SEMANTIC_FLOOR       = float(os.getenv("CONTENT_SEMANTIC_FLOOR", "0.50"))
+    CONTENT_SEMANTIC_MATCH_FLOOR = float(os.getenv("CONTENT_SEMANTIC_MATCH_FLOOR", "0.62"))
+    CONTENT_FUZZY_RATIO          = float(os.getenv("CONTENT_FUZZY_RATIO", "0.82"))
+    CONTENT_GENERIC_DF_RATIO     = float(os.getenv("CONTENT_GENERIC_DF_RATIO", "0.6"))
+
     # Per-signal weights (weighted sum after each signal is normalised to 0–1).
     CONTENT_W_SEMANTIC          = float(os.getenv("CONTENT_W_SEMANTIC", "0.40"))
     CONTENT_W_KEYWORD           = float(os.getenv("CONTENT_W_KEYWORD", "0.20"))

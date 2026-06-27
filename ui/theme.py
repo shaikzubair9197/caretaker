@@ -27,6 +27,14 @@ class Theme:
     table_hdr: str
     radius: str
     name: str  # "dark" | "light"
+    # ── Modern treatment tokens (additive; default-provided for back-compat) ──
+    elevated: str = ""        # hovered/raised surface (one step above `surface`)
+    border_soft: str = ""     # quieter hairline border
+    accent_soft: str = ""     # translucent accent fill (chips, soft buttons)
+    accent_line: str = ""     # translucent accent border
+    focus_ring: str = ""      # focus highlight
+    radius_lg: str = "14px"   # cards / dialogs
+    radius_pill: str = "999px"
 
 
 DARK = Theme(
@@ -42,8 +50,14 @@ DARK = Theme(
     warn="#d29922",
     error="#f85149",
     table_hdr="#21262d",
-    radius="8px",
+    radius="10px",
     name="dark",
+    elevated="#1d2330",
+    border_soft="#262c36",
+    accent_soft="rgba(88, 166, 255, 0.12)",
+    accent_line="rgba(88, 166, 255, 0.35)",
+    focus_ring="rgba(88, 166, 255, 0.55)",
+    radius_lg="14px",
 )
 
 LIGHT = Theme(
@@ -59,8 +73,14 @@ LIGHT = Theme(
     warn="#9a6700",
     error="#cf222e",
     table_hdr="#f6f8fa",
-    radius="8px",
+    radius="10px",
     name="light",
+    elevated="#ffffff",
+    border_soft="#e2e6ea",
+    accent_soft="rgba(9, 105, 218, 0.10)",
+    accent_line="rgba(9, 105, 218, 0.30)",
+    focus_ring="rgba(9, 105, 218, 0.45)",
+    radius_lg="14px",
 )
 
 
@@ -81,7 +101,21 @@ def current_theme() -> Theme:
 
 
 def build_stylesheet(t: Theme) -> str:
-    """Generate the global QSS stylesheet from a Theme."""
+    """Generate the global QSS stylesheet from a Theme.
+
+    Modern dark/light treatment: soft elevation, hover feedback, pill chips,
+    a clear primary/secondary/ghost button hierarchy, underline tabs, slim
+    rounded scrollbars and focus rings — built on the same core palette so any
+    inline-styled widgets stay visually consistent.
+    """
+    # Fall back gracefully if a custom Theme omitted the modern tokens.
+    elevated = t.elevated or t.surface2
+    border_soft = t.border_soft or t.border
+    accent_soft = t.accent_soft or t.surface2
+    accent_line = t.accent_line or t.accent
+    focus_ring = t.focus_ring or t.accent
+    radius_lg = t.radius_lg or t.radius
+    radius_pill = t.radius_pill or "999px"
     return f"""
 /* ── Base ── */
 QWidget {{
@@ -91,6 +125,13 @@ QWidget {{
     font-size: 13px;
     border: none;
     outline: none;
+}}
+QToolTip {{
+    background-color: {elevated};
+    color: {t.fg};
+    border: 1px solid {t.border};
+    border-radius: 6px;
+    padding: 5px 8px;
 }}
 
 /* ── Dialog / Window ── */
@@ -104,13 +145,17 @@ QFrame {{
 }}
 QFrame[class="card"] {{
     background-color: {t.surface};
-    border: 1px solid {t.border};
-    border-radius: {t.radius};
+    border: 1px solid {border_soft};
+    border-radius: {radius_lg};
+}}
+QFrame[class="card"]:hover {{
+    background-color: {elevated};
+    border-color: {accent_line};
 }}
 QFrame[class="card-accent"] {{
     background-color: {t.surface};
-    border: 1px solid {t.accent};
-    border-radius: {t.radius};
+    border: 1px solid {accent_line};
+    border-radius: {radius_lg};
 }}
 
 /* ── Labels ── */
@@ -119,12 +164,14 @@ QLabel {{
     color: {t.fg};
 }}
 QLabel[class="title"] {{
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 27px;
+    font-weight: 800;
     color: {t.fg};
 }}
 QLabel[class="countdown"] {{
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     color: {t.accent};
 }}
 QLabel[class="meta"] {{
@@ -134,17 +181,18 @@ QLabel[class="meta"] {{
 QLabel[class="section-header"] {{
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.10em;
     color: {t.subtle};
     text-transform: uppercase;
 }}
-QLabel[class="tag"] {{
+QLabel[class="tag"], QLabel[class="chip"] {{
     font-size: 11px;
+    font-weight: 600;
     color: {t.accent};
-    background-color: transparent;
-    padding: 1px 6px;
-    border: 1px solid {t.accent};
-    border-radius: 4px;
+    background-color: {accent_soft};
+    padding: 2px 10px;
+    border: 1px solid {accent_line};
+    border-radius: {radius_pill};
 }}
 QLabel[class="error"] {{
     color: {t.error};
@@ -155,13 +203,13 @@ QPushButton {{
     background-color: {t.surface2};
     color: {t.fg};
     border: 1px solid {t.border};
-    border-radius: 6px;
-    padding: 6px 16px;
+    border-radius: 8px;
+    padding: 7px 16px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
 }}
 QPushButton:hover {{
-    background-color: {t.surface};
+    background-color: {elevated};
     border-color: {t.subtle};
 }}
 QPushButton:pressed {{
@@ -169,13 +217,13 @@ QPushButton:pressed {{
 }}
 QPushButton:disabled {{
     color: {t.subtle};
-    border-color: {t.border};
+    border-color: {border_soft};
 }}
 QPushButton[class="accent"] {{
     background-color: {t.accent};
     color: {t.bg};
     border-color: {t.accent};
-    font-weight: 600;
+    font-weight: 700;
 }}
 QPushButton[class="accent"]:hover {{
     background-color: {t.accent_hover};
@@ -183,25 +231,26 @@ QPushButton[class="accent"]:hover {{
 }}
 QPushButton[class="accent"]:pressed {{
     background-color: {t.accent};
-    opacity: 0.85;
 }}
 QPushButton[class="ghost"] {{
     background-color: transparent;
     border-color: transparent;
     color: {t.subtle};
-    padding: 4px 10px;
+    border-radius: {radius_pill};
+    padding: 5px 12px;
+    font-weight: 600;
 }}
 QPushButton[class="ghost"]:hover {{
-    background-color: {t.surface};
-    color: {t.fg};
+    background-color: {accent_soft};
+    color: {t.accent};
 }}
 
 /* ── Tab Widget ── */
 QTabWidget::pane {{
     background-color: {t.bg};
-    border: 1px solid {t.border};
+    border: 1px solid {border_soft};
     border-top: none;
-    border-radius: 0 0 {t.radius} {t.radius};
+    border-radius: 0 0 {radius_lg} {radius_lg};
 }}
 QTabBar {{
     background-color: transparent;
@@ -209,15 +258,16 @@ QTabBar {{
 QTabBar::tab {{
     background-color: transparent;
     color: {t.subtle};
-    padding: 8px 18px;
+    padding: 9px 18px;
     border-bottom: 2px solid transparent;
     font-size: 13px;
+    font-weight: 600;
     margin-right: 2px;
 }}
 QTabBar::tab:selected {{
     color: {t.fg};
     border-bottom: 2px solid {t.accent};
-    font-weight: 600;
+    font-weight: 700;
 }}
 QTabBar::tab:hover {{
     color: {t.fg};
@@ -226,21 +276,24 @@ QTabBar::tab:hover {{
 
 /* ── Splitter ── */
 QSplitter::handle {{
-    background-color: {t.border};
+    background-color: {border_soft};
     width: 1px;
     height: 1px;
+}}
+QSplitter::handle:hover {{
+    background-color: {accent_line};
 }}
 
 /* ── Scroll bars ── */
 QScrollBar:vertical {{
     background: transparent;
-    width: 8px;
-    margin: 0;
+    width: 10px;
+    margin: 2px;
 }}
 QScrollBar::handle:vertical {{
     background: {t.border};
-    border-radius: 4px;
-    min-height: 32px;
+    border-radius: 5px;
+    min-height: 36px;
 }}
 QScrollBar::handle:vertical:hover {{
     background: {t.subtle};
@@ -250,13 +303,13 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
 }}
 QScrollBar:horizontal {{
     background: transparent;
-    height: 8px;
-    margin: 0;
+    height: 10px;
+    margin: 2px;
 }}
 QScrollBar::handle:horizontal {{
     background: {t.border};
-    border-radius: 4px;
-    min-width: 32px;
+    border-radius: 5px;
+    min-width: 36px;
 }}
 QScrollBar::handle:horizontal:hover {{
     background: {t.subtle};
@@ -269,16 +322,16 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
 QTextEdit, QTextBrowser {{
     background-color: {t.surface};
     color: {t.fg};
-    border: none;
-    border-radius: 0;
-    padding: 12px;
+    border: 1px solid {border_soft};
+    border-radius: {t.radius};
+    padding: 14px;
     selection-background-color: {t.accent};
     selection-color: {t.bg};
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.65;
 }}
 QTextEdit:focus, QTextBrowser:focus {{
-    border: 1px solid {t.accent};
+    border: 1px solid {focus_ring};
 }}
 
 /* ── Line Edit (search bar) ── */
@@ -286,13 +339,13 @@ QLineEdit {{
     background-color: {t.surface};
     color: {t.fg};
     border: 1px solid {t.border};
-    border-radius: 6px;
-    padding: 5px 10px;
+    border-radius: 8px;
+    padding: 7px 12px;
     font-size: 13px;
     selection-background-color: {t.accent};
 }}
 QLineEdit:focus {{
-    border-color: {t.accent};
+    border: 1px solid {focus_ring};
 }}
 QLineEdit:disabled {{
     color: {t.subtle};
@@ -303,8 +356,8 @@ QComboBox {{
     background-color: {t.surface};
     color: {t.fg};
     border: 1px solid {t.border};
-    border-radius: 6px;
-    padding: 4px 8px;
+    border-radius: 8px;
+    padding: 5px 10px;
     font-size: 12px;
     min-width: 80px;
 }}
@@ -325,12 +378,13 @@ QComboBox::down-arrow {{
     margin-right: 6px;
 }}
 QComboBox QAbstractItemView {{
-    background-color: {t.surface};
+    background-color: {elevated};
     color: {t.fg};
     border: 1px solid {t.border};
-    selection-background-color: {t.accent};
-    selection-color: {t.bg};
-    padding: 2px;
+    border-radius: 8px;
+    selection-background-color: {accent_soft};
+    selection-color: {t.fg};
+    padding: 4px;
 }}
 
 /* ── List View ── */
@@ -340,21 +394,21 @@ QListView {{
     outline: none;
 }}
 QListView::item {{
-    border-radius: 6px;
-    padding: 2px 4px;
+    border-radius: 8px;
+    padding: 3px 6px;
 }}
 QListView::item:hover {{
     background-color: {t.surface};
 }}
 QListView::item:selected {{
-    background-color: {t.surface2};
+    background-color: {accent_soft};
     color: {t.fg};
 }}
 
 /* ── Table View ── */
 QTableView {{
     background-color: {t.surface};
-    gridline-color: {t.border};
+    gridline-color: {border_soft};
     border: none;
     alternate-background-color: {t.bg};
     selection-background-color: {t.accent};
@@ -368,12 +422,12 @@ QTableView QTableCornerButton::section {{
 QHeaderView::section {{
     background-color: {t.table_hdr};
     color: {t.subtle};
-    font-weight: 600;
+    font-weight: 700;
     font-size: 11px;
-    padding: 4px 8px;
+    padding: 5px 8px;
     border: none;
     border-bottom: 1px solid {t.border};
-    border-right: 1px solid {t.border};
+    border-right: 1px solid {border_soft};
 }}
 QHeaderView::section:checked {{
     background-color: {t.surface2};
@@ -389,16 +443,16 @@ QGraphicsView {{
 /* ── Tool bar area ── */
 QFrame[class="toolbar"] {{
     background-color: {t.surface};
-    border-bottom: 1px solid {t.border};
+    border-bottom: 1px solid {border_soft};
     border-radius: 0;
-    padding: 4px 8px;
+    padding: 6px 10px;
 }}
 
 /* ── Status bar / Info bar ── */
 QFrame[class="statusbar"] {{
     background-color: {t.surface2};
-    border-top: 1px solid {t.border};
-    padding: 2px 8px;
+    border-top: 1px solid {border_soft};
+    padding: 4px 10px;
 }}
 
 /* ── Loading / spinner area ── */
